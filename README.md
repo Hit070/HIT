@@ -1,6 +1,6 @@
-# 🌿 Halamin Herbal – eCommerce Admin Dashboard & Storefront
+# 🌿 HIT – eCommerce Admin Dashboard & Storefront
 
-Halamin Herbal is a full-featured herbal products eCommerce system built with **Next.js**, **Prisma**, **PostgreSQL**, **Neon**, **Cloudinary**, and **Paystack**. It includes a powerful admin dashboard and a lightweight public storefront. Customers can place orders and receive real-time email updates as their order progresses.
+HIT is a full-featured herbal products eCommerce system built with **Next.js**, **Prisma**, **PostgreSQL**, **Neon**, **Cloudinary**, and **Paystack**. It includes a powerful admin dashboard and a lightweight public storefront. Customers can place orders and receive real-time email updates as their order progresses.
 
 ---
 
@@ -45,8 +45,8 @@ Halamin Herbal is a full-featured herbal products eCommerce system built with **
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/halamin-herbal.git
-cd halamin-herbal
+git clone https://github.com/your-username/hit-store.git
+cd hit-store
 ```
 
 ### 2. Install Dependencies
@@ -84,7 +84,7 @@ You must create accounts on Neon (or local postgre sql instance), Cloudinary, Pa
    - Under **"Signing in to Google"**, click **App passwords**
    - Select:
      - App: **Mail**
-     - Device: **Other (Custom name)** → e.g., `HalaminMailer`
+     - Device: **Other (Custom name)** → e.g., `HitMailer`
    - Click **Generate**
    - Copy the **16-character app password** shown (e.g., `abcd efgh ijkl mnop`)
    - Use this value as `GMAIL_APP_PASSWORD` in your .env
