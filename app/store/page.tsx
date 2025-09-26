@@ -248,136 +248,139 @@ export default function StorePage() {
         categories={categories}
       />
 
-      <main className="md:px-36 px-4 py-8">
-        {currentProducts.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <Image
-              src="/basket.png"
-              alt="Empty basket"
-              width={120}
-              height={120}
-              className="mx-auto mb-4 opacity-70"
-            />
-            <p>
-              No products found
-            </p>
-            <p>
-              Check back soon, exciting products are on the way!
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {currentProducts.map((product) => {
-              const productInCart = product.variants?.length
-                ? isAnyVariantInCart(product)
-                : isInCart(product);
+      <main className="py-8">
+        <div className="container mx-auto px-4">
 
-              return (
+          {currentProducts.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Image
+                src="/basket.png"
+                alt="Empty basket"
+                width={120}
+                height={120}
+                className="mx-auto mb-4 opacity-70"
+              />
+              <p>
+                No products found
+              </p>
+              <p>
+                Check back soon, exciting products are on the way!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {currentProducts.map((product) => {
+                const productInCart = product.variants?.length
+                  ? isAnyVariantInCart(product)
+                  : isInCart(product);
 
-                <Card
-                  key={product.id}
-                  onClick={() => handleOpenProduct(product)}
-                  className="overflow-hidden hover:shadow-lg  rounded-3xltransition cursor-pointer relative"
-                >
-                  <CardHeader className="p-0">
-                    <div className="relative h-72 w-full">
-                      <Image
-                        src={product.imageUrl || "/placeholder.svg"}
-                        alt={product.title}
-                        fill
-                        className="object-cover p-3 rounded-3xl"
-                      />
-                      <Badge
-                        className={cn(
-                          "absolute top-5 right-4 px-2 py-1",
-                          (product.variants?.length
-                            ? product.variants.reduce((sum, v) => sum + (v.inventory ?? 0), 0)
-                            : product.inventory ?? 0) < 10
-                            ? "bg-red-100 text-red-800"
-                            : "bg-white text-black"
-                        )}
-                      >
+                return (
+
+                  <Card
+                    key={product.id}
+                    onClick={() => handleOpenProduct(product)}
+                    className="overflow-hidden hover:shadow-lg  rounded-3xltransition cursor-pointer relative"
+                  >
+                    <CardHeader className="p-0">
+                      <div className="relative h-72 w-full">
+                        <Image
+                          src={product.imageUrl || "/placeholder.svg"}
+                          alt={product.title}
+                          fill
+                          className="object-cover p-3 rounded-3xl"
+                        />
+                        <Badge
+                          className={cn(
+                            "absolute top-5 right-4 px-2 py-1",
+                            (product.variants?.length
+                              ? product.variants.reduce((sum, v) => sum + (v.inventory ?? 0), 0)
+                              : product.inventory ?? 0) < 10
+                              ? "bg-red-100 text-red-800"
+                              : "bg-white text-black"
+                          )}
+                        >
+                          {product.variants?.length
+                            ? `${product.variants.reduce((sum, v) => sum + (v.inventory ?? 0), 0)} in stock`
+                            : `${product.inventory ?? 0} in stock`}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <h3 className="text-2xl font-semibold line-clamp-1">
+                        {product.title}
+                      </h3>
+                      <p className="text-gray-600 text-md line-clamp-2">
+                        {product.description}
+                      </p>
+                      <span className="text-3xl font-bold font-cormorant block mt-2">
                         {product.variants?.length
-                          ? `${product.variants.reduce((sum, v) => sum + (v.inventory ?? 0), 0)} in stock`
-                          : `${product.inventory ?? 0} in stock`}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    <h3 className="text-2xl font-semibold line-clamp-1">
-                      {product.title}
-                    </h3>
-                    <p className="text-gray-600 text-md line-clamp-2">
-                      {product.description}
-                    </p>
-                    <span className="text-3xl font-bold font-cormorant block mt-2">
-                      {product.variants?.length
-                        ? `from ₦${Math.min(
-                          ...product.variants
-                            .map((v) => v.price)
-                            .filter((price): price is number => price != null)
-                        ).toLocaleString()}`
-                        : `₦${product.price?.toLocaleString() ?? 'N/A'}`}
-                    </span>
-                  </CardContent>
-                  <CardFooter className="flex items-center gap-2">
-                    <Button
-                      className="flex-1 bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-xl py-2"
-                      disabled={productInCart}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (!product.variants?.length) {
-                          handleAddToCart(product);
-                        } else {
-                          handleOpenProduct(product);
-                        }
-                      }}
-                    >
-                      {productInCart ? "Added to Cart" : "Add to Cart"}
-                    </Button>
+                          ? `from ₦${Math.min(
+                            ...product.variants
+                              .map((v) => v.price)
+                              .filter((price): price is number => price != null)
+                          ).toLocaleString()}`
+                          : `₦${product.price?.toLocaleString() ?? 'N/A'}`}
+                      </span>
+                    </CardContent>
+                    <CardFooter className="flex items-center gap-2">
+                      <Button
+                        className="flex-1 bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-xl py-2"
+                        disabled={productInCart}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!product.variants?.length) {
+                            handleAddToCart(product);
+                          } else {
+                            handleOpenProduct(product);
+                          }
+                        }}
+                      >
+                        {productInCart ? "Added to Cart" : "Add to Cart"}
+                      </Button>
 
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={`h-10 w-10 rounded-xl border bg-orange-50 border-gray-200 hover:bg-gray-100 ${
-                        // Only show as wishlisted if it's actually wishlisted (no variants or specific variant)
-                        (!product.variants?.length && isInWishlist(product.id)) ? "text-[#bf5925]" : "text-[#bf5925]"
-                        }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleWishlist(product.id);
-                      }}
-                    >
-                      <Heart
-                        className="h-5 w-5"
-                        fill={(!product.variants?.length && isInWishlist(product.id)) ? "currentColor" : "none"}
-                      />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={`h-10 w-10 rounded-xl border bg-orange-50 border-gray-200 hover:bg-gray-100 ${
+                          // Only show as wishlisted if it's actually wishlisted (no variants or specific variant)
+                          (!product.variants?.length && isInWishlist(product.id)) ? "text-[#bf5925]" : "text-[#bf5925]"
+                          }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleWishlist(product.id);
+                        }}
+                      >
+                        <Heart
+                          className="h-5 w-5"
+                          fill={(!product.variants?.length && isInWishlist(product.id)) ? "currentColor" : "none"}
+                        />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
-        {totalPages > 1 && (
-          <div className="flex justify-center space-x-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                onClick={() => setCurrentPage(page)}
-                className={
-                  currentPage === page
-                    ? "bg-green-600 hover:bg-green-700"
-                    : ""
-                }
-              >
-                {page}
-              </Button>
-            ))}
-          </div>
-        )}
+          {totalPages > 1 && (
+            <div className="flex justify-center space-x-2">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  onClick={() => setCurrentPage(page)}
+                  className={
+                    currentPage === page
+                      ? "bg-green-600 hover:bg-green-700"
+                      : ""
+                  }
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
       </main>
 
       <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>

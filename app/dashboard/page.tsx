@@ -7,6 +7,7 @@ import {
   getLowStockAlerts,
   useStore,
   useSettingsStore,
+  useAuthStore,
 } from "@/store/store";
 import {
   Card,
@@ -23,6 +24,8 @@ import {
   ShoppingCart,
   AlertTriangle,
   Users,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -31,6 +34,13 @@ import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Define chart data types
 interface ChartData {
@@ -53,12 +63,14 @@ const DonutChart = dynamic(() => import("@/components/charts/donut-chart"), {
 });
 
 export default function Dashboard() {
+  const { user } = useAuthStore();
   const { products, orders, discounts, fetchOrders, fetchProducts, fetchDiscounts } = useStore();
   const { users, shippingOptions, fetchSettings } = useSettingsStore();
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
   const [discountsLoading, setDiscountsLoading] = useState(true);
   const [settingsLoading, setSettingsLoading] = useState(true);
+  const [salesPeriod, setSalesPeriod] = useState<'week' | 'month' | '6months' | 'year'>('year');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -263,8 +275,24 @@ export default function Dashboard() {
     orders.map((order) => ({
       ...order,
       createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : order.createdAt,
-    }))
+    })),
+    salesPeriod
   );
+
+  // Get period label for the chart description
+  const getPeriodLabel = () => {
+    switch (salesPeriod) {
+      case 'week':
+        return 'Daily revenue for the past week';
+      case 'month':
+        return 'Weekly revenue for the past month';
+      case '6months':
+        return 'Monthly revenue for the past 6 months';
+      case 'year':
+      default:
+        return 'Monthly revenue for the past year';
+    }
+  };
 
   const { topByRevenue, topByQuantity } = getTopProducts(
     orders.map((order) => ({
@@ -276,80 +304,215 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 p-6 pt-6 md:p-8">
       <div className="flex flex-col gap-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">
+          Hello, {user?.name || "Admin"}!
+        </h2>
         <p className="text-muted-foreground">
-          Welcome to your HIT dashboard. Here's what's happening with your store today.
+          Welcome back! Here’s a quick overview of your platform activity.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₦{totalRevenue.toLocaleString()}</div>
-            <div className="flex items-center pt-1">
-              <ArrowUpIcon className={cn("mr-1 h-3 w-3", revenueChange >= 0 ? "text-green-500" : "text-red-500")} />
-              <span className={cn("text-xs font-medium", revenueChange >= 0 ? "text-green-500" : "text-red-500")}>
-                {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
-              </span>
-              <span className="text-xs text-muted-foreground ml-1">from last month</span>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="relative">
+        {/* Mobile: Single column */}
+        <div className="grid gap-6 grid-cols-1 md:hidden">
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-app-primary"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <div className="p-2 bg-orange-50 rounded-lg">
+                <DollarSign className="h-4 w-4 text-app-primary" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">₦{totalRevenue.toLocaleString()}</div>
+              <div className="flex items-center pt-1">
+                <ArrowUpIcon className={cn("mr-1 h-3 w-3", revenueChange >= 0 ? "text-green-500" : "text-red-500")} />
+                <span className={cn("text-xs font-medium", revenueChange >= 0 ? "text-green-500" : "text-red-500")}>
+                  {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+                </span>
+                <span className="text-xs text-muted-foreground ml-1">from last month</span>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalOrders}</div>
-            <div className="flex items-center pt-1">
-              <ArrowUpIcon className={cn("mr-1 h-3 w-3", ordersChange >= 0 ? "text-green-500" : "text-red-500")} />
-              <span className={cn("text-xs font-medium", ordersChange >= 0 ? "text-green-500" : "text-red-500")}>
-                {ordersChange >= 0 ? "+" : ""}{ordersChange.toFixed(1)}%
-              </span>
-              <span className="text-xs text-muted-foreground ml-1">from last month</span>
-            </div>
-          </CardContent>
-        </Card>
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Orders</CardTitle>
+              <div className="p-2 bg-purple-50 rounded-lg">
+                <ShoppingCart className="h-4 w-4 text-purple-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">{totalOrders}</div>
+              <div className="flex items-center pt-1">
+                <ArrowUpIcon className={cn("mr-1 h-3 w-3", ordersChange >= 0 ? "text-green-500" : "text-red-500")} />
+                <span className={cn("text-xs font-medium", ordersChange >= 0 ? "text-green-500" : "text-red-500")}>
+                  {ordersChange >= 0 ? "+" : ""}{ordersChange.toFixed(1)}%
+                </span>
+                <span className="text-xs text-muted-foreground ml-1">from last month</span>
+              </div>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Catalog</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-            <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
-              <span>{totalVariants} variants</span>
-              {lowStockCount > 0 ? (
-                <div className="flex items-center">
-                  <AlertTriangle className="mr-1 h-3 w-3 text-amber-500" />
-                  <span className="text-amber-500 font-medium">{lowStockCount} low stock</span>
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Catalog</CardTitle>
+              <div className="p-2 bg-green-50 rounded-lg">
+                <Package className="h-4 w-4 text-green-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">{totalProducts}</div>
+              <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
+                <span>{totalVariants} variants</span>
+                {lowStockCount > 0 ? (
+                  <div className="flex items-center">
+                    <AlertTriangle className="mr-1 h-3 w-3 text-amber-500" />
+                    <span className="text-amber-500 font-medium">{lowStockCount} low stock</span>
+                  </div>
+                ) : (
+                  <span className="text-green-600">All in stock</span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Customers</CardTitle>
+              <div className="p-2 bg-pink-50 rounded-lg">
+                <Users className="h-4 w-4 text-pink-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">{totalCustomers}</div>
+              <p className="text-xs text-muted-foreground pt-1">
+                Unique customers
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Desktop: Horizontal scroll with arrows */}
+        <div className="hidden md:block relative">
+          <button
+            type="button"
+            title="Scroll left"
+            onClick={() => {
+              const container = document.getElementById('stats-scroll-container');
+              container?.scrollBy({ left: -320, behavior: 'smooth' });
+            }}
+            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors border"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+
+          <button
+            title="Scroll right"
+            onClick={() => {
+              const container = document.getElementById('stats-scroll-container');
+              container?.scrollBy({ left: 320, behavior: 'smooth' });
+            }}
+            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-2 hover:bg-gray-50 transition-colors border"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+
+          <div
+            id="stats-scroll-container"
+            className="flex gap-6 overflow-x-auto scrollbar-hide"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style jsx>{`
+        #stats-scroll-container::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
+
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <div className="p-2 bg-orange-50 rounded-lg">
+                  <DollarSign className="h-4 w-4 text-orange-600" />
                 </div>
-              ) : (
-                <span className="text-green-600">All in stock</span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">₦{totalRevenue.toLocaleString()}</div>
+                <div className="flex items-center pt-1">
+                  <ArrowUpIcon className={cn("mr-1 h-3 w-3", revenueChange >= 0 ? "text-green-500" : "text-red-500")} />
+                  <span className={cn("text-xs font-medium", revenueChange >= 0 ? "text-green-500" : "text-red-500")}>
+                    {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                </div>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalCustomers}</div>
-            <p className="text-xs text-muted-foreground pt-1">
-              Unique customers
-            </p>
-          </CardContent>
-        </Card>
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Orders</CardTitle>
+                <div className="p-2 bg-purple-50 rounded-lg">
+                  <ShoppingCart className="h-4 w-4 text-purple-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">{totalOrders}</div>
+                <div className="flex items-center pt-1">
+                  <ArrowUpIcon className={cn("mr-1 h-3 w-3", ordersChange >= 0 ? "text-green-500" : "text-red-500")} />
+                  <span className={cn("text-xs font-medium", ordersChange >= 0 ? "text-green-500" : "text-red-500")}>
+                    {ordersChange >= 0 ? "+" : ""}{ordersChange.toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Catalog</CardTitle>
+                <div className="p-2 bg-green-50 rounded-lg">
+                  <Package className="h-4 w-4 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">{totalProducts}</div>
+                <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
+                  <span>{totalVariants} variants</span>
+                  {lowStockCount > 0 ? (
+                    <div className="flex items-center">
+                      <AlertTriangle className="mr-1 h-3 w-3 text-amber-500" />
+                      <span className="text-amber-500 font-medium">{lowStockCount} low stock</span>
+                    </div>
+                  ) : (
+                    <span className="text-green-600">All in stock</span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Customers</CardTitle>
+                <div className="p-2 bg-pink-50 rounded-lg">
+                  <Users className="h-4 w-4 text-pink-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">{totalCustomers}</div>
+                <p className="text-xs text-muted-foreground pt-1">
+                  Unique customers
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -361,16 +524,29 @@ export default function Dashboard() {
         <TabsContent value="overview" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
             <Card className="col-span-full lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Revenue Over Time</CardTitle>
-                <CardDescription>Monthly revenue for the past year</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Revenue Over Time</CardTitle>
+                  <CardDescription>{getPeriodLabel()}</CardDescription>
+                </div>
+                <Select value={salesPeriod} onValueChange={(value: 'week' | 'month' | '6months' | 'year') => setSalesPeriod(value)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="week">Last Week</SelectItem>
+                    <SelectItem value="month">Last Month</SelectItem>
+                    <SelectItem value="6months">Last 6 Months</SelectItem>
+                    <SelectItem value="year">Last Year</SelectItem>
+                  </SelectContent>
+                </Select>
               </CardHeader>
               <CardContent>
                 <LineChart
                   data={salesData}
                   categories={["revenue"]}
                   index="date"
-                  colors={["emerald"]}
+                  colors={["orange"]}
                   valueFormatter={(value: number) => `₦${value.toLocaleString()}`}
                   yAxisWidth={70}
                   height={350}

@@ -500,35 +500,93 @@ export function getTopProducts(orders: OrderWithItems[]) {
   };
 }
 
-export function getSalesData(orders: AnalyticsOrder[]): SalesData[] {
-  const revenueByMonth: Record<string, number> = {};
-  const orderCountByMonth: Record<string, number> = {};
+export function getSalesData(orders: AnalyticsOrder[], period: 'week' | 'month' | '6months' | 'year' = 'year'): SalesData[] {
+  const revenueByPeriod: Record<string, number> = {};
+  const orderCountByPeriod: Record<string, number> = {};
+
+  const now = new Date();
+  let startDate: Date;
+
+  switch (period) {
+    case 'week':
+      startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      break;
+    case 'month':
+      startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      break;
+    case '6months':
+      startDate = new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000);
+      break;
+    case 'year':
+    default:
+      startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+      break;
+  }
 
   orders.forEach((order) => {
-    const date = new Date(order.createdAt);
-    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const orderDate = new Date(order.createdAt);
+    if (orderDate < startDate) return;
 
-    if (!orderCountByMonth[month]) {
-      orderCountByMonth[month] = 0;
+    let periodKey: string;
+
+    switch (period) {
+      case 'week':
+        periodKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}-${String(orderDate.getDate()).padStart(2, "0")}`;
+        break;
+      case 'month':
+        periodKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}-${Math.ceil(orderDate.getDate() / 7)}`;
+        break;
+      case '6months':
+      case 'year':
+      default:
+        periodKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}`;
+        break;
     }
-    orderCountByMonth[month] += 1;
+
+    if (!orderCountByPeriod[periodKey]) {
+      orderCountByPeriod[periodKey] = 0;
+    }
+    orderCountByPeriod[periodKey] += 1;
 
     if (order.status === "DELIVERED") {
-      if (!revenueByMonth[month]) {
-        revenueByMonth[month] = 0;
+      if (!revenueByPeriod[periodKey]) {
+        revenueByPeriod[periodKey] = 0;
       }
-      // Use the order's total which already accounts for variant pricing
-      revenueByMonth[month] += order.total;
+      revenueByPeriod[periodKey] += order.total;
     }
   });
 
-  const months = Object.keys(orderCountByMonth).sort();
-  return months.map((month) => ({
-    date: month,
-    revenue: revenueByMonth[month] || 0,
-    orders: orderCountByMonth[month],
-  }));
+  const periods = Object.keys(orderCountByPeriod).sort();
+
+  // Format the period labels for display
+  const formattedData = periods.map((periodKey) => {
+    let displayDate: string;
+
+    switch (period) {
+      case 'week':
+        displayDate = periodKey; // YYYY-MM-DD
+        break;
+      case 'month':
+        const [year, month, week] = periodKey.split('-');
+        displayDate = `${year}-${month} W${week}`;
+        break;
+      case '6months':
+      case 'year':
+      default:
+        displayDate = periodKey; // YYYY-MM
+        break;
+    }
+
+    return {
+      date: displayDate,
+      revenue: revenueByPeriod[periodKey] || 0,
+      orders: orderCountByPeriod[periodKey],
+    };
+  });
+
+  return formattedData;
 }
+
 export function getVariantAnalytics(orders: OrderWithItems[]) {
   const variantStats: Record<
     string,

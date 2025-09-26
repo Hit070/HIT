@@ -5,6 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  Book,
+  BookCopy,
   Gift,
   Home,
   Package,
@@ -34,6 +36,16 @@ const routes = [
     label: "Orders",
     icon: ShoppingCart,
     href: "/orders",
+  },
+  {
+    label: "Blogs",
+    icon: Book,
+    href: "/blogs",
+  },
+  {
+    label: "Stories",
+    icon: BookCopy,
+    href: "/stories",
   },
   {
     label: "Discounts",

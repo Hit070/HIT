@@ -1,14 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { LineChart as TremorLineChart } from "@tremor/react"
+import { AreaChart } from "@tremor/react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function LineChart({
   data = [],
   index = "",
   categories = [],
-  colors = ["emerald"],
+  colors = ["orange"],
   valueFormatter = (value: number) => `₦${value}`,
   yAxisWidth = 60,
   height = 350,
@@ -26,7 +26,7 @@ export default function LineChart({
 
   return (
     <div style={{ height: `${height}px` }} className={`w-full ${className}`}>
-      <TremorLineChart
+      <AreaChart
         data={data}
         index={index}
         categories={categories}
@@ -37,6 +37,7 @@ export default function LineChart({
         showGridLines={true}
         showAnimation={true}
         className="h-full"
+        curveType="monotone"
       />
     </div>
   )
