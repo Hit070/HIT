@@ -11,8 +11,8 @@ export default function Home() {
   useEffect(() => {
     if (isLoading) return;
 
-    // Always redirect to store from root ("/"), regardless of login status
-    router.replace("/store");
+    // Always redirect to home from root ("/"), regardless of login status
+    router.replace("/home");
   }, [isLoading, router]);
 
   // Show loading state while redirecting

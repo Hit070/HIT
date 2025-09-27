@@ -55,7 +55,7 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 relative">
         <div className="absolute inset-0 bg-black/20"></div>
         <Image
-          src="/left.png"
+          src="/left1.png"
           alt="Her Immigrant Tales"
           fill
           className="object-cover object-center"

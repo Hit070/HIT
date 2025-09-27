@@ -7,6 +7,7 @@ import {
   BarChart3,
   Book,
   BookCopy,
+  Calendar,
   Gift,
   Home,
   Package,
@@ -46,6 +47,11 @@ const routes = [
     label: "Stories",
     icon: BookCopy,
     href: "/stories",
+  },
+  {
+    label: "Events",
+    icon: Calendar,
+    href: "/events",
   },
   {
     label: "Discounts",

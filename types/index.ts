@@ -271,3 +271,59 @@ export interface ResetPasswordData {
   token: string;
   password: string;
 }
+
+export interface Story {
+  id: string
+  title: string
+  summary: string
+  content: string
+  type: "text" | "video" | "audio"
+  videoUrl?: string
+  audioFile?: string
+  thumbnail?: string
+  isFeatured: boolean
+  status: "published" | "draft"
+  dateCreated: string
+  lastUpdated: string
+}
+
+export interface Blog {
+  id: string
+  title: string
+  summary: string
+  description: string
+  content: {
+    introduction: string
+    sections: Array<{
+      title: string
+      content: string
+    }>
+    closingThoughts: string
+  }
+  category: string
+  type: "text" | "video" | "audio"
+  videoUrl?: string
+  audioFile?: string
+  thumbnail?: string
+  image?: string
+  isFeatured: boolean
+  status: "published" | "draft"
+  dateCreated: string
+  lastUpdated: string
+  date: string
+}
+
+export interface Event {
+  id: string
+  title: string
+  date: string
+  location: string
+  description: string
+  featured: boolean
+  image: string
+  meetingLink: string
+  status: "active" | "ended"
+  time: string
+  dateCreated: string
+  lastUpdated: string
+}

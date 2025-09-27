@@ -21,7 +21,8 @@ export function MainLayout({ children }: MainLayoutProps) {
   // Check if we're on special pages that don't need the dashboard layout
   const isLoginPage = pathname === "/login";
   const isStorePage = pathname.startsWith("/store");
-  const isRootPage = pathname === "/"; // Add this check
+  const isRootPage = pathname === "/";
+  const isHomePage = pathname.startsWith("/home");
 
   // For unauthenticated users on protected routes, redirect to login
   // Only redirect after we're completely done loading AND there's definitely no user
@@ -29,7 +30,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     if (isLoading) return; // Wait for loading to complete
 
     // Only redirect if we're on a protected route and definitely have no user
-    if (!user && !isLoginPage && !isStorePage && !isRootPage) {
+    if (!user && !isLoginPage && !isStorePage && !isRootPage && !isHomePage) {
       // Add a small delay to ensure auth state has fully resolved
       const timer = setTimeout(() => {
         if (!user) {
@@ -40,10 +41,10 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [user, isLoading, isLoginPage, isStorePage, isRootPage, router]);
+  }, [user, isLoading, isLoginPage, isStorePage, isRootPage, isHomePage, router]);
 
   // If we're on the login, store, or root page, don't wrap with the dashboard layout
-  if (isLoginPage || isStorePage || isRootPage) {
+  if (isLoginPage || isStorePage || isRootPage || isHomePage) {
     return <>{children}</>;
   }
 

@@ -28,6 +28,8 @@ import { StoreHeader } from "../components/store-header";
 import { useToast } from "@/components/ui/use-toast";
 import { useStore, useSettingsStore } from "@/store/store";
 import { Discount, ShippingOption, Product } from "@/types";
+import Header from "@/components/headeruser";
+import Footer from "@/components/footer";
 
 declare global {
   interface Window {
@@ -492,6 +494,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Header />
       <div className="text-center relative h-[200px]">
         <div className="w-full h-full z-10 overflow-hidden">
           <Image src="/storehero.png" alt="Background frame" fill className="object-cover object-center" />
@@ -840,6 +843,7 @@ export default function CartPage() {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 }

@@ -22,6 +22,9 @@ const quicksand = Quicksand({
 export const metadata: Metadata = {
   title: "HIT - Admin Dashboard",
   description: "A comprehensive eCommerce admin dashboard",
+  icons: {
+    icon: "/favicon.png",
+  }
 };
 
 export default function RootLayout({
