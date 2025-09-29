@@ -1,17 +1,42 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { initialStories1 } from "@/lib/mockData"
+import { Button } from "@/components/ui/button"
 import { useParams } from "next/navigation"
+import { useContentStore } from "@/store/store"
+import { toast } from "@/components/ui/use-toast"
 
 export default function ViewStoryPage() {
-  const params = useParams<{ id: string }>()
-  const storyId = params.id
-  const story = initialStories1.find((s) => s.id === storyId)
+  const params = useParams<{ slug: string }>()
+  const storySlug = params.slug
+  const { stories, fetchStories } = useContentStore()
+  const [loading, setLoading] = useState(true)
+  const story = stories.find((b) => b.slug === storySlug)
+
+  useEffect(() => {
+    if (stories.length === 0) {
+      fetchStories()
+        .catch(() => {
+          toast({
+            title: "Failed to fetch stories",
+            variant: "destructive",
+          })
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    } else {
+      setLoading(false)
+    }
+  }, [])
+
+  if (loading) {
+    return <div>Loading...</div>
+  }
 
   if (!story) {
     return <div>Story not found</div>
@@ -22,7 +47,7 @@ export default function ViewStoryPage() {
       <main className="max-w-[1200px] mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm mb-8">
-          <Link href="/admin/stories" className="hover:text-[#bf5925]">
+          <Link href="/stories" className="hover:text-[#bf5925]">
             Stories
           </Link>
           <span>&gt;</span>
@@ -38,13 +63,17 @@ export default function ViewStoryPage() {
                 Back to Stories
               </Button>
             </Link>
-            <Link href={`/stories/${story.id}/edit`}>
+            <Link href={`/stories/${story.slug}/edit`}>
               <Button className="bg-primary hover:bg-primary/90">Edit Story</Button>
             </Link>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{story.title}</h1>
-
+          {/* Story Summary */}
+          <div className="mb-8">
+            {/* <h2 className="text-2xl font-bold mb-4">Summary</h2> */}
+            <p className="leading-relaxed">{story.summary}</p>
+          </div>
           <div className="flex items-center gap-4 mb-8">
             <Badge
               variant={story.status === "published" ? "default" : "secondary"}
@@ -91,18 +120,12 @@ export default function ViewStoryPage() {
           )}
         </header>
 
-        {/* Story Summary */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Summary</h2>
-          <p className="text-gray-700 leading-relaxed">{story.summary}</p>
-        </div>
-
         {/* Story Content */}
-        <article className="prose prose-lg max-w-none">
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-4">Story</h2>
-            <div className="leading-relaxed" dangerouslySetInnerHTML={{ __html: story.content }} />
-          </div>
+        <article className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono">
+          <div
+            className="mb-8 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: story.content.html || "" }}
+          />
         </article>
       </main>
     </div>

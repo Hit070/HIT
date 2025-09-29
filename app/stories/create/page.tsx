@@ -12,14 +12,28 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { useContentStore, useAuthStore } from "@/store/store"
+import { toast } from "@/components/ui/use-toast"
+import { Story } from "@/types"
+import { useRouter } from "next/navigation"
 
 export default function CreateStoryPage() {
-  const [storyType, setStoryType] = useState("Text")
+  const router = useRouter()
+  const { addStory } = useContentStore()
+  const { user } = useAuthStore()
+  const [storyType, setStoryType] = useState<"text" | "video" | "audio">("text")
   const [videoUrl, setVideoUrl] = useState("")
   const [videoPreview, setVideoPreview] = useState("")
   const [title, setTitle] = useState("")
   const [summary, setSummary] = useState("")
-  const [content, setContent] = useState("")
+  const [content, setContent] = useState<Record<string, any>>({})
+  const [author, setAuthor] = useState(user?.name || "")
+  const [thumbnail, setThumbnail] = useState("")
+  const [audioFile, setAudioFile] = useState("")
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const audioInputRef = useRef<HTMLInputElement>(null)
 
@@ -50,6 +64,126 @@ export default function CreateStoryPage() {
     audioInputRef.current?.click()
   }
 
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file (PNG or JPG).",
+        variant: "destructive",
+      })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      })
+      return
+    }
+    setIsUploadingThumbnail(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const response = await fetch("/api/upload/stories", {
+        method: "POST",
+        body: formData,
+      })
+      if (!response.ok) throw new Error("Upload failed")
+      const { url } = await response.json()
+      setThumbnail(url)
+      toast({ title: "Thumbnail uploaded", description: "Upload successful." })
+    } catch (error) {
+      console.error("[UPLOAD_THUMBNAIL]", error)
+      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+    } finally {
+      setIsUploadingThumbnail(false)
+    }
+  }
+
+  const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("audio/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an audio file (MP3, WAV).",
+        variant: "destructive",
+      })
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an audio file smaller than 10MB.",
+        variant: "destructive",
+      })
+      return
+    }
+    setIsUploadingAudio(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const response = await fetch("/api/upload/stories", {
+        method: "POST",
+        body: formData,
+      })
+      if (!response.ok) throw new Error("Upload failed")
+      const { url } = await response.json()
+      setAudioFile(url)
+      toast({ title: "Audio uploaded", description: "Upload successful." })
+    } catch (error) {
+      console.error("[UPLOAD_AUDIO]", error)
+      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+    } finally {
+      setIsUploadingAudio(false)
+    }
+  }
+
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+  }
+
+  const handleSubmit = async (status: "published" | "draft") => {
+    if (!user) {
+      toast({ title: "Please log in to create a story", variant: "destructive" })
+      return
+    }
+    if (!title || !summary || Object.keys(content).length === 0) {
+      toast({ title: "Please fill in all required fields", variant: "destructive" })
+      return
+    }
+    const setLoading = status === "draft" ? setIsSavingDraft : setIsPublishing
+    setLoading(true)
+    try {
+      const story: Omit<Story, "id" | "dateCreated" | "lastUpdated" | "isFeatured"> = {
+        title,
+        author,
+        summary,
+        content,
+        type: storyType,
+        videoUrl: storyType === "video" ? videoUrl : undefined,
+        audioFile: storyType === "audio" ? audioFile : undefined,
+        thumbnail: thumbnail || undefined,
+        status,
+        slug: generateSlug(title),
+      }
+      await addStory(story)
+      toast({ title: `Story ${status === "published" ? "published" : "saved as draft"} successfully`, variant: "default" })
+      router.push("/stories")
+    } catch (error) {
+      console.error("[CREATE_STORY]", error)
+      toast({ title: "Failed to create story", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="md:px-20 space-y-6">
       <div className="flex items-center gap-4">
@@ -74,6 +208,18 @@ export default function CreateStoryPage() {
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="author">Author</Label>
+          <Input
+            id="author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder="Enter author name"
+            className="text-base"
+            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="summary">Story Summary/Abstract</Label>
           <Textarea
             id="summary"
@@ -81,6 +227,7 @@ export default function CreateStoryPage() {
             onChange={(e) => setSummary(e.target.value)}
             placeholder="Enter story summary"
             className="min-h-[100px] text-base"
+            disabled={isUploadingAudio || isSavingDraft || isPublishing}
           />
         </div>
 
@@ -99,31 +246,46 @@ export default function CreateStoryPage() {
                   variant="outline"
                   size="sm"
                   onClick={handleFileUpload}
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="bg-app-primary text-primary-foreground hover:bg-primary/90"
+                  disabled={isUploadingThumbnail || isSavingDraft || isPublishing}
                 >
-                  Browse Files
+                  {isUploadingThumbnail ? "Uploading..." : "Browse Files"}
                 </Button>
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" title="file" />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  title="thumbnail"
+                  onChange={handleThumbnailChange}
+                />
               </div>
+              {thumbnail && (
+                <img src={thumbnail} alt="Thumbnail preview" className="mt-4 h-24 w-24 object-cover rounded" />
+              )}
             </div>
           </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="story-type">Story Type</Label>
-          <Select value={storyType} onValueChange={setStoryType}>
+          <Select
+            value={storyType}
+            onValueChange={(value: string) => setStoryType(value as "text" | "video" | "audio")}
+            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Text">Text</SelectItem>
-              <SelectItem value="Video">Video</SelectItem>
-              <SelectItem value="Audio">Audio</SelectItem>
+              <SelectItem value="text">Text</SelectItem>
+              <SelectItem value="video">Video</SelectItem>
+              <SelectItem value="audio">Audio</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        {storyType === "Video" && (
+        {storyType === "video" && (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="video-url">Video URL</Label>
@@ -131,8 +293,9 @@ export default function CreateStoryPage() {
                 id="video-url"
                 value={videoUrl}
                 onChange={(e) => handleVideoUrlChange(e.target.value)}
-                placeholder="Enter YouTube, Vimeo, or other video URL"
+                placeholder="Enter YouTube or Vimeo URL"
                 className="text-base"
+                disabled={isUploadingAudio || isSavingDraft || isPublishing}
               />
             </div>
             {videoPreview && (
@@ -140,7 +303,7 @@ export default function CreateStoryPage() {
                 <Label>Video Preview</Label>
                 <div className="aspect-video rounded-lg overflow-hidden border">
                   <iframe
-                    title="frame"
+                    title="video-preview"
                     src={videoPreview}
                     className="w-full h-full"
                     frameBorder="0"
@@ -153,7 +316,7 @@ export default function CreateStoryPage() {
           </div>
         )}
 
-        {storyType === "Audio" && (
+        {storyType === "audio" && (
           <div className="space-y-4">
             <Label>Upload Audio</Label>
             <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center bg-muted/10">
@@ -168,11 +331,24 @@ export default function CreateStoryPage() {
                     size="sm"
                     onClick={handleAudioUpload}
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={isUploadingAudio || isSavingDraft || isPublishing}
                   >
-                    Browse Files
+                    {isUploadingAudio ? "Uploading..." : "Browse Files"}
                   </Button>
-                  <input ref={audioInputRef} type="file" accept="audio/*" className="hidden" title="frame" />
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    title="audio"
+                    onChange={handleAudioChange}
+                  />
                 </div>
+                {audioFile && (
+                  <audio controls src={audioFile} className="mt-4 w-full max-w-md">
+                    Your browser does not support the audio element.
+                  </audio>
+                )}
               </div>
             </div>
           </div>
@@ -183,16 +359,27 @@ export default function CreateStoryPage() {
           <RichTextEditor
             content={content}
             onChange={setContent}
-            placeholder="Write your blog content here..."
+            placeholder="Write your story content here..."
+            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
           />
         </div>
 
         <div className="flex items-center justify-end gap-4 pt-6">
-          <Button variant="outline" size="lg">
-            Save as draft
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => handleSubmit("draft")}
+            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+          >
+            {isSavingDraft ? "Saving..." : "Save as draft"}
           </Button>
-          <Button size="lg" className="bg-primary hover:bg-primary/90">
-            Publish
+          <Button
+            size="lg"
+            className="bg-app-primary hover:bg-primary/90"
+            onClick={() => handleSubmit("published")}
+            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+          >
+            {isPublishing ? "Publishing..." : "Publish"}
           </Button>
         </div>
       </div>

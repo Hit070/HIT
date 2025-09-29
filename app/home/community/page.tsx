@@ -4,15 +4,18 @@ import Header from '@/components/headeruser'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { Events } from '@/lib/mockData'
 import { QRCodeComponent } from '@/components/qrcode'
 import { Briefcase } from 'lucide-react'
 import { BiBullseye } from 'react-icons/bi'
 import Footer from '@/components/footer'
 import Link from 'next/link'
 import { EventModal } from "@/components/event-modal"
+import { useEventStore } from '@/store/store'
+import { toast } from '@/components/ui/use-toast'
 
 export default function Community() {
+    const { events, fetchEvents } = useEventStore()
+
     const [translateX, setTranslateX] = useState(0)
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -26,6 +29,25 @@ export default function Community() {
         setIsModalOpen(false)
         setSelectedEvent(null)
     }
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                if (events.length === 0) {
+                    await fetchEvents();
+                    // console.log("[FETCHED_STORIES]", stories);
+                }
+            } catch (error) {
+                // console.error("[FETCH_STORIES_ERROR]", error);
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch stories. Please try again.",
+                    variant: "destructive",
+                });
+            }
+        };
+        fetchData();
+    }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -172,7 +194,7 @@ export default function Community() {
                             together
                         </p>
                     </div>
-                    {Events.length === 0 ? (
+                    {events.length === 0 ? (
                         <div className="text-center py-12">
                             <Image src="/no-events.png" alt="No Events" width={200} height={200} className="mx-auto mb-4" />
                             <div className="text-2xl font-semibold mb-4">
@@ -185,7 +207,7 @@ export default function Community() {
                     ) : (
                         <>
                             <div className="space-y-8">
-                                {Events.slice(0, 3).map((event) => {
+                                {events.slice(0, 3).map((event) => {
                                     // Parse the date string to extract day and day number
                                     const eventDate = new Date(event.date);
                                     const day = eventDate.toLocaleDateString('en-US', { weekday: 'short' });
@@ -276,7 +298,7 @@ export default function Community() {
 
                             {/* Mobile Event Cards */}
                             <div className="space-y-8">
-                                {Events.slice(0, 3).map((event) => (
+                                {events.slice(0, 3).map((event) => (
                                     <div key={event.id} className="relative max-w-[1440px] mx-auto">
                                         {/* Add responsive grid for mobile */}
                                         <div className="md:hidden bg-white rounded-4xl border border-gray-200 p-6">
@@ -418,7 +440,15 @@ export default function Community() {
                         Be part of a supportive network that celebrates diversity, shares stories,
                         and creates meaningful connections across borders.
                     </p>
-                    <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white px-8 py-3 rounded-full">
+                    <Button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            const footer = document.getElementById('footer');
+                            if (footer) {
+                                footer.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        }}
+                        className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white px-8 py-3 rounded-full">
                         Join Now
                     </Button>
                 </div>

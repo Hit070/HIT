@@ -466,7 +466,15 @@ export default function AboutPage() {
                             Get inspiring stories of immigrant women, meaningful community updates, and unique opportunities to
                             connect, learn, and grow all delivered straight to your inbox.
                         </p>
-                        <Button size="lg" className="bg-white text-[#bf5925] hover:bg-gray-100 px-8 py-3 rounded-full font-medium">
+                        <Button
+                            onClick={(e) => {
+                                e.preventDefault();
+                                const footer = document.getElementById('footer');
+                                if (footer) {
+                                    footer.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            }}
+                            size="lg" className="bg-white text-[#bf5925] hover:bg-gray-100 px-8 py-3 rounded-full font-medium">
                             Join Us
                         </Button>
                     </div>

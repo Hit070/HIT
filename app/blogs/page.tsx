@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Filter, MoreHorizontal, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,22 +13,46 @@ import { DateRangeFilter } from "@/components/date-range-filter"
 import { format } from "date-fns"
 import { DeleteModal } from "@/components/delete-modal"
 import Link from "next/link"
-import { initialBlogs1 } from "@/lib/mockData"
 import { toast } from "@/components/ui/use-toast"
+import { useContentStore } from "@/store/store"
+import { Blog } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
 export default function BlogsPage() {
   const [activeTab, setActiveTab] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; blogId: string | null }>({
+  const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; blogSlug: string | null }>({
     isOpen: false,
-    blogId: null,
+    blogSlug: null,
   })
+
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
   })
-  const [blogs, setBlogs] = useState(initialBlogs1)
+
+  const { blogs, fetchBlogs, updateBlog, deleteBlog } = useContentStore()
+
+  useEffect(() => {
+    if (blogs.length === 0) {
+      fetchBlogs()
+        .catch(() => {
+          toast({
+            title: "Failed to fetch blogs",
+            variant: "destructive",
+          })
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    } else {
+      setLoading(false)
+    }
+  }, [])
+
   const itemsPerPage = 10
 
   const filteredData = blogs.filter((item) => {
@@ -44,38 +68,46 @@ export default function BlogsPage() {
     return matchesSearch && matchesTab && matchesDate
   })
 
-  const handleDeleteClick = (blogId: string) => {
-    setDeleteModal({ isOpen: true, blogId })
+  const handleDeleteClick = (blogSlug: string) => {
+    setDeleteModal({ isOpen: true, blogSlug })
   }
 
   const handleDeleteConfirm = async () => {
-    if (deleteModal.blogId) {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setBlogs((prev) => prev.filter((blog) => blog.id !== deleteModal.blogId))
-      toast({
-        title: "Blog deleted successfully",
-        variant: "default",
-      })
+    if (deleteModal.blogSlug) {
+      try {
+        await deleteBlog(deleteModal.blogSlug)
+        toast({
+          title: "Blog deleted successfully",
+          variant: "default",
+        })
+        setDeleteModal({ isOpen: false, blogSlug: null })
+      } catch (error) {
+        toast({
+          title: "Failed to delete blog",
+          variant: "destructive",
+        })
+      }
     }
   }
 
   const handleDeleteCancel = () => {
-    setDeleteModal({ isOpen: false, blogId: null })
+    setDeleteModal({ isOpen: false, blogSlug: null })
   }
 
-  const handleMarkAsFeatured = (blogId: string) => {
-    // Find the blog and toggle its featured status
-    const updatedBlogs = blogs.map(blog =>
-      blog.id === blogId ? { ...blog, isFeatured: !blog.isFeatured } : blog
-    );
-    setBlogs(updatedBlogs);
-
-    // In a real app, you'd also make an API call here to update the backend
-    toast({
-      title: "Blog marked as featured successfully",
-      variant: "default",
-    })
-  };
+  const handleMarkAsFeatured = async (slug: string, isFeatured: boolean) => {
+    try {
+      await updateBlog(slug, { isFeatured: !isFeatured })
+      toast({
+        title: `Blog ${!isFeatured ? "marked as featured" : "removed from featured"} successfully`,
+        variant: "default",
+      })
+    } catch (error) {
+      toast({
+        title: "Failed to update featured status",
+        variant: "destructive",
+      })
+    }
+  }
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
@@ -167,6 +199,47 @@ export default function BlogsPage() {
     return buttons
   }
 
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-[300px]" />
+          <Skeleton className="h-10 w-[120px]" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[200px] mb-2" />
+            <Skeleton className="h-4 w-[300px]" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <Skeleton className="h-24 w-full" />
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Skeleton className="h-10 w-[100px]" />
+              <Skeleton className="h-10 w-[150px]" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 md:px-10">
       <div>
@@ -249,6 +322,7 @@ export default function BlogsPage() {
             <TableRow>
               <TableHead className="w-[100px]">Blog ID</TableHead>
               <TableHead>Blog Title</TableHead>
+              <TableHead>Author</TableHead>
               <TableHead className="w-[120px]">Date Created</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[120px]">Last Updated</TableHead>
@@ -257,57 +331,72 @@ export default function BlogsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium text-muted-foreground">#{item.id}</TableCell>
-                <TableCell className="font-medium">{item.title}</TableCell>
-                <TableCell className="text-muted-foreground">{item.dateCreated}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={item.status === "published" ? "default" : "secondary"}
-                    className={
-                      item.status === "published"
-                        ? "bg-green-100 text-green-800 hover:bg-green-100"
-                        : "bg-orange-100 text-orange-800 hover:bg-orange-100"
-                    }
-                  >
-                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{item.lastUpdated}</TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm" className="text-app-primary hover:text-primary" asChild>
-                    <Link href={`/blogs/${item.id}/view`}>View</Link>
-                  </Button>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/blogs/${item.id}/edit`}>Edit</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMarkAsFeatured(item.id)}
-                        >
-                          {item.isFeatured ? "Remove as Featured" : "Mark as Featured"}
-                        </Button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(item.id)}>
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            {paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <p className="text-muted-foreground text-lg mb-2">No blogs found</p>
+                    <p className="text-muted-foreground text-sm">
+                      {searchQuery || dateRange.from || dateRange.to || activeTab !== "All"
+                        ? "Try adjusting your filters or search terms"
+                        : "Create your first blog to get started"}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedData.map((item: Blog) => (
+                <TableRow key={item.slug}>
+                  <TableCell className="font-medium text-muted-foreground">#{item.id}</TableCell>
+                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell className="text-muted-foreground">{item.author}</TableCell>
+                  <TableCell className="text-muted-foreground">{item.dateCreated}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={item.status === "published" ? "default" : "secondary"}
+                      className={
+                        item.status === "published"
+                          ? "bg-green-100 text-green-800 hover:bg-green-100"
+                          : "bg-orange-100 text-orange-800 hover:bg-orange-100"
+                      }
+                    >
+                      {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.lastUpdated}</TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="sm" className="text-app-primary hover:text-primary" asChild>
+                      <Link href={`/blogs/${item.slug}/view`}>View</Link>
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/blogs/${item.slug}/edit`}>Edit</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleMarkAsFeatured(item.slug, item.isFeatured as boolean)}
+                        >
+                          {item.isFeatured ? "Remove as Featured" : "Mark as Featured"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleDeleteClick(item.slug)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

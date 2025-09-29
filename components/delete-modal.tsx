@@ -47,7 +47,7 @@ export function DeleteModal({ isOpen, onClose, onConfirm, title, description, it
             </div>
           </div>
           <AlertDialogTitle className="text-xl font-semibold">
-            Delete {itemType === "story" ? "Story" : "Blog"}?
+            Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
             Are you sure you want to delete this {itemType}?

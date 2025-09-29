@@ -8,6 +8,8 @@ import {
   useStore,
   useSettingsStore,
   useAuthStore,
+  useContentStore,
+  useEventStore,
 } from "@/store/store";
 import {
   Card,
@@ -41,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CalendarDays, BookOpen, MessageSquare } from "lucide-react";
 
 // Define chart data types
 interface ChartData {
@@ -65,6 +68,8 @@ const DonutChart = dynamic(() => import("@/components/charts/donut-chart"), {
 export default function Dashboard() {
   const { user } = useAuthStore();
   const { products, orders, discounts, fetchOrders, fetchProducts, fetchDiscounts } = useStore();
+  const { events, fetchEvents } = useEventStore();
+  const { blogs, stories, fetchBlogs, fetchStories } = useContentStore();
   const { users, shippingOptions, fetchSettings } = useSettingsStore();
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -156,6 +161,63 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (events.length === 0) {
+          await fetchEvents();
+          console.log("[FETCHED_EVENTS]", events);
+        }
+      } catch (error) {
+        console.error("[FETCH_EVENTS_ERROR]", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch events. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (blogs.length === 0) {
+          await fetchBlogs();
+          console.log("[FETCHED_BLOGS]", blogs);
+        }
+      } catch (error) {
+        console.error("[FETCH_BLOGS_ERROR]", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch blogs. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (stories.length === 0) {
+          await fetchStories();
+          console.log("[FETCHED_STORIES]", stories);
+        }
+      } catch (error) {
+        console.error("[FETCH_STORIES_ERROR]", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch stories. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchData();
+  }, []);
+
   if (ordersLoading || productsLoading || discountsLoading || settingsLoading) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -199,6 +261,9 @@ export default function Dashboard() {
 
   const totalOrders = orders.length;
   const totalProducts = products.length;
+  const totalEvents = events.length;
+  const totalBlogs = blogs.length;
+  const totalStories = stories.length;
 
   // Count total variants across all products
   const totalVariants = products.reduce((sum, product) => {
@@ -356,6 +421,54 @@ export default function Dashboard() {
           </Card>
 
           <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Events</CardTitle>
+              <div className="p-2 bg-blue-50 rounded-lg">
+                <CalendarDays className="h-4 w-4 text-blue-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">{totalEvents}</div>
+              <p className="text-xs text-muted-foreground pt-1">
+                Upcoming & past events
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Blogs</CardTitle>
+              <div className="p-2 bg-indigo-50 rounded-lg">
+                <BookOpen className="h-4 w-4 text-indigo-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">{totalBlogs}</div>
+              <p className="text-xs text-muted-foreground pt-1">
+                Published blog posts
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500"></div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+              <CardTitle className="text-sm font-medium">Stories</CardTitle>
+              <div className="p-2 bg-cyan-50 rounded-lg">
+                <MessageSquare className="h-4 w-4 text-cyan-600" />
+              </div>
+            </CardHeader>
+            <CardContent className="pl-4">
+              <div className="text-2xl font-bold">{totalStories}</div>
+              <p className="text-xs text-muted-foreground pt-1">
+                Community stories
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
               <CardTitle className="text-sm font-medium">Catalog</CardTitle>
@@ -469,6 +582,54 @@ export default function Dashboard() {
                   </span>
                   <span className="text-xs text-muted-foreground ml-1">from last month</span>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Events</CardTitle>
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <CalendarDays className="h-4 w-4 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">{totalEvents}</div>
+                <p className="text-xs text-muted-foreground pt-1">
+                  Upcoming & past events
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Blogs</CardTitle>
+                <div className="p-2 bg-indigo-50 rounded-lg">
+                  <BookOpen className="h-4 w-4 text-indigo-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">{totalBlogs}</div>
+                <p className="text-xs text-muted-foreground pt-1">
+                  Published blog posts
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
+                <CardTitle className="text-sm font-medium">Stories</CardTitle>
+                <div className="p-2 bg-cyan-50 rounded-lg">
+                  <MessageSquare className="h-4 w-4 text-cyan-600" />
+                </div>
+              </CardHeader>
+              <CardContent className="pl-4">
+                <div className="text-2xl font-bold">{totalStories}</div>
+                <p className="text-xs text-muted-foreground pt-1">
+                  Community stories
+                </p>
               </CardContent>
             </Card>
 

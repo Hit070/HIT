@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Search, Filter, MoreHorizontal, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,72 +13,102 @@ import { DateRangeFilter } from "@/components/date-range-filter"
 import { DeleteModal } from "@/components/delete-modal"
 import { CreateEventModal } from "@/components/create-event-modal"
 import { EditEventModal } from "@/components/edit-event-modal"
-import { Events } from "@/lib/mockData"
+import { useEventStore } from "@/store/store"
+import { toast } from "@/components/ui/use-toast"
 import type { Event } from "@/types"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 
 export default function EventsPage() {
+  const { events, fetchEvents, updateEvent, deleteEvent } = useEventStore()
   const [activeTab, setActiveTab] = useState("All")
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; eventId: string | null }>({
+  const [loading, setLoading] = useState(true)
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; eventSlug: string | null }>({
     isOpen: false,
-    eventId: null,
+    eventSlug: null,
   })
   const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
     from: undefined,
     to: undefined,
   })
   const [createModal, setCreateModal] = useState(false)
-  const [editModal, setEditModal] = useState<{ isOpen: boolean; eventId: string | null }>({
+  const [editModal, setEditModal] = useState<{ isOpen: boolean; eventSlug: string | null }>({
     isOpen: false,
-    eventId: null,
+    eventSlug: null,
   })
-  const [events, setEvents] = useState<Event[]>(Events)
   const itemsPerPage = 10
+
+  useEffect(() => {
+    if (events.length === 0) {
+      fetchEvents()
+        .catch(() => {
+          toast({
+            title: "Failed to fetch events",
+            variant: "destructive",
+          })
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    } else {
+      setLoading(false)
+    }
+  }, [])
 
   const filteredData = events.filter((item) => {
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesTab = activeTab === "All" || item.status.toLowerCase() === activeTab.toLowerCase()
-
-    // Date filter logic
-    const matchesDate = !dateRange.from && !dateRange.to ? true : (
-      new Date(item.dateCreated) >= (dateRange.from || new Date(0)) &&
-      new Date(item.dateCreated) <= (dateRange.to || new Date(8640000000000000))
-    )
-
+    const matchesDate = !dateRange.from && !dateRange.to
+      ? true
+      : new Date(item.date) >= (dateRange.from || new Date(0)) &&
+      new Date(item.date) <= (dateRange.to || new Date(8640000000000000))
     return matchesSearch && matchesTab && matchesDate
   })
 
-  const handleDeleteClick = (eventId: string) => {
-    setDeleteModal({ isOpen: true, eventId })
+  const handleDeleteClick = (eventSlug: string) => {
+    setDeleteModal({ isOpen: true, eventSlug })
   }
 
   const handleDeleteConfirm = async () => {
-    if (deleteModal.eventId) {
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-      setEvents((prev) => prev.filter((event) => event.id.toString() !== deleteModal.eventId))
-      console.log("[v0] Event deleted successfully:", deleteModal.eventId)
+    if (deleteModal.eventSlug) {
+      try {
+        await deleteEvent(deleteModal.eventSlug)
+        toast({ title: "Event deleted successfully", variant: "default" })
+      } catch (error) {
+        toast({ title: "Failed to delete event", variant: "destructive" })
+      } finally {
+        setDeleteModal({ isOpen: false, eventSlug: null })
+      }
     }
   }
 
   const handleDeleteCancel = () => {
-    setDeleteModal({ isOpen: false, eventId: null })
+    setDeleteModal({ isOpen: false, eventSlug: null })
   }
 
-  const handleEditClick = (eventId: string) => {
-    setEditModal({ isOpen: true, eventId })
+  const handleEditClick = (eventSlug: string) => {
+    setEditModal({ isOpen: true, eventSlug })
   }
 
   const handleEditClose = () => {
-    setEditModal({ isOpen: false, eventId: null })
+    setEditModal({ isOpen: false, eventSlug: null })
   }
 
-  const handleMarkAsFeatured = (eventId: string) => {
-    setEvents(prev => prev.map(event =>
-      event.id.toString() === eventId
-        ? { ...event, featured: !event.featured }
-        : event
-    ))
+  const handleMarkAsFeatured = async (eventSlug: string) => {
+    try {
+      const event = events.find((e) => e.slug === eventSlug)
+      if (event) {
+        await updateEvent(eventSlug, { featured: !event.featured })
+        toast({
+          title: `Event ${!event.featured ? "marked as featured" : "removed from featured"} successfully`,
+          variant: "default",
+        })
+      }
+    } catch (error) {
+      toast({ title: "Failed to update featured status", variant: "destructive" })
+    }
   }
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
@@ -171,6 +201,47 @@ export default function EventsPage() {
     return buttons
   }
 
+  if (loading) {
+    return (
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-10 w-[300px]" />
+          <Skeleton className="h-10 w-[120px]" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-[200px] mb-2" />
+            <Skeleton className="h-4 w-[300px]" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <Skeleton className="h-24 w-full" />
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Skeleton className="h-10 w-[100px]" />
+              <Skeleton className="h-10 w-[150px]" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -252,53 +323,59 @@ export default function EventsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {paginatedData.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-medium text-muted-foreground">#{item.id}</TableCell>
-                <TableCell className="font-medium">{item.title}</TableCell>
-                <TableCell className="text-muted-foreground">{item.dateCreated}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={item.status === "active" ? "default" : "secondary"}
-                    className={
-                      item.status === "active"
-                        ? "bg-green-100 text-green-800 hover:bg-green-100"
-                        : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                    }
-                  >
-                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{item.date}</TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEditClick(item.id.toString())}>Edit</DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleMarkAsFeatured(item.id)}
-                        >
-                          {item.featured ? "Remove as Featured" : "Mark as Featured"}
-                        </Button>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => handleDeleteClick(item.id.toString())}
-                      >
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+            {paginatedData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center">No events found</TableCell>
               </TableRow>
-            ))}
+            ) : (
+              paginatedData.map((item) => (
+                <TableRow key={item.slug}>
+                  <TableCell className="font-medium text-muted-foreground">#{item.id}</TableCell>
+                  <TableCell className="font-medium">{item.title}</TableCell>
+                  <TableCell className="text-muted-foreground">{item.dateCreated}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={item.status === "active" ? "default" : "secondary"}
+                      className={
+                        item.status === "active"
+                          ? "bg-green-100 text-green-800 hover:bg-green-100"
+                          : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                      }
+                    >
+                      {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.date}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEditClick(item.slug)}>Edit</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleMarkAsFeatured(item.slug)}
+                          >
+                            {item.featured ? "Remove as Featured" : "Mark as Featured"}
+                          </Button>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => handleDeleteClick(item.slug)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
@@ -337,20 +414,22 @@ export default function EventsPage() {
       <CreateEventModal
         isOpen={createModal}
         onClose={() => setCreateModal(false)}
-        onEventCreated={(newEvent) => {
-          setEvents((prev) => [...prev, { ...newEvent, id: Date.now().toString() }])
+        onEventCreated={() => {
+          fetchEvents()
           setCreateModal(false)
+          toast({ title: "Event created successfully", variant: "default" })
         }}
       />
 
       <EditEventModal
         isOpen={editModal.isOpen}
-        eventId={editModal.eventId}
+        eventSlug={editModal.eventSlug}
         events={events}
         onClose={handleEditClose}
-        onEventUpdated={(updatedEvent) => {
-          setEvents((prev) => prev.map((event) => (event.id.toString() === editModal.eventId ? updatedEvent : event)))
+        onEventUpdated={() => {
+          fetchEvents()
           handleEditClose()
+          toast({ title: "Event updated successfully", variant: "default" })
         }}
       />
     </div>

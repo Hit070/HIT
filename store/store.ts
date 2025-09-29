@@ -1,6 +1,6 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware";
-import type { Product, Order, Discount, AnalyticsOrder, OrderWithItems, User, ShippingOption, SalesData, ProductPerformance, Customer, WishlistItem, } from "@/types"
+import type { Product, Order, Discount, AnalyticsOrder, OrderWithItems, User, ShippingOption, SalesData, ProductPerformance, Customer, WishlistItem, Event, Blog, Story } from "@/types"
 
 interface StoreState {
   // Products
@@ -39,6 +39,29 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   setUser: (user: User | null) => void;
+}
+
+// Content State for Blogs and Stories
+interface ContentState {
+  blogs: Blog[];
+  stories: Story[];
+  fetchBlogs: () => Promise<void>;
+  fetchStories: () => Promise<void>;
+  addBlog: (blog: Omit<Blog, "id" | "dateCreated" | "lastUpdated" | "isFeatured">) => Promise<void>;
+  addStory: (story: Omit<Story, "id" | "dateCreated" | "lastUpdated" | "isFeatured">) => Promise<void>;
+  updateBlog: (slug: string, blog: Partial<Blog>) => Promise<void>;
+  updateStory: (slug: string, story: Partial<Story>) => Promise<void>;
+  deleteBlog: (slug: string) => Promise<void>;
+  deleteStory: (slug: string) => Promise<void>;
+}
+
+// Event State
+interface EventState {
+  events: Event[];
+  fetchEvents: () => Promise<void>;
+  addEvent: (event: Omit<Event, "id" | "dateCreated" | "lastUpdated" | "featured">) => Promise<void>;
+  updateEvent: (slug: string, event: Partial<Event>) => Promise<void>;
+  deleteEvent: (slug: string) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -1196,3 +1219,226 @@ export const useCustomerAuthStore = create<CustomerAuthState>()(
     }
   )
 );
+
+// Updated store functions that need changes
+
+export const useContentStore = create<ContentState>((set) => ({
+  blogs: [],
+  stories: [],
+
+  fetchBlogs: async () => {
+    try {
+      const res = await fetch("/api/blogs");
+      if (!res.ok) throw new Error(`Failed to fetch blogs: ${res.statusText}`);
+      const blogs: Blog[] = await res.json();
+      set({ blogs });
+    } catch (error) {
+      console.error("[FETCH_BLOGS]", error);
+      throw error;
+    }
+  },
+
+  fetchStories: async () => {
+    try {
+      const res = await fetch("/api/stories");
+      if (!res.ok) throw new Error(`Failed to fetch stories: ${res.statusText}`);
+      const stories: Story[] = await res.json();
+      set({ stories });
+    } catch (error) {
+      console.error("[FETCH_STORIES]", error);
+      throw error;
+    }
+  },
+
+  addBlog: async (blog) => {
+    try {
+      const res = await fetch("/api/blogs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(blog),
+      });
+      if (!res.ok) throw new Error(`Failed to add blog: ${res.statusText}`);
+
+      // Refetch all blogs to ensure featured states are correct
+      const blogsRes = await fetch("/api/blogs");
+      const blogs: Blog[] = await blogsRes.json();
+      set({ blogs });
+    } catch (error) {
+      console.error("[ADD_BLOG]", error);
+      throw error;
+    }
+  },
+
+  addStory: async (story) => {
+    try {
+      const res = await fetch("/api/stories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(story),
+      });
+      if (!res.ok) throw new Error(`Failed to add story: ${res.statusText}`);
+
+      // Refetch all stories to ensure featured states are correct
+      const storiesRes = await fetch("/api/stories");
+      const stories: Story[] = await storiesRes.json();
+      set({ stories });
+    } catch (error) {
+      console.error("[ADD_STORY]", error);
+      throw error;
+    }
+  },
+
+  updateBlog: async (slug, updatedBlog) => {
+    try {
+      const res = await fetch(`/api/blogs/${slug}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedBlog),
+      });
+      if (!res.ok) throw new Error(`Failed to update blog: ${res.statusText}`);
+
+      // Refetch all blogs to ensure featured states are correct
+      const blogsRes = await fetch("/api/blogs");
+      const blogs: Blog[] = await blogsRes.json();
+      set({ blogs });
+    } catch (error) {
+      console.error("[UPDATE_BLOG]", error);
+      throw error;
+    }
+  },
+
+  updateStory: async (slug, updatedStory) => {
+    try {
+      const res = await fetch(`/api/stories/${slug}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedStory),
+      });
+      if (!res.ok) throw new Error(`Failed to update story: ${res.statusText}`);
+
+      // Refetch all stories to ensure featured states are correct
+      const storiesRes = await fetch("/api/stories");
+      const stories: Story[] = await storiesRes.json();
+      set({ stories });
+    } catch (error) {
+      console.error("[UPDATE_STORY]", error);
+      throw error;
+    }
+  },
+
+  deleteBlog: async (slug) => {
+    try {
+      const res = await fetch(`/api/blogs/${slug}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed to delete blog: ${res.statusText}`);
+      set((state) => ({
+        blogs: state.blogs.filter((b) => b.slug !== slug),
+      }));
+    } catch (error) {
+      console.error("[DELETE_BLOG]", error);
+      throw error;
+    }
+  },
+
+  deleteStory: async (slug) => {
+    try {
+      const res = await fetch(`/api/stories/${slug}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed to delete story: ${res.statusText}`);
+      set((state) => ({
+        stories: state.stories.filter((s) => s.slug !== slug),
+      }));
+    } catch (error) {
+      console.error("[DELETE_STORY]", error);
+      throw error;
+    }
+  },
+}));
+
+
+export const useEventStore = create<EventState>((set) => ({
+  events: [],
+
+  fetchEvents: async () => {
+    try {
+      const res = await fetch("/api/events");
+      if (!res.ok) throw new Error(`Failed to fetch events: ${res.statusText}`);
+      const events: Event[] = await res.json();
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to start of day
+
+      for (const event of events) {
+        const eventDate = new Date(event.date);
+        if (event.status === "active" && eventDate < today) {
+          try {
+            await fetch(`/api/events/${event.slug}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...event, status: "ended" }),
+            });
+          } catch (error) {
+            console.error(`[UPDATE_EVENT_STATUS_${event.slug}]`, error);
+          }
+        }
+      }
+
+      // Fetch updated events after status updates
+      const updatedRes = await fetch("/api/events");
+      if (!updatedRes.ok) throw new Error(`Failed to fetch updated events: ${updatedRes.statusText}`);
+      const updatedEvents: Event[] = await updatedRes.json();
+      set({ events: updatedEvents });
+    } catch (error) {
+      console.error("[FETCH_EVENTS]", error);
+      throw error;
+    }
+  },
+
+  addEvent: async (event) => {
+    try {
+      const res = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(event),
+      });
+      if (!res.ok) throw new Error(`Failed to add event: ${res.statusText}`);
+
+      // Refetch all events to ensure featured states are correct
+      const eventsRes = await fetch("/api/events");
+      const events: Event[] = await eventsRes.json();
+      set({ events });
+    } catch (error) {
+      console.error("[ADD_EVENT]", error);
+      throw error;
+    }
+  },
+
+  updateEvent: async (slug, updatedEvent) => {
+    try {
+      const res = await fetch(`/api/events/${slug}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedEvent),
+      });
+      if (!res.ok) throw new Error(`Failed to update event: ${res.statusText}`);
+
+      // Refetch all events to ensure featured states are correct
+      const eventsRes = await fetch("/api/events");
+      const events: Event[] = await eventsRes.json();
+      set({ events });
+    } catch (error) {
+      console.error("[UPDATE_EVENT]", error);
+      throw error;
+    }
+  },
+
+  deleteEvent: async (slug) => {
+    try {
+      const res = await fetch(`/api/events/${slug}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`Failed to delete event: ${res.statusText}`);
+      set((state) => ({
+        events: state.events.filter((e) => e.slug !== slug),
+      }));
+    } catch (error) {
+      console.error("[DELETE_EVENT]", error);
+      throw error;
+    }
+  },
+}));

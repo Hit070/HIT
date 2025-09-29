@@ -167,3 +167,54 @@ model WishlistItem {
   
   @@unique([customerId, productId, variantId]) // Prevent duplicate wishlist items (including variants)
 }
+
+model Blog {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  summary     String
+  content     Json
+  category    String
+  type        String   @default("text")
+  videoUrl    String?
+  audioFile   String?
+  thumbnail   String?
+  isFeatured  Boolean  @default(false)
+  status      String   @default("draft")
+  slug        String   @unique
+  dateCreated DateTime @default(now())
+  lastUpdated DateTime @updatedAt
+}
+
+model Story {
+  id          String   @id @default(uuid())
+  title       String
+  author      String
+  summary     String
+  content     Json
+  type        String   @default("text")
+  videoUrl    String?
+  audioFile   String?
+  thumbnail   String?
+  isFeatured  Boolean  @default(false)
+  status      String   @default("draft")
+  slug        String   @unique
+  dateCreated DateTime @default(now())
+  lastUpdated DateTime @updatedAt
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  title       String
+  date        String
+  location    String
+  description String
+  featured    Boolean  @default(false)
+  image       String
+  meetingLink String
+  status      String   @default("active")
+  time        String
+  slug        String   @unique
+  dateCreated DateTime @default(now())
+  lastUpdated DateTime @updatedAt
+}

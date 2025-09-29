@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { Upload, Calendar, MapPin, Clock, Link2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -11,65 +9,147 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { useEventStore } from "@/store/store"
+import { toast } from "@/components/ui/use-toast"
 import type { Event } from "@/types"
 
 interface EditEventModalProps {
   isOpen: boolean
-  eventId: string | null
+  eventSlug: string | null
   events: Event[]
   onClose: () => void
-  onEventUpdated: (event: Event) => void
+  onEventUpdated: () => void
 }
 
-export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdated }: EditEventModalProps) {
-  const [title, setTitle] = useState("")
-  const [date, setDate] = useState("")
-  const [time, setTime] = useState("")
-  const [location, setLocation] = useState("")
-  const [description, setDescription] = useState("")
-  const [meetingLink, setMeetingLink] = useState("")
-  const [featured, setFeatured] = useState(false)
-  const [status, setStatus] = useState<"active" | "ended">("active")
+export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpdated }: EditEventModalProps) {
+  const { updateEvent } = useEventStore()
+  const [formData, setFormData] = useState({
+    title: "",
+    slug: "",
+    date: "",
+    time: "",
+    location: "",
+    description: "",
+    meetingLink: "",
+    image: "",
+    status: "active" as "active" | "ended",
+    featured: false,
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const currentEvent = events.find((event) => event.id.toString() === eventId)
+  const currentEvent = events.find((event) => event.slug === eventSlug)
 
   useEffect(() => {
     if (currentEvent) {
-      setTitle(currentEvent.title)
-      setDate(currentEvent.date)
-      setTime(currentEvent.time)
-      setLocation(currentEvent.location)
-      setDescription(currentEvent.description)
-      setMeetingLink(currentEvent.meetingLink)
-      setFeatured(currentEvent.featured)
-      setStatus(currentEvent.status)
+      setFormData({
+        title: currentEvent.title,
+        slug: currentEvent.slug,
+        date: currentEvent.date,
+        time: currentEvent.time,
+        location: currentEvent.location,
+        description: currentEvent.description,
+        meetingLink: currentEvent.meetingLink,
+        image: currentEvent.image,
+        status: currentEvent.status,
+        featured: currentEvent.featured,
+      })
     }
   }, [currentEvent])
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!currentEvent) return
-
-    const updatedEvent: Event = {
-      ...currentEvent,
-      title,
-      date,
-      time,
-      location,
-      description,
-      meetingLink,
-      featured,
-      status,
-      lastUpdated: new Date().toLocaleDateString(),
-    }
-
-    onEventUpdated(updatedEvent)
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
   }
 
-  const handleFileUpload = () => {
-    fileInputRef.current?.click()
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "title" ? { slug: generateSlug(value) } : {}),
+    }))
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file (PNG or JPG).",
+        variant: "destructive",
+      })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      })
+      return
+    }
+    setIsUploading(true)
+    try {
+      const uploadFormData = new FormData()
+      uploadFormData.append("file", file)
+      const response = await fetch("/api/upload/events", {
+        method: "POST",
+        body: uploadFormData,
+      })
+      if (!response.ok) throw new Error("Upload failed")
+      const { url } = await response.json()
+      setFormData((prev) => ({ ...prev, image: url }))
+      toast({ title: "Image uploaded", description: "Upload successful." })
+    } catch (error) {
+      console.error("[UPLOAD_IMAGE]", error)
+      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentEvent || !eventSlug) return
+    if (!formData.title || !formData.slug || !formData.date || !formData.time || !formData.location || !formData.description) {
+      toast({ title: "Please fill in all required fields", variant: "destructive" })
+      return
+    }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug)) {
+      toast({
+        title: "Invalid slug format",
+        description: "Use lowercase letters, numbers, and hyphens only.",
+        variant: "destructive",
+      })
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await updateEvent(eventSlug, {
+        title: formData.title,
+        slug: formData.slug,
+        date: formData.date,
+        time: formData.time,
+        location: formData.location,
+        description: formData.description,
+        meetingLink: formData.meetingLink,
+        image: formData.image,
+        status: formData.status,
+        featured: formData.featured,
+      })
+      onEventUpdated()
+      // toast({ title: "Event updated successfully", variant: "default" })
+    } catch (error) {
+      console.error("[UPDATE_EVENT]", error)
+      toast({ title: "Failed to update event", variant: "destructive" })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!currentEvent) return null
@@ -84,6 +164,7 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
             size="icon"
             className="absolute right-0 top-0 h-12 w-12 bg-gray-100 p-2 rounded-full"
             onClick={onClose}
+            disabled={isSubmitting || isUploading}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -94,10 +175,25 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
             <Label htmlFor="title">Event Title</Label>
             <Input
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              name="title"
+              value={formData.title}
+              onChange={handleInputChange}
               placeholder="Enter event title"
               required
+              disabled={isSubmitting || isUploading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="slug">Slug</Label>
+            <Input
+              id="slug"
+              name="slug"
+              value={formData.slug}
+              onChange={handleInputChange}
+              placeholder="Enter event slug"
+              required
+              disabled={isSubmitting || isUploading}
             />
           </div>
 
@@ -108,11 +204,13 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
                 <Calendar className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  placeholder="e.g., September 30, 2025"  // Remove type="date" since it conflicts with placeholder
+                  name="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={handleInputChange}
                   className="pl-10"
                   required
+                  disabled={isSubmitting || isUploading}
                 />
               </div>
             </div>
@@ -123,11 +221,13 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
                 <Clock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  placeholder="e.g., 10:00 AM"
+                  name="time"
+                  type="time"
+                  value={formData.time}
+                  onChange={handleInputChange}
                   className="pl-10"
                   required
+                  disabled={isSubmitting || isUploading}
                 />
               </div>
             </div>
@@ -139,11 +239,13 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                name="location"
+                value={formData.location}
+                onChange={handleInputChange}
                 placeholder="Enter event location"
                 className="pl-10"
                 required
+                disabled={isSubmitting || isUploading}
               />
             </div>
           </div>
@@ -152,11 +254,13 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
               placeholder="Enter event description"
               className="min-h-[100px]"
               required
+              disabled={isSubmitting || isUploading}
             />
           </div>
 
@@ -166,42 +270,73 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
               <Link2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="meetingLink"
-                value={meetingLink}
-                onChange={(e) => setMeetingLink(e.target.value)}
+                name="meetingLink"
+                value={formData.meetingLink}
+                onChange={handleInputChange}
                 placeholder="Enter Zoom, Teams, or other meeting link"
                 className="pl-10"
+                disabled={isSubmitting || isUploading}
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            <Label>Upload Event Image</Label>
+            <Label>Event Image (Optional)</Label>
             <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center bg-muted/10">
               <div className="flex flex-col items-center gap-3">
-                <div className="p-2 rounded-full bg-muted">
-                  <Upload className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Upload event image. PNG or JPG format recommended.</p>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleFileUpload}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    Browse Files
-                  </Button>
-                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" title="file" />
-                </div>
+                {formData.image ? (
+                  <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
+                    <img
+                      src={formData.image}
+                      alt="Event image preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => setFormData((prev) => ({ ...prev, image: "" }))}
+                      disabled={isSubmitting || isUploading}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-2 rounded-full bg-muted">
+                      <Upload className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Upload event image. PNG or JPG format recommended.</p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-primary text-primary-foreground hover:bg-primary/90"
+                        disabled={isSubmitting || isUploading}
+                      >
+                        {isUploading ? "Uploading..." : "Browse Files"}
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/png,image/jpeg"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        title="Upload Image"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Select value={status} onValueChange={(value: "active" | "ended") => setStatus(value)}>
+              <Select value={formData.status} onValueChange={(value: "active" | "ended") => setFormData((prev) => ({ ...prev, status: value }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -212,23 +347,28 @@ export function EditEventModal({ isOpen, eventId, events, onClose, onEventUpdate
               </Select>
             </div>
 
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="featured">Featured Event</Label>
               <div className="flex items-center space-x-2 pt-2">
-                <Switch id="featured" checked={featured} onCheckedChange={setFeatured} />
+                <Switch
+                  id="featured"
+                  checked={formData.featured}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, featured: checked }))}
+                  disabled={isSubmitting || isUploading}
+                />
                 <Label htmlFor="featured" className="text-sm text-muted-foreground">
                   Mark as featured
                 </Label>
               </div>
-            </div>
-          </div> */}
+            </div> */}
+          </div>
 
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting || isUploading}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
-              Update Event
+            <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting || isUploading}>
+              {isSubmitting ? "Updating..." : "Update Event"}
             </Button>
           </DialogFooter>
         </form>

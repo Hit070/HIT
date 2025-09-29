@@ -20,7 +20,7 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "HIT - Admin Dashboard",
+  title: "HIT - Tales",
   description: "A comprehensive eCommerce admin dashboard",
   icons: {
     icon: "/favicon.png",

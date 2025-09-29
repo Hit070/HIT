@@ -5,8 +5,37 @@ import { Button } from "@/components/ui/button"
 import Header from "@/components/headeruser"
 import Footer from "@/components/footer"
 import { ArrowRight } from "lucide-react"
+import { useContentStore } from "@/store/store"
+import { useEffect } from "react"
+import { toast } from "@/components/ui/use-toast"
+import Link from "next/link"
+import { Story } from "@/types"
 
 export default function HomePage() {
+  const { stories, fetchStories } = useContentStore();
+
+  const filteredStories = stories.filter(story => story.status === "published")
+  const featuredStory = filteredStories.find((s: Story) => s.isFeatured)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (stories.length === 0) {
+          await fetchStories();
+          // console.log("[FETCHED_STORIES]", stories);
+        }
+      } catch (error) {
+        // console.error("[FETCH_STORIES_ERROR]", error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch stories. Please try again.",
+          variant: "destructive",
+        });
+      }
+    };
+    fetchData();
+  }, []);
+
   const storyNotifications = [
     {
       name: "Li Na shared her story",
@@ -240,10 +269,12 @@ export default function HomePage() {
               We celebrate their resilience, honor their journeys, and build a community rooted in trust, truth, and
               shared humanity.
             </p>
-            <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-6 inline-flex items-center gap-2">
-              Learn more
-              <ArrowRight className="w-16 h-16" />
-            </Button>
+            <Link href="/home/about">
+              <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-6 inline-flex items-center gap-2">
+                Learn more
+                <ArrowRight className="w-16 h-16" />
+              </Button>
+            </Link>
           </div>
 
           {/* Content Grid */}
@@ -343,46 +374,56 @@ export default function HomePage() {
       </section>
 
       {/* Featured Story Section */}
-      <section className="bg-black py-16 px-6">
-        <div className="max-w-[1536px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Image */}
-            <div className="rounded-3xl overflow-hidden">
-              <Image
-                src="three-diverse-women-smiling-together-portrait.jpg"
-                alt="Smiling woman in colorful traditional dress on city street"
-                width={600}
-                height={400}
-                className="w-full h-[400px] lg:h-[500px] object-cover bg-cover bg-center"
-              />
-            </div>
+      {featuredStory && (
 
-            {/* Right Side - Content */}
-            <div className="text-white">
-              <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <span className="text-white text-sm font-medium">Featured Story</span>
+        <section className="bg-black py-16 px-6">
+          <div className="max-w-[1536px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              {/* Left Side - Image */}
+              <div className="rounded-3xl overflow-hidden">
+                <Image
+                  src={stories.find(story => story.isFeatured)?.thumbnail || "/bloghero.png"}
+                  alt="Featured story"
+                  width={600}
+                  height={400}
+                  className="w-full h-[400px] lg:h-[500px] object-cover bg-cover bg-center"
+                />
               </div>
 
-              <h2 className="text-4xl lg:text-5xl font-cormorant text-white mb-6 leading-tight">
-                Finding Home in a New Land
-              </h2>
+              {/* Right Side - Content */}
+              <div className="text-white">
+                <div className="inline-block bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
+                  <span className="text-white text-sm font-medium">Featured Story</span>
+                </div>
 
-              <p className="text-white/80 text-lg mb-2">by Zhang Mei</p>
+                {stories
+                  .filter(story => story.isFeatured)
+                  .slice(0, 1)
+                  .map(story => (
+                    <div key={story.id}>
+                      <h2 className="text-4xl lg:text-5xl font-cormorant text-white mb-6 leading-tight">
+                        {story.title}
+                      </h2>
 
-              <p className="text-white/90 text-lg leading-relaxed mb-8 max-w-lg">
-                When I arrived in Toronto, I spoke little English and knew no one. Sharing my story helped me find a
-                community that feels like family.
-              </p>
+                      <p className="text-white/80 text-lg mb-2">by {story.author || "Anonymous Author"}</p>
 
-              <Button className="bg-white text-[#353336] hover:bg-white/90 rounded-full px-8 py-6 inline-flex items-center gap-2 font-medium">
-                Read full story
-                <ArrowRight className="w-16 h-16" />
+                      <p className="text-white/90 text-lg leading-relaxed mb-8 max-w-lg">
+                        {story.summary}
+                      </p>
 
-              </Button>
+                      <Link href={`/home/stories/${featuredStory.slug}`}>
+                        <Button className="bg-white text-[#353336] hover:bg-white/90 rounded-full px-8 py-6 inline-flex items-center gap-2 font-medium">
+                          Read full story
+                          <ArrowRight className="w-16 h-16" />
+                        </Button>
+                      </Link>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* What Our Community Says Section */}
       <section className="bg-white py-16 px-6">
@@ -492,9 +533,19 @@ export default function HomePage() {
                 Get inspiring stories of immigrant women, meaningful community updates, and unique opportunities to
                 connect, learn, and grow - all delivered straight to your inbox.
               </p>
-              <Button className="bg-white text-[#bf5925] hover:bg-gray-50 rounded-full px-8 py-3 font-medium w-fit">
-                Join Us
-              </Button>
+              <Link href="#footer" className="w-fit">
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const footer = document.getElementById('footer');
+                    if (footer) {
+                      footer.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="bg-white text-[#bf5925] hover:bg-gray-50 rounded-full px-8 py-3 font-medium w-fit">
+                  Join Us
+                </Button>
+              </Link>
             </div>
 
             {/* Right Side - 2x2 Photo Grid */}

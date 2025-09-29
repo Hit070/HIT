@@ -422,6 +422,7 @@ export const initialStories1: Story[] = [
         isFeatured: true,
         dateCreated: "12/05/2025",
         lastUpdated: "12/05/2025",
+        author: "Zhang Mei" // Added author field
     },
     {
         id: "12346",
@@ -436,6 +437,7 @@ export const initialStories1: Story[] = [
         status: "draft",
         dateCreated: "12/05/2025",
         lastUpdated: "12/05/2025",
+        author: "Community Writer" // Added author field
     },
 ]
 
@@ -443,27 +445,30 @@ export const initialBlogs1: Blog[] = [
     {
         id: "12347",
         title: "Navigating Cultural Identity in a New Home",
+        author: "Amina Khan",
         summary: "Exploring the balance between preserving heritage and embracing new traditions.",
-        description:
-            "A thoughtful exploration of maintaining cultural roots while adapting to life in a new country, featuring personal stories and practical advice.",
-        content: {
-            introduction:
-                "Cultural identity becomes more complex when you're living between two worlds. This blog explores how immigrants navigate the delicate balance of honoring their heritage while embracing their new home.",
-            sections: [
-                {
-                    title: "Preserving Traditions",
-                    content:
-                        "Keeping cultural traditions alive requires intentional effort. From cooking traditional meals to celebrating cultural holidays, these practices serve as anchors to our roots while sharing our heritage with new communities.",
-                },
-                {
-                    title: "Embracing Change",
-                    content:
-                        "Adaptation doesn't mean abandonment. Learning new customs and traditions can enrich our lives while adding layers to our identity. The key is finding harmony between old and new.",
-                },
-            ],
-            closingThoughts:
-                "Cultural identity is not fixed but evolving. Embracing this fluidity allows us to grow while staying connected to who we are.",
-        },
+        content: "Cultural identity becomes more complex when you're living between two worlds. This blog explores how immigrants navigate the delicate balance of honoring their heritage while embracing their new home.",
+
+        // description:
+        // "A ?thoughtful exploration of maintaining cultural roots while adapting to life in a new country, featuring personal stories and practical advice.",
+        // content: {
+        //     introduction:
+        //         "Cultural identity becomes more complex when you're living between two worlds. This blog explores how immigrants navigate the delicate balance of honoring their heritage while embracing their new home.",
+        //     sections: [
+        //         {
+        //             title: "Preserving Traditions",
+        //             content:
+        //                 "Keeping cultural traditions alive requires intentional effort. From cooking traditional meals to celebrating cultural holidays, these practices serve as anchors to our roots while sharing our heritage with new communities.",
+        //         },
+        //         {
+        //             title: "Embracing Change",
+        //             content:
+        //                 "Adaptation doesn't mean abandonment. Learning new customs and traditions can enrich our lives while adding layers to our identity. The key is finding harmony between old and new.",
+        //         },
+        //     ],
+        //     closingThoughts:
+        //         "Cultural identity is not fixed but evolving. Embracing this fluidity allows us to grow while staying connected to who we are.",
+        // },
         category: "Lifestyle",
         type: "text",
         // image: "/bloghero.png",
@@ -472,32 +477,34 @@ export const initialBlogs1: Blog[] = [
         status: "published",
         dateCreated: "12/05/2025",
         lastUpdated: "12/05/2025",
-        date: "December 5, 2025",
     },
     {
         id: "12348",
         title: "Language Learning Tips for Adult Immigrants",
+        author: "Jane Smith",
         summary: "Practical strategies for mastering a new language later in life.",
-        description:
-            "Comprehensive guide with proven techniques, resources, and encouragement for adult language learners in immigrant communities.",
-        content: {
-            introduction:
-                "Learning a new language as an adult presents unique challenges, but with the right approach and mindset, it's absolutely achievable. This guide shares practical strategies that have helped thousands of immigrants succeed.",
-            sections: [
-                {
-                    title: "Start with Daily Conversations",
-                    content:
-                        "Focus on phrases you'll use every day - grocery shopping, asking for directions, workplace interactions. Practice these until they become automatic, building confidence for more complex conversations.",
-                },
-                {
-                    title: "Immerse Yourself Gradually",
-                    content:
-                        "Begin with children's books and simple TV shows, gradually increasing complexity. Join community groups where you can practice in a supportive environment without fear of judgment.",
-                },
-            ],
-            closingThoughts:
-                "Remember, every expert was once a beginner. Be patient with yourself and celebrate small victories along the way.",
-        },
+        content: "Cultural identity becomes more complex when you're living between two worlds. This blog explores how immigrants navigate the delicate balance of honoring their heritage while embracing their new home.",
+        // description:
+        // "Comprehensive guide with proven techniques, resources, and encouragement for adult language learners in immigrant communities.",
+        // content: {
+        //     introduction:
+        //         "Learning a new language as an adult presents unique challenges, but with the right approach and mindset, it's absolutely achievable. This guide shares practical strategies that have helped thousands of immigrants succeed.",
+        //     sections: [
+        //         {
+        //             title: "Start with Daily Conversations",
+        //             content:
+        //                 "Focus on phrases you'll use every day - grocery shopping, asking for directions, workplace interactions. Practice these until they become automatic, building confidence for more complex conversations.",
+        //         },
+        //         {
+        //             title: "Immerse Yourself Gradually",
+        //             content:
+        //                 "Begin with children's books and simple TV shows, gradually increasing complexity. Join community groups where you can practice in a supportive environment without fear of judgment.",
+        //         },
+        //     ],
+        //     closingThoughts:
+        //         "Remember, every expert was once a beginner. Be patient with yourself and celebrate small victories along the way.",
+        // },
+
         category: "Community",
         type: "audio",
         audioFile: "/placeholder.mp3",
@@ -507,7 +514,6 @@ export const initialBlogs1: Blog[] = [
         isFeatured: false,
         dateCreated: "12/05/2025",
         lastUpdated: "12/05/2025",
-        date: "December 5, 2025",
     },
 ]
 

@@ -8,7 +8,7 @@ import { BsTwitterX } from "react-icons/bs";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1a1a1a] text-white">
+    <footer className="bg-[#1a1a1a] text-white" id="footer">
       {/* Newsletter Section */}
       <div className="px-6 py-12">
         <div className="max-w-[1536px] mx-auto">

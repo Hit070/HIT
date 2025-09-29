@@ -275,42 +275,36 @@ export interface ResetPasswordData {
 export interface Story {
   id: string
   title: string
+  author: string
   summary: string
-  content: string
+  content: Record<string, any>;
   type: "text" | "video" | "audio"
   videoUrl?: string
   audioFile?: string
   thumbnail?: string
-  isFeatured: boolean
+  isFeatured?: boolean
   status: "published" | "draft"
   dateCreated: string
   lastUpdated: string
+  slug: string;
 }
 
 export interface Blog {
   id: string
   title: string
+  author: string
   summary: string
-  description: string
-  content: {
-    introduction: string
-    sections: Array<{
-      title: string
-      content: string
-    }>
-    closingThoughts: string
-  }
+  content: Record<string, any>;
   category: string
   type: "text" | "video" | "audio"
   videoUrl?: string
   audioFile?: string
   thumbnail?: string
-  image?: string
-  isFeatured: boolean
+  isFeatured?: boolean
   status: "published" | "draft"
   dateCreated: string
   lastUpdated: string
-  date: string
+  slug: string;
 }
 
 export interface Event {
@@ -326,4 +320,5 @@ export interface Event {
   time: string
   dateCreated: string
   lastUpdated: string
+  slug: string;
 }

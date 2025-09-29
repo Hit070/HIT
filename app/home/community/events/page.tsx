@@ -4,25 +4,52 @@ import Footer from '@/components/footer'
 import Header from '@/components/headeruser'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { Events } from '@/lib/mockData'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { QRCodeComponent } from '@/components/qrcode'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { EventModal } from '@/components/event-modal'
+import { useEventStore } from '@/store/store'
+import { toast } from '@/components/ui/use-toast'
 
 export default function CommunityEventsPage() {
+    const { events, fetchEvents } = useEventStore()
+
     const [currentPage, setCurrentPage] = useState(1)
     const eventsPerPage = 5
 
-    const totalPages = Math.ceil(Events.length / eventsPerPage)
-    const currentEvents = Events.slice(
+    const totalPages = Math.ceil(events.length / eventsPerPage)
+    const currentEvents = events.slice(
         (currentPage - 1) * eventsPerPage,
         currentPage * eventsPerPage
     )
 
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                if (events.length === 0) {
+                    await fetchEvents();
+                    // console.log("[FETCHED_STORIES]", stories);
+                }
+            } catch (error) {
+                // console.error("[FETCH_STORIES_ERROR]", error);
+                toast({
+                    title: "Error",
+                    description: "Failed to fetch stories. Please try again.",
+                    variant: "destructive",
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, []);
+
 
     const handleEventClick = (event: any) => {
         setSelectedEvent(event)
@@ -32,6 +59,61 @@ export default function CommunityEventsPage() {
     const closeModal = () => {
         setIsModalOpen(false)
     }
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-white">
+                <Header />
+                <div className="max-w-[1440px] mx-auto px-4 py-16">
+                    {/* Hero section skeleton */}
+                    <div className="rounded-[50px] overflow-hidden h-[700px] bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse mb-16">
+                        <div className="p-8 h-full flex flex-col justify-end">
+                            <div className="max-w-2xl space-y-4">
+                                <div className="h-6 w-32 bg-white/30 rounded-full"></div>
+                                <div className="h-12 w-full bg-white/20 rounded-lg"></div>
+                                <div className="h-12 w-3/4 bg-white/20 rounded-lg"></div>
+                                <div className="flex gap-4">
+                                    <div className="h-8 w-24 bg-white/20 rounded-full"></div>
+                                    <div className="h-4 w-20 bg-white/20 rounded"></div>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="h-4 w-full bg-white/20 rounded"></div>
+                                    <div className="h-4 w-2/3 bg-white/20 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Title skeleton */}
+                    <div className="h-10 w-64 bg-gray-200 rounded-lg animate-pulse mb-12"></div>
+
+                    {/* Grid skeleton */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="animate-pulse">
+                                <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 mb-4"></div>
+                                <div className="space-y-3">
+                                    <div className="h-6 w-full bg-gray-200 rounded"></div>
+                                    <div className="h-6 w-3/4 bg-gray-200 rounded"></div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-6 w-20 bg-gray-200 rounded-full"></div>
+                                        <div className="h-4 w-16 bg-gray-200 rounded"></div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <div className="h-4 w-full bg-gray-200 rounded"></div>
+                                        <div className="h-4 w-5/6 bg-gray-200 rounded"></div>
+                                        <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        )
+    }
+
     return (
         <div className="min-h-screen bg-white">
             <Header />
@@ -46,15 +128,15 @@ export default function CommunityEventsPage() {
                     />
                 </div>
                 {/* Breadcrumb */}
-                <nav className="flex relative z-20 items-center gap-2 text-sm ml-24 text-gray-600 mb-8 pt-4">
-                    <Link href="/community" className="hover:text-[#bf5925]">
+                <nav className="flex relative z-20 items-center gap-2 text-sm md:ml-24 ml-10 text-gray-600 mb-8 pt-4">
+                    <Link href="/home/community" className="hover:text-[#bf5925]">
                         Community
                     </Link>
                     <span>&gt;</span>
                     <span>Events</span>
                 </nav>
 
-                <div className="relative z-20 max-w-2xl mx-auto mt-20">
+                <div className="relative z-20 max-w-2xl mx-auto md:mt-20 md:px-0 px-5">
                     <h1 className="text-5xl md:text-6xl font-cormorant text-[#353336] mb-6 leading-tight">
                         Celebrate, Connect, and <br /> <span className="text-[#bf5925] italic">Create Change</span> Together!
                     </h1>
@@ -64,7 +146,7 @@ export default function CommunityEventsPage() {
                 </div>
             </div>
 
-            <section className="relative px-6 bg-white z-10">
+            <section className="relative px-6 bg-white z-10 pb-20">
                 <div className="max-w-6xl mx-auto">
                     {currentEvents.length === 0 ? (
                         <div className="text-center py-12">
@@ -206,7 +288,7 @@ export default function CommunityEventsPage() {
                                                         <Button
                                                             size="sm"
                                                             className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white"
-                                                            onClick={() => window.open(event.meetingLink, '_blank')}
+                                                            onClick={() => handleEventClick(event)}
                                                         >
                                                             Join
                                                         </Button>
