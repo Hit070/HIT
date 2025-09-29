@@ -65,7 +65,9 @@ export default function Header() {
             Collaborate
           </Button>
         </Link>
-        <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
+        <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+          <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
+        </Link>
       </div>
 
       <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -97,7 +99,9 @@ export default function Header() {
                   Collaborate
                 </Button>
               </Link>
-              <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
+              <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+                <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
+              </Link>
             </div>
           </nav>
         </div>

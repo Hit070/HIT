@@ -176,7 +176,9 @@ export default function HomePage() {
                   Collaborate
                 </Button>
               </Link>
-              <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
+              <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+                <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
+              </Link>
             </div>
 
             <div className="relative">
@@ -283,21 +285,21 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Side - Large Image with Overlay */}
             <div className="relative">
-              <div className="rounded-3xl overflow-hidden">
+              <div className="rounded-[50px] overflow-hidden h-full">
                 <Image
-                  src="/diverse-women-celebrating-together-at-community-ev.jpg"
+                  src="/diverse-women-celebrating-together-at-community-ev.png"
                   alt="Three diverse women laughing together"
                   width={600}
                   height={600}
-                  className="w-full h-[600px] object-cover bg-cover bg-center"
+                  className="w-full h-full object-cover bg-cover bg-center"
                 />
               </div>
               {/* Overlay notification */}
               <div className="absolute bottom-6 left-4 right-4 md:left-40 lg:left-40 md:right-auto">
-                <div className="bg-white rounded-2xl p-4 border border-gray-100 max-w-sm md:max-w-lg mx-auto"> {/* Added mx-auto to center the container */}
+                <div className="bg-white rounded-[50px] p-4 border border-gray-100 max-w-sm md:max-w-lg mx-auto">
                   <div className="space-y-3">
-                    <div className="flex -space-x-2 justify-center"> {/* Added justify-center to center the images */}
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-3 border-white bg-white z-30">
+                    <div className="flex -space-x-2 justify-center">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-30">
                         <Image
                           src="/woman-profile.png"
                           alt="Profile 1"
@@ -306,7 +308,7 @@ export default function HomePage() {
                           className="w-full h-full object-cover bg-cover bg-center"
                         />
                       </div>
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-3 border-white bg-white z-20">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-20">
                         <Image
                           src="/asian-woman-profile.png"
                           alt="Profile 2"
@@ -315,9 +317,9 @@ export default function HomePage() {
                           className="w-full h-full object-cover bg-cover bg-center"
                         />
                       </div>
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-3 border-white bg-white z-10">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-10">
                         <Image
-                          src="/asian-woman-profile.png"
+                          src="/left.png"
                           alt="Profile 3"
                           width={40}
                           height={40}
@@ -326,7 +328,9 @@ export default function HomePage() {
                       </div>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[#353336] text-sm font-medium md:mr-2">With 100+ immigrant women stories</span>
+                      <span className="text-[#353336] text-sm font-medium md:mr-2">
+                        With 100+ immigrant women stories
+                      </span>
                       <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-4 py-2 text-sm whitespace-nowrap">
                         Share yours
                       </Button>
@@ -337,37 +341,37 @@ export default function HomePage() {
             </div>
 
             {/* Right Side - Three Images Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
-              {/* Top Left Image */}
-              <div className="rounded-3xl overflow-hidden">
-                <Image
-                  src="/asian-woman-profile.png"
-                  alt="Woman in traditional dress"
-                  width={400}
-                  height={180}
-                  className="w-full h-[180px] object-cover bg-cover bg-center"
-                />
+            <div className="flex flex-col gap-6 h-full">
+              {/* Top row = 40% height */}
+              <div className="grid grid-cols-2 gap-6 h-[40%]">
+                <div className="rounded-[50px] overflow-hidden">
+                  <Image
+                    src="/asian-woman-profile.png"
+                    alt="Woman in traditional dress"
+                    width={400}
+                    height={200}
+                    className="w-full h-full object-cover bg-cover bg-center"
+                  />
+                </div>
+                <div className="rounded-[50px] overflow-hidden">
+                  <Image
+                    src="/three-diverse-women-smiling-together-portrait.png"
+                    alt="Three women celebrating"
+                    width={400}
+                    height={200}
+                    className="w-full h-full object-cover bg-cover bg-center"
+                  />
+                </div>
               </div>
 
-              {/* Top Right Image */}
-              <div className="rounded-3xl overflow-hidden">
-                <Image
-                  src="/three-diverse-women-smiling-together-portrait.jpg"
-                  alt="Three women celebrating"
-                  width={400}
-                  height={180}
-                  className="w-full h-[180px] object-cover bg-cover bg-center"
-                />
-              </div>
-
-              {/* Bottom Full Width Image */}
-              <div className="sm:col-span-2 rounded-3xl overflow-hidden">
+              {/* Bottom row = 60% height */}
+              <div className="rounded-[50px] overflow-hidden h-[60%]">
                 <Image
                   src="/globe.png"
                   alt="Immigrant Women Across the Globe"
                   width={400}
-                  height={390}
-                  className="w-full h-[390px] object-cover bg-cover bg-center"
+                  height={400}
+                  className="w-full h-full object-cover bg-cover bg-center"
                 />
               </div>
             </div>
@@ -529,42 +533,46 @@ export default function HomePage() {
         <div className="max-w-[1536px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Side - Orange Content Area */}
-            <div className="bg-[url('/join.png')] bg-cover bg-center rounded-[2rem] p-8 lg:p-10 text-white h-[520px] flex flex-col justify-center">
-              <h2 className="text-3xl lg:text-4xl font-cormorant mb-4 leading-tight">Join the HIT Community</h2>
+            <div className="bg-[url('/join.png')] bg-cover bg-center rounded-[2rem] p-8 lg:p-10 text-white flex flex-col justify-center h-full">
+              <h2 className="text-3xl lg:text-4xl font-cormorant mb-4 leading-tight">
+                Join the HIT Community
+              </h2>
               <p className="text-base mb-6 leading-relaxed opacity-95">
-                Get inspiring stories of immigrant women, meaningful community updates, and unique opportunities to
-                connect, learn, and grow - all delivered straight to your inbox.
+                Get inspiring stories of immigrant women, meaningful community updates,
+                and unique opportunities to connect, learn, and grow - all delivered
+                straight to your inbox.
               </p>
               <Link href="#footer" className="w-fit">
                 <Button
                   onClick={(e) => {
                     e.preventDefault();
-                    const footer = document.getElementById('footer');
+                    const footer = document.getElementById("footer");
                     if (footer) {
-                      footer.scrollIntoView({ behavior: 'smooth' });
+                      footer.scrollIntoView({ behavior: "smooth" });
                     }
                   }}
-                  className="bg-white text-[#bf5925] hover:bg-gray-50 rounded-full px-8 py-3 font-medium w-fit">
+                  className="bg-white text-[#bf5925] hover:bg-gray-50 rounded-full px-8 py-3 font-medium w-fit"
+                >
                   Join Us
                 </Button>
               </Link>
             </div>
 
             {/* Right Side - 2x2 Photo Grid */}
-            <div className="grid grid-cols-2 gap-4 h-[520px] md:max-w-[80%] md:ml-10 ml-0 md:gap-8 relative">
+            <div className="grid grid-cols-2 gap-4 md:gap-8 md:max-w-[80%] md:ml-10 ml-0 relative h-full">
               {/* Top Row */}
-              <div className="rounded-[50px] overflow-hidden">
+              <div className="rounded-[50px] overflow-hidden h-full">
                 <Image
-                  src="/woman-green-top.jpg"
+                  src="/jointl.png"
                   alt="Asian woman in professional attire with colorful scarf"
                   width={300}
                   height={300}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
               </div>
-              <div className="rounded-[50px] overflow-hidden transform md:-rotate-[25deg] md:translate-y-4 md:scale-80">
+              <div className="rounded-[50px] overflow-hidden transform md:-rotate-[25deg] md:translate-y-4 md:scale-100 md:w-[80%] md:h-[80%]">
                 <Image
-                  src="/woman-golden-outfit.jpg"
+                  src="/jointr.png"
                   alt="Woman in golden bronze colored clothing"
                   width={200}
                   height={300}
@@ -573,18 +581,18 @@ export default function HomePage() {
               </div>
 
               {/* Bottom Row */}
-              <div className="rounded-[50px] overflow-hidden">
+              <div className="rounded-[50px] overflow-hidden h-full">
                 <Image
-                  src="/woman-green-top.jpg"
+                  src="/joinbl.png"
                   alt="Woman in green top"
                   width={300}
                   height={300}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
               </div>
-              <div className="rounded-[50px] overflow-hidden">
+              <div className="rounded-[50px] overflow-hidden h-full">
                 <Image
-                  src="/woman-blue-denim.jpg"
+                  src="/joinbr.png"
                   alt="Woman in blue denim shirt"
                   width={300}
                   height={300}

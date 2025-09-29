@@ -109,7 +109,9 @@ export default function Community() {
                                 Collaborate
                             </Button>
                         </Link>
-                        <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
+                        <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+                            <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
+                        </Link>
                     </div>
                 </div>
             </div>

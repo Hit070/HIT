@@ -113,9 +113,11 @@ export default function AboutPage() {
                                 Collaborate
                             </Button>
                         </Link>
-                        <Button size="lg" className="bg-[#bf5925] hover:bg-[#a04920] text-white px-8 py-3 rounded-full">
-                            Donate
-                        </Button>
+                        <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+                            <Button size="lg" className="bg-[#bf5925] hover:bg-[#a04920] text-white px-8 py-3 rounded-full">
+                                Donate
+                            </Button>
+                        </Link>
                     </div>
 
                     {/* Hero Images with Dynamic Layout */}
@@ -138,7 +140,7 @@ export default function AboutPage() {
                                         <Image
                                             width={288}
                                             height={320}
-                                            src="/left.png"
+                                            src="/aboutl.png"
                                             alt="Woman in traditional colorful dress"
                                             className="h-80 object-cover rounded-[50px] shadow-2xl border-[10px] border-[#FFF3EA] mx-auto md:mx-0"
                                         />
@@ -161,7 +163,7 @@ export default function AboutPage() {
                                 <div className="relative z-20 md:mr-0 mr-12 transform md:rotate-6 md:translate-y-12 rotate-12 translate-y-4 flex justify-end md:justify-start">
                                     <div className="relative">
                                         <Image
-                                            src="/right.png"
+                                            src="/aboutr.png"
                                             alt="Woman in red top"
                                             className="h-80 object-cover rounded-[50px] shadow-2xl border-[10px] border-[#FFF3EA]"
                                             width={288}
@@ -225,7 +227,7 @@ export default function AboutPage() {
                         <div className="relative">
                             <div className="rounded-[50px] h-80 flex items-end transform scale-70 -rotate-48">
                                 <img
-                                    src="/who3.png"
+                                    src="/try.png"
                                     alt="Asian woman in blue top"
                                     className="w-full h-full object-cover object-center rounded-[50px]"
                                 />
@@ -346,30 +348,30 @@ export default function AboutPage() {
 
                                     {/* Overlapping Profile Images */}
                                     <div className="flex -space-x-2 justify-center"> {/* Added justify-center to center the images */}
-                                        <div className="w-16 h-16 rounded-full overflow-hidden border-3 border-white bg-white z-30">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white bg-white z-30">
                                             <Image
-                                                src="/woman-profile.png"
+                                                src="/prof1.png"
                                                 alt="Profile 1"
-                                                width={80}
-                                                height={80}
+                                                width={40}
+                                                height={40}
                                                 className="w-full h-full object-cover bg-cover bg-center"
                                             />
                                         </div>
-                                        <div className="w-16 h-16 rounded-full overflow-hidden border-3 border-white bg-white z-20">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white bg-white z-20">
                                             <Image
-                                                src="/asian-woman-profile.png"
+                                                src="/prof2.png"
                                                 alt="Profile 2"
-                                                width={80}
-                                                height={80}
+                                                width={40}
+                                                height={40}
                                                 className="w-full h-full object-cover bg-cover bg-center"
                                             />
                                         </div>
-                                        <div className="w-16 h-16 rounded-full overflow-hidden border-3 border-white bg-white z-10">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white bg-white z-10">
                                             <Image
-                                                src="/asian-woman-profile.png"
+                                                src="/prof3.png"
                                                 alt="Profile 3"
-                                                width={80}
-                                                height={80}
+                                                width={40}
+                                                height={40}
                                                 className="w-full h-full object-cover bg-cover bg-center"
                                             />
                                         </div>
