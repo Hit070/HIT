@@ -5,6 +5,7 @@ import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
+import Link from "next/link"
 
 function useCountUp(end: number, duration = 2000) {
     const [count, setCount] = useState(0)
@@ -103,13 +104,15 @@ export default function AboutPage() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row md:px-0 px-8 gap-4 justify-center mb-20">
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white px-8 py-3 rounded-full bg-transparent"
-                        >
-                            Collaborate
-                        </Button>
+                        <Link href="https://herimmigranttalepartners.framer.website" target="_blank" rel="noopener noreferrer">
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white px-8 py-3 rounded-full bg-transparent"
+                            >
+                                Collaborate
+                            </Button>
+                        </Link>
                         <Button size="lg" className="bg-[#bf5925] hover:bg-[#a04920] text-white px-8 py-3 rounded-full">
                             Donate
                         </Button>

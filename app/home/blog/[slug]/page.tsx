@@ -105,7 +105,7 @@ export default function BlogDetailsPage() {
                 <div className="flex flex-col items-center justify-center min-h-[60vh]">
                     <h1 className="text-2xl font-bold text-gray-900 mb-4">Blog not found</h1>
                     <Link
-                        href="/blog"
+                        href="/home/blog"
                         className="text-[#bf5925] hover:underline"
                     >
                         ← Back to blogs
@@ -125,7 +125,7 @@ export default function BlogDetailsPage() {
             <main className="max-w-[1200px] mx-auto px-4 py-8">
                 {/* Breadcrumb */}
                 <nav className="flex items-center gap-2 text-sm text-gray-600 mb-8">
-                    <Link href="/blog" className="hover:text-[#bf5925]">
+                    <Link href="/home/blog" className="hover:text-[#bf5925]">
                         Blog
                     </Link>
                     <span>&gt;</span>
@@ -172,7 +172,7 @@ export default function BlogDetailsPage() {
                 </header>
 
                 {/* Blog Content */}
-                <article className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono">
+                <article className="text-xl prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono">
                     <div
                         className="mb-8 leading-relaxed"
                         dangerouslySetInnerHTML={{ __html: blog.content?.html || "" }}
@@ -224,7 +224,7 @@ export default function BlogDetailsPage() {
                                 return (
                                     <Link
                                         key={otherBlog.id}
-                                        href={`/blog/${otherBlog.slug}`}
+                                        href={`/home/blog/${otherBlog.slug}`}
                                         className="group cursor-pointer block"
                                     >
                                         <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300">

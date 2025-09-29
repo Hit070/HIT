@@ -145,7 +145,7 @@ export default function BlogPage() {
             {/* Hero Section */}
             {featuredBlog && (
                 <section className="px-4 py-16 max-w-[1440px] mx-auto">
-                    <Link href={`/blog/${featuredBlog.slug}`}>
+                    <Link href={`/home/blog/${featuredBlog.slug}`}>
                         <div
                             className="relative rounded-[50px] overflow-hidden h-[700px] bg-cover bg-center"
                             style={{ backgroundImage: `url(${featuredBlog.thumbnail || "/placeholder.svg"})` }}
@@ -203,7 +203,7 @@ export default function BlogPage() {
                         return (
                             <Link
                                 key={blog.id}
-                                href={`/blog/${blog.slug}`}
+                                href={`/home/blog/${blog.slug}`}
                                 className="group cursor-pointer block"
                             >
                                 <div className="rounded-2xl transition-shadow duration-300 overflow-hidden h-full">

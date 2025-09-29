@@ -168,12 +168,14 @@ export default function HomePage() {
               women everywhere.
             </p>
             <div className="flex items-center justify-center gap-4 mb-16">
-              <Button
-                variant="outline"
-                className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-8 py-3 bg-white"
-              >
-                Collaborate
-              </Button>
+              <Link href="https://herimmigranttalepartners.framer.website" target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-8 py-3 bg-white"
+                >
+                  Collaborate
+                </Button>
+              </Link>
               <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
             </div>
 

@@ -9,6 +9,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { Phone, Mail, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link";
 
 export default function Contact() {
 
@@ -235,9 +236,11 @@ export default function Contact() {
                                 <p className="mb-6 opacity-90">
                                     Want to discuss a project, partnership, or just chat? Schedule a time that works for you.
                                 </p>
-                                <Button className="bg-white text-[#bf5925] hover:bg-gray-100 px-6 py-2 rounded-full">
-                                    Schedule now
-                                </Button>
+                                <Link href="https://calendly.com/herimmigranttales" target="_blank">
+                                    <Button className="bg-white text-[#bf5925] hover:bg-gray-100 px-6 py-2 rounded-full">
+                                        Schedule now
+                                    </Button>
+                                </Link>
                             </div>
                         </div>
                     </div>

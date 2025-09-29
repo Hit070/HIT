@@ -57,12 +57,14 @@ export default function Header() {
       </nav>
 
       <div className="hidden md:flex items-center gap-3">
-        <Button
-          variant="outline"
-          className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-6 bg-white"
-        >
-          Collaborate
-        </Button>
+        <Link href="https://herimmigranttalepartners.framer.website" target="_blank" rel="noopener noreferrer">
+          <Button
+            variant="outline"
+            className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-6 bg-white"
+          >
+            Collaborate
+          </Button>
+        </Link>
         <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
       </div>
 
@@ -87,12 +89,14 @@ export default function Header() {
               </Link>
             ))}
             <div className="flex flex-col gap-3 pt-4 border-t border-[#bf5925]/20">
-              <Button
-                variant="outline"
-                className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-6 bg-white"
-              >
-                Collaborate
-              </Button>
+              <Link href="https://herimmigranttalepartners.framer.website" target="_blank" rel="noopener noreferrer">
+                <Button
+                  variant="outline"
+                  className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-6 bg-white"
+                >
+                  Collaborate
+                </Button>
+              </Link>
               <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
             </div>
           </nav>
