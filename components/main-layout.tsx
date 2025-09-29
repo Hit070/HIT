@@ -23,14 +23,34 @@ export function MainLayout({ children }: MainLayoutProps) {
   const isStorePage = pathname.startsWith("/store");
   const isRootPage = pathname === "/";
   const isHomePage = pathname.startsWith("/home");
+  const isNotFoundPage = pathname === "/not-found" || pathname.startsWith("/_not-found");
+
+  // Define your valid protected routes here
+  const validProtectedRoutes = [
+    "/dashboard",
+    "/analytics",
+    "/blogs",
+    "/discounts",
+    "/events",
+    "/products",
+    "/inventory",
+    "/orders",
+    "/stories",
+    "/settings",
+    // Add all your valid dashboard routes here
+  ];
+
+  // Check if current path is a valid protected route
+  const isValidProtectedRoute = validProtectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
 
   // For unauthenticated users on protected routes, redirect to login
-  // Only redirect after we're completely done loading AND there's definitely no user
   useEffect(() => {
     if (isLoading) return; // Wait for loading to complete
 
     // Only redirect if we're on a protected route and definitely have no user
-    if (!user && !isLoginPage && !isStorePage && !isRootPage && !isHomePage) {
+    if (!user && !isLoginPage && !isStorePage && !isRootPage && !isHomePage && !isNotFoundPage) {
       // Add a small delay to ensure auth state has fully resolved
       const timer = setTimeout(() => {
         if (!user) {
@@ -41,10 +61,10 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       return () => clearTimeout(timer);
     }
-  }, [user, isLoading, isLoginPage, isStorePage, isRootPage, isHomePage, router]);
+  }, [user, isLoading, isLoginPage, isStorePage, isRootPage, isHomePage, isNotFoundPage, router]);
 
-  // If we're on the login, store, or root page, don't wrap with the dashboard layout
-  if (isLoginPage || isStorePage || isRootPage || isHomePage) {
+  // If we're on special pages (login, store, root, home, or 404), don't wrap with the dashboard layout
+  if (isLoginPage || isStorePage || isRootPage || isHomePage || isNotFoundPage) {
     return <>{children}</>;
   }
 
@@ -57,8 +77,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // Render the main layout if the user is authenticated
-  if (user) {
+  // Only render dashboard layout for authenticated users on valid routes
+  if (user && isValidProtectedRoute) {
     return (
       <div className="flex h-screen bg-background">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -72,10 +92,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // For unauthenticated users on protected routes, show loading while redirecting
-  return (
-    <div className="flex h-screen w-full items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-    </div>
-  );
+  // For invalid routes or unauthenticated access, just render children
+  // (Next.js will handle 404 properly)
+  return <>{children}</>;
 }
