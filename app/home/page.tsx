@@ -41,22 +41,21 @@ export default function HomePage() {
       name: "Li Na shared her story",
       position: "top-2 left-4 md:-top-4 md:left-4",
       rotation: "rotate-[-5.58deg]",
-      initial: "L",
+      image: "/pic1.png", // Replace initial with image
     },
     {
       name: "Li Wei shared a story",
       position: "top-0 right-4 md:-top-6 md:right-4",
       rotation: "rotate-[5.58deg]",
-      initial: "L",
+      image: "/pic3.png", // Replace initial with image
     },
     {
       name: "Kavya shared her story",
       position: "top-8 left-1/2 transform -translate-x-1/2 md:-top-2 md:left-1/2 md:transform md:-translate-x-1/2",
       rotation: "rotate-[-4.07deg]",
-      initial: "K",
+      image: "/pic2.png", // Replace initial with image
     },
   ]
-
   const testimonials = [
     {
       quote:
@@ -146,7 +145,13 @@ export default function HomePage() {
               >
                 <div className="inline-flex items-center gap-1 md:gap-2 p-1 md:p-2 bg-[#ffffffe6] rounded-full border border-[#bbbbbb3d] shadow-[0px_0px_32px_#00000005] backdrop-blur-[10px] text-xs md:text-sm">
                   <div className="w-6 h-6 md:w-8 md:h-8 bg-[#bf5925] rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold">
-                    {notification.initial}
+                    <Image
+                      src={notification.image}
+                      alt={notification.name}
+                      width={24}
+                      height={24}
+                      className="w-6 h-6 md:w-8 md:h-8 rounded-full"
+                    />
                   </div>
                   <div className="pr-1 md:pr-2 font-normal text-[#161616] whitespace-nowrap">{notification.name}</div>
                 </div>
@@ -186,7 +191,13 @@ export default function HomePage() {
               <div className="absolute left-4 -top-4 md:left-8 md:-top-8 rotate-[3.38deg] pointer-events-auto z-50">
                 <div className="inline-flex items-center gap-1 md:gap-2 p-1 md:p-2 bg-[#ffffffe6] rounded-full border border-[#bbbbbb3d] shadow-[0px_0px_32px_#00000005] backdrop-blur-[10px] text-xs md:text-sm">
                   <div className="w-6 h-6 md:w-8 md:h-8 bg-[#bf5925] rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold">
-                    M
+                    <Image
+                      width={24}
+                      height={24}
+                      src="/prof3.png"
+                      alt="Profile"
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   </div>
                   <div className="pr-1 md:pr-2 font-normal text-[#161616] whitespace-nowrap">
                     Mwangi shared her story
@@ -197,7 +208,13 @@ export default function HomePage() {
               <div className="absolute right-4 -top-0 md:right-16 md:-top-4 rotate-[-3.38deg] pointer-events-auto z-50">
                 <div className="inline-flex items-center gap-1 md:gap-2 p-1 md:p-2 bg-[#ffffffe6] rounded-full border border-[#bbbbbb3d] shadow-[0px_0px_32px_#00000005] backdrop-blur-[10px] text-xs md:text-sm">
                   <div className="w-6 h-6 md:w-8 md:h-8 bg-[#bf5925] rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold">
-                    B
+                    <Image
+                      width={24}
+                      height={24}
+                      src="/beatriz.png"
+                      alt="pic5"
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   </div>
                   <div className="pr-1 md:pr-2 font-normal text-[#161616] whitespace-nowrap">
                     Beatriz shared her story
@@ -227,9 +244,9 @@ export default function HomePage() {
                 </p>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full overflow-hidden">
-                    <Image src="/woman-profile.png" alt="Testimonial author" width={32} height={32} />
+                    <Image src="/herosm.png" alt="Testimonial author" width={32} height={32} />
                   </div>
-                  <span className="text-sm text-[#353336]">xxx</span>
+                  <span className="text-sm font-cormorant font-bold">XXX</span>
                 </div>
               </div>
             </div>
@@ -273,7 +290,7 @@ export default function HomePage() {
               We celebrate their resilience, honor their journeys, and build a community rooted in trust, truth, and
               shared humanity.
             </p>
-            <Link href="/home/about">
+            <Link href="/about">
               <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-6 inline-flex items-center gap-2">
                 Learn more
                 <ArrowRight className="w-16 h-16" />
@@ -310,7 +327,7 @@ export default function HomePage() {
                       </div>
                       <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-20">
                         <Image
-                          src="/asian-woman-profile.png"
+                          src="/whos22.png"
                           alt="Profile 2"
                           width={40}
                           height={40}
@@ -319,7 +336,7 @@ export default function HomePage() {
                       </div>
                       <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-10">
                         <Image
-                          src="/left.png"
+                          src="/prof3.png"
                           alt="Profile 3"
                           width={40}
                           height={40}
@@ -331,9 +348,11 @@ export default function HomePage() {
                       <span className="text-[#353336] text-sm font-medium md:mr-2">
                         With 100+ immigrant women stories
                       </span>
-                      <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-4 py-2 text-sm whitespace-nowrap">
-                        Share yours
-                      </Button>
+                      <Link href="/contact">
+                        <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-4 py-2 text-sm whitespace-nowrap">
+                          Share yours
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -417,7 +436,7 @@ export default function HomePage() {
                         {story.summary}
                       </p>
 
-                      <Link href={`/home/stories/${featuredStory.slug}`}>
+                      <Link href={`/stories/${featuredStory.slug}`}>
                         <Button className="bg-white text-[#353336] hover:bg-white/90 rounded-full px-8 py-6 inline-flex items-center gap-2 font-medium">
                           Read full story
                           <ArrowRight className="w-16 h-16" />
@@ -484,7 +503,15 @@ export default function HomePage() {
                         <p className="text-gray-700 mb-4 leading-relaxed">"{testimonial.quote}"</p>
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-[#bf5925] flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">{testimonial.name.charAt(0)}</span>
+                            <span className="text-white font-semibold text-sm">
+                              <Image
+                                width={24}
+                                height={24}
+                                src="/prof3.png"
+                                alt="Profile"
+                                className="w-full h-full object-cover rounded-full"
+                              />
+                            </span>
                           </div>
                           <span className="text-gray-600 font-medium">{testimonial.name}</span>
                         </div>
@@ -605,7 +632,7 @@ export default function HomePage() {
       </section>
 
       {/* HIT TALES text section */}
-      <section className="bg-[#f5f5f5] px-1 overflow-hidden">
+      <section className="px-1 overflow-hidden">
         <div className="w-full mx-auto text-center relative overflow-hidden">
           <h2 className="text-[5rem] md:text-[16rem] lg:text-[18rem] font-cormorant text-[#353336] opacity-20 tracking-widest leading-none select-none pointer-events-none overflow-hidden">
             HIT Tales

@@ -166,17 +166,17 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/home/stories" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/stories" className="text-gray-300 hover:text-white transition-colors">
                     Stories
                   </Link>
                 </li>
                 <li>
-                  <Link href="/home/community" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/community" className="text-gray-300 hover:text-white transition-colors">
                     Community
                   </Link>
                 </li>
                 <li>
-                  <Link href="/home/events" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/events" className="text-gray-300 hover:text-white transition-colors">
                     Events
                   </Link>
                 </li>
@@ -187,22 +187,22 @@ export default function Footer() {
               <h5 className="text-gray-400 font-medium mb-4">Learn</h5>
               <ul className="space-y-3">
                 <li>
-                  <Link href="/home/about" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
                     About
                   </Link>
                 </li>
                 <li>
-                  <Link href="/home/blog" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/blog" className="text-gray-300 hover:text-white transition-colors">
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="/home/faq" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/faq" className="text-gray-300 hover:text-white transition-colors">
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link href="/home/stories" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/stories" className="text-gray-300 hover:text-white transition-colors">
                     Store
                   </Link>
                 </li>

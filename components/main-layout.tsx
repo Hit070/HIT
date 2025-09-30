@@ -4,7 +4,6 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/store";
 
@@ -18,58 +17,26 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { user, isLoading } = useAuthStore();
   const router = useRouter();
 
-  // Check if we're on special pages that don't need the dashboard layout
-  const isLoginPage = pathname === "/login";
-  const isStorePage = pathname.startsWith("/store");
-  const isRootPage = pathname === "/";
-  const isHomePage = pathname.startsWith("/home");
-  const isNotFoundPage = pathname === "/not-found" || pathname.startsWith("/_not-found");
+  // Admin area lives under /dashboard
+  const isDashboardRoute = pathname.startsWith("/dashboard");
+  const isLoginPage = pathname === "/dashboard/login";
 
-  // Define your valid protected routes here
-  const validProtectedRoutes = [
-    "/dashboard",
-    "/analytics",
-    "/blogs",
-    "/discounts",
-    "/events",
-    "/products",
-    "/inventory",
-    "/orders",
-    "/stories",
-    "/settings",
-    // Add all your valid dashboard routes here
-  ];
-
-  // Check if current path is a valid protected route
-  const isValidProtectedRoute = validProtectedRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-
-  // For unauthenticated users on protected routes, redirect to login
+  // Redirect unauthenticated users away from protected admin pages
   useEffect(() => {
-    if (isLoading) return; // Wait for loading to complete
+    if (isLoading) return;
 
-    // Only redirect if we're on a protected route and definitely have no user
-    if (!user && !isLoginPage && !isStorePage && !isRootPage && !isHomePage && !isNotFoundPage) {
-      // Add a small delay to ensure auth state has fully resolved
-      const timer = setTimeout(() => {
-        if (!user) {
-          // Double-check user is still null
-          router.push("/login");
-        }
-      }, 100);
-
-      return () => clearTimeout(timer);
+    if (isDashboardRoute && !isLoginPage && !user) {
+      router.push("/dashboard/login");
     }
-  }, [user, isLoading, isLoginPage, isStorePage, isRootPage, isHomePage, isNotFoundPage, router]);
+  }, [user, isLoading, isDashboardRoute, isLoginPage, router]);
 
-  // If we're on special pages (login, store, root, home, or 404), don't wrap with the dashboard layout
-  if (isLoginPage || isStorePage || isRootPage || isHomePage || isNotFoundPage) {
+  // If it's /dashboard/login → don't wrap
+  if (isDashboardRoute && isLoginPage) {
     return <>{children}</>;
   }
 
-  // Show loading state while checking authentication
-  if (isLoading) {
+  // Loading spinner while checking auth (for dashboard routes only)
+  if (isDashboardRoute && isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
@@ -77,8 +44,8 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // Only render dashboard layout for authenticated users on valid routes
-  if (user && isValidProtectedRoute) {
+  // Authenticated dashboard routes → full layout
+  if (isDashboardRoute && user) {
     return (
       <div className="flex h-screen bg-background">
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -92,7 +59,6 @@ export function MainLayout({ children }: MainLayoutProps) {
     );
   }
 
-  // For invalid routes or unauthenticated access, just render children
-  // (Next.js will handle 404 properly)
+  // Public routes (root) → no layout
   return <>{children}</>;
 }

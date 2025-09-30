@@ -18,19 +18,19 @@ export default function Header() {
 
   const navLinks = [
     { href: "/home", label: "Home" },
-    { href: "/home/about", label: "About" },
-    { href: "/home/blog", label: "Blog" },
-    { href: "/home/stories", label: "Stories" },
+    { href: "/about", label: "About" },
+    { href: "/blog", label: "Blog" },
+    { href: "/stories", label: "Stories" },
     { href: "/store", label: "Store" },
-    { href: "/home/community", label: "Community" },
-    { href: "/home/faq", label: "FAQ" },
-    { href: "/home/contact", label: "Contact" },
+    { href: "/community", label: "Community" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/contact", label: "Contact" },
   ]
 
   return (
     <header className="relative flex items-center justify-between px-12 py-4 z-50">
       <div className="flex items-center gap-2">
-        <Link href="/home" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <Image
             src="/logo.png"
             alt="HIT Logo"

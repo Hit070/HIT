@@ -26,52 +26,52 @@ const routes = [
   {
     label: "Dashboard",
     icon: Home,
-    href: "/dashboard",
+    href: "/dashboard/main",
   },
   {
     label: "Products",
     icon: Package,
-    href: "/products",
+    href: "/dashboard/products",
   },
   {
     label: "Orders",
     icon: ShoppingCart,
-    href: "/orders",
+    href: "/dashboard/orders",
   },
   {
     label: "Blogs",
     icon: Book,
-    href: "/blogs",
+    href: "/dashboard/blogs",
   },
   {
     label: "Stories",
     icon: BookCopy,
-    href: "/stories",
+    href: "/dashboard/stories",
   },
   {
     label: "Events",
     icon: Calendar,
-    href: "/events",
+    href: "/dashboard/events",
   },
   {
     label: "Discounts",
     icon: Gift,
-    href: "/discounts",
+    href: "/dashboard/discounts",
   },
   {
     label: "Inventory",
     icon: Tag,
-    href: "/inventory",
+    href: "/dashboard/inventory",
   },
   {
     label: "Analytics",
     icon: BarChart3,
-    href: "/analytics",
+    href: "/dashboard/analytics",
   },
   {
     label: "Settings",
     icon: Settings,
-    href: "/settings",
+    href: "/dashboard/settings",
   },
 ];
 
