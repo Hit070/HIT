@@ -225,7 +225,7 @@ export default function AboutPage() {
 
                         {/* Right Image - Tilted Left */}
                         <div className="relative">
-                            <div className="rounded-[50px] h-80 flex items-end transform scale-70 -rotate-48">
+                            <div className="rounded-[50px] md:h-80 flex items-end transform -rotate-48">
                                 <img
                                     src="/try.png"
                                     alt="Asian woman in blue top"

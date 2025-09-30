@@ -141,7 +141,7 @@ export default function HomePage() {
             {storyNotifications.map((notification, index) => (
               <div
                 key={index}
-                className={`absolute ${notification.position} ${notification.rotation} pointer-events-auto z-50`}
+                className={`absolute ${notification.position} ${notification.rotation} pointer-events-auto z-40`}
               >
                 <div className="inline-flex items-center gap-1 md:gap-2 p-1 md:p-2 bg-[#ffffffe6] rounded-full border border-[#bbbbbb3d] shadow-[0px_0px_32px_#00000005] backdrop-blur-[10px] text-xs md:text-sm">
                   <div className="w-6 h-6 md:w-8 md:h-8 bg-[#bf5925] rounded-full flex items-center justify-center text-white text-xs md:text-sm font-semibold">

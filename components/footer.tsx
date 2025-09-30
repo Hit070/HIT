@@ -218,7 +218,10 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="https://paystack.shop/pay/testers"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 hover:text-white transition-colors">
                     Donate
                   </Link>
                 </li>
