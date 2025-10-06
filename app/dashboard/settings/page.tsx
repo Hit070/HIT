@@ -320,11 +320,20 @@ export default function SettingsPage() {
 
         <TabsContent value="shipping" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Shipping Options</CardTitle>
-              <CardDescription>
-                Manage your store's shipping options
-              </CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="flex-1 items-center">
+                <CardTitle>Shipping Options</CardTitle>
+                <CardDescription>
+                  Manage your store's shipping options
+                </CardDescription>
+              </div>
+
+              <div>
+                <Button onClick={() => setIsAddShippingOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Shipping Option
+                </Button>
+              </div>
             </CardHeader>
 
             <CardContent>
@@ -339,96 +348,96 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Name</TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            Price
-                          </TableHead>
-                          <TableHead className="hidden md:table-cell">
-                            Delivery Time
-                          </TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {shippingOptions.map((option) => (
-                          <TableRow key={option.id}>
-                            <TableCell className="font-medium">
-                              {option.name}
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              ₦{option.price}
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">
-                              {option.deliveryTime}
-                            </TableCell>
-                            <TableCell>
-                              <span
-                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${option.status === "ACTIVE"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-yellow-100 text-yellow-800"
-                                  }`}
-                              >
-                                {option.status === "ACTIVE"
-                                  ? "ACTIVE"
-                                  : "CONDITIONAL"}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Open menu</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setCurrentShipping(option);
-                                      setIsEditShippingOpen(true);
-                                    }}
-                                  >
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setShippingToDelete(option.id);
-                                      setDeleteDialogOpen(true);
-                                    }}
-                                  >
-                                    <Trash className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                  <div className="overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-muted/50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground rounded-l-xl">
+                              Name
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                              Price
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                              Delivery Time
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                              Status
+                            </th>
+                            <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[80px] rounded-r-xl">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {shippingOptions.map((option) => (
+                            <tr key={option.id} className="border-b last:border-0">
+                              <td className="px-4 py-4 text-sm font-medium">
+                                {option.name}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-muted-foreground">
+                                ₦{option.price}
+                              </td>
+                              <td className="px-4 py-4 text-sm text-muted-foreground">
+                                {option.deliveryTime}
+                              </td>
+                              <td className="px-4 py-4 text-sm">
+                                <div
+                                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${option.status
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                    }`}
+                                >
+                                  <span
+                                    className={`h-2 w-2 rounded-full ${option.status ? "bg-green-500" : "bg-red-500"
+                                      }`}
+                                  />
+                                  <span>{option.status ? "ACTIVE" : "CONDITIONAL"}</span>
+                                </div>
+                              </td>
+                              <td className="px-4 py-4">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setCurrentShipping(option);
+                                        setIsEditShippingOpen(true);
+                                      }}
+                                    >
+                                      <Edit className="mr-2 h-4 w-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => {
+                                        setShippingToDelete(option.id);
+                                        setDeleteDialogOpen(true);
+                                      }}
+                                    >
+                                      <Trash className="mr-2 h-4 w-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </>
               )}
-              <div className="mt-4">
-                <Button onClick={() => setIsAddShippingOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Shipping Option
-                </Button>
-              </div>
             </CardContent>
           </Card>
 
-          <AlertDialog
-            open={deleteDialogOpen}
-            onOpenChange={setDeleteDialogOpen}
-          >
+          {/* Keep all the modals and dialogs as they are */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
@@ -477,84 +486,89 @@ export default function SettingsPage() {
               </Button>
             </CardHeader>
             <CardContent>
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Email
-                      </TableHead>
-                      <TableHead>Last Active</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center">
-                            <UserIcon className="mr-2 h-4 w-4" />
-                            {user.name}
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {user.email}
-                        </TableCell>
-                        <TableCell>
-                          {(() => {
-                            const date = new Date(user.lastActive);
-                            return `${date.toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            })} at ${date.toLocaleTimeString("en-US", {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}`;
-                          })()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCurrentUser(user);
-                                  setIsEditUserOpen(true);
-                                }}
-                              >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCurrentUser(user);
-                                  setIsDeleteUserOpen(true);
-                                }}
-                              >
-                                <Trash className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              <div className="overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground rounded-l-xl">
+                          Name
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                          Email
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                          Last Active
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[80px] rounded-r-xl">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((user) => (
+                        <tr key={user.id} className="border-b last:border-0">
+                          <td className="px-4 py-4 text-sm font-medium">
+                            <div className="flex items-center">
+                              <UserIcon className="mr-2 h-4 w-4" />
+                              {user.name}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-muted-foreground">
+                            {user.email}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-muted-foreground">
+                            {(() => {
+                              const date = new Date(user.lastActive);
+                              return `${date.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })} at ${date.toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}`;
+                            })()}
+                          </td>
+                          <td className="px-4 py-4">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setCurrentUser(user);
+                                    setIsEditUserOpen(true);
+                                  }}
+                                >
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setCurrentUser(user);
+                                    setIsDeleteUserOpen(true);
+                                  }}
+                                >
+                                  <Trash className="mr-2 h-4 w-4" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* User Modals */}
+          {/* Keep all the modals as they are */}
           <AddUserModal
             open={isAddUserOpen}
             onOpenChange={setIsAddUserOpen}

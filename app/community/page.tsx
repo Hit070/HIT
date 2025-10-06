@@ -87,7 +87,7 @@ export default function Community() {
                 <div className="absolute bottom-[10%] left-1/2 transform -translate-x-1/2 w-[90vw] max-w-[1400px] h-[400px] bg-white/60 rounded-full blur-[100px]"></div>
             </div>
 
-            <div className="relative px-6 max-w-[1536px] mx-auto">
+            <div className="relative px-6 max-w-[1200px] mx-auto">
                 <div className="absolute w-[587px] h-[740px] top-[142px] left-[427px] rounded-[293.3px/369.87px] rotate-[-52.53deg] blur-[374.42px] opacity-[0.16]" />
 
                 {/* Hero Section */}
@@ -373,7 +373,7 @@ export default function Community() {
             </section>
 
             {/* How to Get Involved section */}
-            <section className="py-20 px-6 bg-[#f5f1eb]">
+            <section className="py-20 px-6 bg-[#FFF3EA]">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl md:text-5xl font-cormorant text-[#353336] mb-4">How to Get Involved</h2>
@@ -386,7 +386,7 @@ export default function Community() {
                     <div className="grid md:grid-cols-3 gap-12">
                         {/* Subscribe to Newsletter */}
                         <div className="text-center">
-                            <div className="w-16 h-16 bg-[#bf5925] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-[#bf5925] border-[6px] border-custom-orange-20 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                         strokeLinecap="round"
@@ -404,7 +404,7 @@ export default function Community() {
 
                         {/* Collaborate on Projects */}
                         <div className="text-center">
-                            <div className="w-16 h-16 bg-[#bf5925] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-[#bf5925] border-[6px] border-custom-orange-20 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <Briefcase className="w-8 h-8 text-white" />
                             </div>
                             <h3 className="text-xl font-semibold text-[#353336] mb-4">Collaborate on Projects</h3>
@@ -413,7 +413,7 @@ export default function Community() {
 
                         {/* Support the Mission */}
                         <div className="text-center">
-                            <div className="w-16 h-16 bg-[#bf5925] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <div className="w-16 h-16 bg-[#bf5925] border-[6px] border-custom-orange-20 rounded-full flex items-center justify-center mx-auto mb-6">
 
                                 <BiBullseye className="w-8 h-8 text-white" />
                             </div>

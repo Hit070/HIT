@@ -28,6 +28,8 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -44,6 +46,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarDays, BookOpen, MessageSquare } from "lucide-react";
+import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { useRouter } from "next/navigation";
 
 // Define chart data types
 interface ChartData {
@@ -380,105 +384,137 @@ export default function Dashboard() {
       <div className="relative">
         {/* Mobile: Single column */}
         <div className="grid gap-6 grid-cols-1 md:hidden">
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-app-primary"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <div className="p-2 bg-orange-50 rounded-lg">
-                <DollarSign className="h-4 w-4 text-app-primary" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-primary" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                    <p className="text-3xl font-semibold">₦{totalRevenue.toLocaleString()}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-orange-500/10 backdrop-blur-3xl shadow-inner">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">₦{totalRevenue.toLocaleString()}</div>
-              <div className="flex items-center pt-1">
-                <ArrowUpIcon className={cn("mr-1 h-3 w-3", revenueChange >= 0 ? "text-green-500" : "text-red-500")} />
-                <span className={cn("text-xs font-medium", revenueChange >= 0 ? "text-green-500" : "text-red-500")}>
-                  {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+              <div className="flex items-center gap-1 text-xs mt-4">
+                {revenueChange >= 0 ? (
+                  <TrendingUp className="h-3 w-3 text-green-600" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 text-red-600" />
+                )}
+                <span className={revenueChange >= 0 ? "text-green-600" : "text-red-600"}>
+                  {Math.abs(revenueChange).toFixed(1)}% {revenueChange >= 0 ? "increase" : "Decrease"}
                 </span>
-                <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                <span className="text-muted-foreground">vs previous month</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Orders</CardTitle>
-              <div className="p-2 bg-purple-50 rounded-lg">
-                <ShoppingCart className="h-4 w-4 text-purple-600" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-purple-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Orders</p>
+                    <p className="text-3xl font-semibold">{totalOrders}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-purple-500/10 backdrop-blur-3xl shadow-inner">
+                  <ShoppingCart className="h-5 w-5 text-purple-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">{totalOrders}</div>
-              <div className="flex items-center pt-1">
-                <ArrowUpIcon className={cn("mr-1 h-3 w-3", ordersChange >= 0 ? "text-green-500" : "text-red-500")} />
-                <span className={cn("text-xs font-medium", ordersChange >= 0 ? "text-green-500" : "text-red-500")}>
-                  {ordersChange >= 0 ? "+" : ""}{ordersChange.toFixed(1)}%
+              <div className="flex items-center gap-1 text-xs mt-4">
+                {ordersChange >= 0 ? (
+                  <TrendingUp className="h-3 w-3 text-green-600" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 text-red-600" />
+                )}
+                <span className={ordersChange >= 0 ? "text-green-600" : "text-red-600"}>
+                  {Math.abs(ordersChange).toFixed(1)}% {ordersChange >= 0 ? "increase" : "Decrease"}
                 </span>
-                <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                <span className="text-muted-foreground">vs previous month</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Events</CardTitle>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <CalendarDays className="h-4 w-4 text-blue-600" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-blue-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Events</p>
+                    <p className="text-3xl font-semibold">{totalEvents}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-blue-500/10 backdrop-blur-3xl shadow-inner">
+                  <CalendarDays className="h-5 w-5 text-blue-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">{totalEvents}</div>
-              <p className="text-xs text-muted-foreground pt-1">
+              <p className="text-xs text-muted-foreground mt-4">
                 Upcoming & past events
               </p>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Blogs</CardTitle>
-              <div className="p-2 bg-indigo-50 rounded-lg">
-                <BookOpen className="h-4 w-4 text-indigo-600" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-indigo-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Blogs</p>
+                    <p className="text-3xl font-semibold">{totalBlogs}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-indigo-500/10 backdrop-blur-3xl shadow-inner">
+                  <BookOpen className="h-5 w-5 text-indigo-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">{totalBlogs}</div>
-              <p className="text-xs text-muted-foreground pt-1">
+              <p className="text-xs text-muted-foreground mt-4">
                 Published blog posts
               </p>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Stories</CardTitle>
-              <div className="p-2 bg-cyan-50 rounded-lg">
-                <MessageSquare className="h-4 w-4 text-cyan-600" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-cyan-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Stories</p>
+                    <p className="text-3xl font-semibold">{totalStories}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-cyan-500/10 backdrop-blur-3xl shadow-inner">
+                  <MessageSquare className="h-5 w-5 text-cyan-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">{totalStories}</div>
-              <p className="text-xs text-muted-foreground pt-1">
+              <p className="text-xs text-muted-foreground mt-4">
                 Community stories
               </p>
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Catalog</CardTitle>
-              <div className="p-2 bg-green-50 rounded-lg">
-                <Package className="h-4 w-4 text-green-600" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-green-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Catalog</p>
+                    <p className="text-3xl font-semibold">{totalProducts}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-green-500/10 backdrop-blur-3xl shadow-inner">
+                  <Package className="h-5 w-5 text-green-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">{totalProducts}</div>
-              <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
+              <div className="flex items-center justify-between text-xs text-muted-foreground mt-4">
                 <span>{totalVariants} variants</span>
                 {lowStockCount > 0 ? (
                   <div className="flex items-center">
@@ -492,17 +528,21 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500"></div>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-              <CardTitle className="text-sm font-medium">Customers</CardTitle>
-              <div className="p-2 bg-pink-50 rounded-lg">
-                <Users className="h-4 w-4 text-pink-600" />
+          <Card className="shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-1 h-12 rounded-full bg-pink-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Customers</p>
+                    <p className="text-3xl font-semibold">{totalCustomers}</p>
+                  </div>
+                </div>
+                <div className="rounded-lg p-3 bg-pink-500/10 backdrop-blur-3xl shadow-inner">
+                  <Users className="h-5 w-5 text-pink-600" />
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="pl-4">
-              <div className="text-2xl font-bold">{totalCustomers}</div>
-              <p className="text-xs text-muted-foreground pt-1">
+              <p className="text-xs text-muted-foreground mt-4">
                 Unique customers
               </p>
             </CardContent>
@@ -524,6 +564,7 @@ export default function Dashboard() {
           </button>
 
           <button
+            type="button"
             title="Scroll right"
             onClick={() => {
               const container = document.getElementById('stats-scroll-container');
@@ -545,105 +586,138 @@ export default function Dashboard() {
         }
       `}</style>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                <div className="p-2 bg-orange-50 rounded-lg">
-                  <DollarSign className="h-4 w-4 text-orange-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-primary" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Total Revenue</p>
+                      <p className="text-xl font-semibold">₦{totalRevenue.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-orange-500/10 backdrop-blur-xl shadow-inner">
+                    <DollarSign className="h-5 w-5 text-[#bf5925]" />
+                  </div>
+
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">₦{totalRevenue.toLocaleString()}</div>
-                <div className="flex items-center pt-1">
-                  <ArrowUpIcon className={cn("mr-1 h-3 w-3", revenueChange >= 0 ? "text-green-500" : "text-red-500")} />
-                  <span className={cn("text-xs font-medium", revenueChange >= 0 ? "text-green-500" : "text-red-500")}>
-                    {revenueChange >= 0 ? "+" : ""}{revenueChange.toFixed(1)}%
+                <div className="flex items-center gap-1 text-xs mt-4">
+                  {revenueChange >= 0 ? (
+                    <TrendingUp className="h-3 w-3 text-green-600" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 text-red-600" />
+                  )}
+                  <span className={revenueChange >= 0 ? "text-green-600" : "text-red-600"}>
+                    {Math.abs(revenueChange).toFixed(1)}% {revenueChange >= 0 ? "increase" : "Decrease"}
                   </span>
-                  <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                  <span className="text-muted-foreground">vs previous month</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Orders</CardTitle>
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <ShoppingCart className="h-4 w-4 text-purple-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-purple-500" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Orders</p>
+                      <p className="text-xl font-semibold">{totalOrders}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-purple-500/10 backdrop-blur-3xl shadow-inner">
+                    <ShoppingCart className="h-5 w-5 text-purple-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">{totalOrders}</div>
-                <div className="flex items-center pt-1">
-                  <ArrowUpIcon className={cn("mr-1 h-3 w-3", ordersChange >= 0 ? "text-green-500" : "text-red-500")} />
-                  <span className={cn("text-xs font-medium", ordersChange >= 0 ? "text-green-500" : "text-red-500")}>
-                    {ordersChange >= 0 ? "+" : ""}{ordersChange.toFixed(1)}%
+                <div className="flex items-center gap-1 text-xs mt-4">
+                  {ordersChange >= 0 ? (
+                    <TrendingUp className="h-3 w-3 text-green-600" />
+                  ) : (
+                    <TrendingDown className="h-3 w-3 text-red-600" />
+                  )}
+                  <span className={ordersChange >= 0 ? "text-green-600" : "text-red-600"}>
+                    {Math.abs(ordersChange).toFixed(1)}% {ordersChange >= 0 ? "increase" : "Decrease"}
                   </span>
-                  <span className="text-xs text-muted-foreground ml-1">from last month</span>
+                  <span className="text-muted-foreground">vs previous month</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Events</CardTitle>
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <CalendarDays className="h-4 w-4 text-blue-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-blue-500" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Events</p>
+                      <p className="text-xl font-semibold">{totalEvents}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-blue-500/10 backdrop-blur-3xl shadow-inner">
+                    <CalendarDays className="h-5 w-5 text-blue-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">{totalEvents}</div>
-                <p className="text-xs text-muted-foreground pt-1">
+                <p className="text-xs text-muted-foreground mt-4">
                   Upcoming & past events
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Blogs</CardTitle>
-                <div className="p-2 bg-indigo-50 rounded-lg">
-                  <BookOpen className="h-4 w-4 text-indigo-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-indigo-500" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Blogs</p>
+                      <p className="text-xl font-semibold">{totalBlogs}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-indigo-500/10 backdrop-blur-3xl shadow-inner">
+                    <BookOpen className="h-5 w-5 text-indigo-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">{totalBlogs}</div>
-                <p className="text-xs text-muted-foreground pt-1">
+                <p className="text-xs text-muted-foreground mt-4">
                   Published blog posts
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Stories</CardTitle>
-                <div className="p-2 bg-cyan-50 rounded-lg">
-                  <MessageSquare className="h-4 w-4 text-cyan-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-cyan-500" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Stories</p>
+                      <p className="text-xl font-semibold">{totalStories}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-cyan-500/10 backdrop-blur-3xl shadow-inner">
+                    <MessageSquare className="h-5 w-5 text-cyan-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">{totalStories}</div>
-                <p className="text-xs text-muted-foreground pt-1">
+                <p className="text-xs text-muted-foreground mt-4">
                   Community stories
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-green-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Catalog</CardTitle>
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <Package className="h-4 w-4 text-green-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-green-500" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Catalog</p>
+                      <p className="text-xl font-semibold">{totalProducts}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-green-500/10 backdrop-blur-3xl shadow-inner">
+                    <Package className="h-5 w-5 text-green-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">{totalProducts}</div>
-                <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-4">
                   <span>{totalVariants} variants</span>
                   {lowStockCount > 0 ? (
                     <div className="flex items-center">
@@ -657,17 +731,21 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="flex-shrink-0 w-80 relative overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-pink-500"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pl-4">
-                <CardTitle className="text-sm font-medium">Customers</CardTitle>
-                <div className="p-2 bg-pink-50 rounded-lg">
-                  <Users className="h-4 w-4 text-pink-600" />
+            <Card className="flex-shrink-0 w-80 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1 h-12 rounded-full bg-pink-500" />
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">Customers</p>
+                      <p className="text-xl font-semibold">{totalCustomers}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-lg p-4 bg-pink-500/10 backdrop-blur-3xl shadow-inner">
+                    <Users className="h-5 w-5 text-pink-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="pl-4">
-                <div className="text-2xl font-bold">{totalCustomers}</div>
-                <p className="text-xs text-muted-foreground pt-1">
+                <p className="text-xs text-muted-foreground mt-4">
                   Unique customers
                 </p>
               </CardContent>
@@ -715,20 +793,76 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card className="col-span-full lg:col-span-3">
+            {/* Order Status */}
+            <Card className="col-span-full lg:col-span-3 shadow-sm">
               <CardHeader>
-                <CardTitle>Order Status</CardTitle>
-                <CardDescription>Distribution of orders by status</CardDescription>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base font-medium">Order Status</CardTitle>
+                  <Select defaultValue="thismonth">
+                    <SelectTrigger className="w-[120px] h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="thismonth">This Month</SelectItem>
+                      <SelectItem value="lastmonth">Last Month</SelectItem>
+                      <SelectItem value="thisyear">This Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardHeader>
-              <CardContent className="flex justify-center">
-                <DonutChart
-                  data={orderStatusData}
-                  index="name"
-                  categories={["value"]}
-                  colors={["blue", "amber", "emerald", "indigo", "red"]}
-                  valueFormatter={(value: number) => `${value} orders`}
-                  height={300}
-                />
+              <CardContent>
+                <div className="flex flex-col items-center">
+                  <div className="relative h-[300px] w-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={orderStatusData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={70}
+                          outerRadius={110}
+                          paddingAngle={2}
+                          dataKey="value"
+                        >
+                          {orderStatusData.map((entry, index) => {
+                            const colors = {
+                              "Pending": "#BF5925",
+                              "Processing": "#a855f7",
+                              "Shipped": "#3b82f6",
+                              "Delivered": "#22c55e",
+                              "Cancelled": "#BB0909FF"
+                            };
+                            return (
+                              <Cell key={`cell-${index}`} fill={colors[entry.name as keyof typeof colors] || "#6b7280"} />
+                            );
+                          })}
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                      <p className="text-xs text-muted-foreground">Total Orders</p>
+                      <p className="text-2xl font-semibold">{totalOrders.toLocaleString()}</p>
+                    </div>
+                  </div>
+                  <div className="mt-6 grid grid-cols-2 gap-4 w-full">
+                    {orderStatusData.map((item) => {
+                      const colors = {
+                        "Pending": "#BF5925",
+                        "Processing": "#a855f7",
+                        "Shipped": "#3b82f6",
+                        "Delivered": "#22c55e",
+                        "Cancelled": "#BB0909FF"
+                      };
+                      return (
+                        <div key={item.name} className="flex items-center gap-2">
+                          <div className="h-3 w-3 rounded-full" style={{ backgroundColor: colors[item.name as keyof typeof colors] || "#6b7280" }} />
+                          <span className="text-xs text-muted-foreground">{item.name}</span>
+                          <span className="ml-auto text-xs font-medium">{item.value}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

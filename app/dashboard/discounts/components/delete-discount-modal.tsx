@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import type { Discount } from "@/types";
+import Image from "next/image";
 
 interface DeleteDiscountModalProps {
   open: boolean;
@@ -36,10 +37,20 @@ export function DeleteDiscountModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-red-500" />
-            Confirm Deletion
-          </DialogTitle>
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Image
+              src={"/delete.png"}
+              alt={"delete"}
+              width={100}
+              height={100}
+              className="h-40 w-40"
+            />
+
+            <DialogTitle className="flex items-center text-center text-2xl gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500 " />
+              Confirm Deletion
+            </DialogTitle>
+          </div>
           <DialogDescription>
             Are you sure you want to delete the discount code "
             <strong>{discount?.code}</strong>"? This action cannot be undone.

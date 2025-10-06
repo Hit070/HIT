@@ -242,12 +242,11 @@ export function AddDiscountModal({
             Create a new discount code for your customers.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+
+        <div className="space-y-4 py-4">
           {/* Basic Fields */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="code" className="text-right">
-              Code
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="code">Code</Label>
             <Input
               id="code"
               value={newDiscount.code}
@@ -257,52 +256,42 @@ export function AddDiscountModal({
                   code: e.target.value.toUpperCase(),
                 })
               }
-              className="col-span-3"
               placeholder="SUMMER20"
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Description
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={newDiscount.description ?? ""}
               onChange={(e) =>
                 setNewDiscount({ ...newDiscount, description: e.target.value })
               }
-              className="col-span-3"
               placeholder="Summer sale 20% off"
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">
-              Type
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="type">Type</Label>
             <Select
               onValueChange={(
                 value: "percentage" | "fixed_amount"
-                // | "free_shipping"
               ) => setNewDiscount({ ...newDiscount, type: value })}
               defaultValue={newDiscount.type}
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger>
                 <SelectValue placeholder="Select discount type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="percentage">Percentage</SelectItem>
                 <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
-                {/* <SelectItem value="free_shipping">Free Shipping</SelectItem> */}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="value" className="text-right">
-              Value
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="value">Value</Label>
             <Input
               id="value"
               type="number"
@@ -315,20 +304,14 @@ export function AddDiscountModal({
                   if (value > 100) value = 100;
                   if (value < 1) value = 1;
                 }
-                setNewDiscount({
-                  ...newDiscount,
-                  value,
-                });
+                setNewDiscount({ ...newDiscount, value });
               }}
-              className="col-span-3"
               placeholder={newDiscount.type === "percentage" ? "20" : "10.00"}
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="startsAt" className="text-right">
-              Start Date
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="startsAt">Start Date</Label>
             <Input
               id="startsAt"
               type="datetime-local"
@@ -339,14 +322,11 @@ export function AddDiscountModal({
                   startsAt: new Date(e.target.value),
                 })
               }
-              className="col-span-3"
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="endsAt" className="text-right">
-              End Date
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="endsAt">End Date</Label>
             <Input
               id="endsAt"
               type="datetime-local"
@@ -357,14 +337,11 @@ export function AddDiscountModal({
                   endsAt: e.target.value ? new Date(e.target.value) : undefined,
                 })
               }
-              className="col-span-3"
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="minSubtotal" className="text-right">
-              Min. Subtotal
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="minSubtotal">Min. Subtotal</Label>
             <Input
               id="minSubtotal"
               type="number"
@@ -378,103 +355,93 @@ export function AddDiscountModal({
                       : parseFloat(e.target.value),
                 })
               }
-              className="col-span-3"
               placeholder="0.00"
             />
           </div>
 
           {/* Product Search */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="productSearch" className="text-right">
-              Applies to
-            </Label>
-            <div className="col-span-3 space-y-2">
-              <Input
-                id="productSearch"
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                placeholder="Search by product name or ID"
-              />
-              {filteredProducts.length > 0 && (
-                <div className="border rounded p-2 max-h-[150px] overflow-y-auto space-y-1">
-                  {filteredProducts.map((product) => (
-                    <div
-                      key={product.id}
-                      className="cursor-pointer hover:bg-muted p-1 rounded text-sm"
-                      onClick={() => addProductToList(product.id)}
-                    >
-                      {product.title} ({product.id})
-                    </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {newDiscount.productIds.map((productId) => {
-                  const product = products.find((p) => p.id === productId);
-                  return (
-                    <Badge key={productId} variant="secondary">
-                      {product?.title || productId}
-                      <X
-                        className="ml-1 h-3 w-3 cursor-pointer"
-                        onClick={() => removeProductFromList(productId)}
-                      />
-                    </Badge>
-                  );
-                })}
+          <div className="space-y-2">
+            <Label htmlFor="productSearch">Applies to Products</Label>
+            <Input
+              id="productSearch"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="Search by product name or ID"
+            />
+            {filteredProducts.length > 0 && (
+              <div className="border rounded p-2 max-h-[150px] overflow-y-auto space-y-1">
+                {filteredProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="cursor-pointer hover:bg-muted p-1 rounded text-sm"
+                    onClick={() => addProductToList(product.id)}
+                  >
+                    {product.title} ({product.id})
+                  </div>
+                ))}
               </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {newDiscount.productIds.map((productId) => {
+                const product = products.find((p) => p.id === productId);
+                return (
+                  <Badge key={productId} variant="secondary">
+                    {product?.title || productId}
+                    <X
+                      className="ml-1 h-3 w-3 cursor-pointer"
+                      onClick={() => removeProductFromList(productId)}
+                    />
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 
           {/* Variant Search */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="variantSearch" className="text-right">
-              Applies to Variants
-            </Label>
-            <div className="col-span-3 space-y-2">
-              <Input
-                id="variantSearch"
-                value={variantSearch}
-                onChange={(e) => setVariantSearch(e.target.value)}
-                placeholder="Search by variant name, SKU, product, or ID"
-              />
-              {filteredVariants.length > 0 && (
-                <div className="border rounded p-2 max-h-[150px] overflow-y-auto space-y-1">
-                  {filteredVariants.map((variant) => (
-                    <div
-                      key={variant.id}
-                      className="cursor-pointer hover:bg-muted p-1 rounded text-sm"
-                      onClick={() => addVariantToList(variant.id)}
-                    >
-                      <div className="font-medium">{variant.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {variant.productTitle} • SKU: {variant.sku || 'N/A'} • ID: {variant.id}
-                      </div>
+          <div className="space-y-2">
+            <Label htmlFor="variantSearch">Applies to Variants</Label>
+            <Input
+              id="variantSearch"
+              value={variantSearch}
+              onChange={(e) => setVariantSearch(e.target.value)}
+              placeholder="Search by variant name, SKU, product, or ID"
+            />
+            {filteredVariants.length > 0 && (
+              <div className="border rounded p-2 max-h-[150px] overflow-y-auto space-y-1">
+                {filteredVariants.map((variant) => (
+                  <div
+                    key={variant.id}
+                    className="cursor-pointer hover:bg-muted p-1 rounded text-sm"
+                    onClick={() => addVariantToList(variant.id)}
+                  >
+                    <div className="font-medium">{variant.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {variant.productTitle} • SKU: {variant.sku || "N/A"} • ID:{" "}
+                      {variant.id}
                     </div>
-                  ))}
-                </div>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {newDiscount.variantIds.map((variantId) => {
-                  const variant = allVariants.find((v) => v.id === variantId);
-                  return (
-                    <Badge key={variantId} variant="secondary">
-                      {variant?.name || variantId}
-                      {variant?.sku && ` (${variant.sku})`}
-                      <X
-                        className="ml-1 h-3 w-3 cursor-pointer"
-                        onClick={() => removeVariantFromList(variantId)}
-                      />
-                    </Badge>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {newDiscount.variantIds.map((variantId) => {
+                const variant = allVariants.find((v) => v.id === variantId);
+                return (
+                  <Badge key={variantId} variant="secondary">
+                    {variant?.name || variantId}
+                    {variant?.sku && ` (${variant.sku})`}
+                    <X
+                      className="ml-1 h-3 w-3 cursor-pointer"
+                      onClick={() => removeVariantFromList(variantId)}
+                    />
+                  </Badge>
+                );
+              })}
             </div>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="usageLimit" className="text-right">
-              Usage Limit
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="usageLimit">Usage Limit</Label>
             <Input
               id="usageLimit"
               type="number"
@@ -487,14 +454,13 @@ export function AddDiscountModal({
                     : undefined,
                 })
               }
-              className="col-span-3"
               placeholder="Unlimited"
             />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Active</Label>
-            <div className="flex items-center space-x-2 col-span-3">
+          <div className="space-y-2">
+            <Label>Active</Label>
+            <div className="flex items-center space-x-2">
               <Switch
                 checked={newDiscount.isActive}
                 onCheckedChange={(checked) =>
@@ -507,15 +473,10 @@ export function AddDiscountModal({
         </div>
 
         <DialogFooter>
-          <Button variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button
-            onClick={handleAddDiscount}
-            disabled={isAdding}
-          >
+          <Button onClick={handleAddDiscount} disabled={isAdding}>
             {isAdding ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -525,7 +486,6 @@ export function AddDiscountModal({
               "Add Discount"
             )}
           </Button>
-
         </DialogFooter>
       </DialogContent>
     </Dialog>

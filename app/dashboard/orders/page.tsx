@@ -34,7 +34,9 @@ import { toast } from "@/components/ui/use-toast";
 import { CreateOrderModal } from "./components/create-order-modal";
 import { ViewOrderModal } from "./components/view-order-modal";
 import { EditOrderModal } from "./components/edit-order-modal";
+import { RiArrowLeftSLine, RiArrowRightSLine } from "react-icons/ri";
 import {
+  Check,
   ChevronDown,
   Filter,
   MoreHorizontal,
@@ -55,6 +57,15 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const statuses = [
+    { label: "All Orders", value: null },
+    { label: "Pending", value: "PENDING" },
+    { label: "Processing", value: "PROCESSING" },
+    { label: "Shipped", value: "SHIPPED" },
+    { label: "Delivered", value: "DELIVERED" },
+    { label: "Cancelled", value: "CANCELLED" },
+  ];
 
   // Filter orders based on search query and status filter
   const filteredOrders = useMemo(() => {
@@ -341,7 +352,7 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-8">
+    <div className="flex flex-col gap-8 md:p-8 p-2">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Orders</h1>
@@ -350,181 +361,263 @@ export default function OrdersPage() {
           </p>
 
         </div>
-        <Button onClick={() => setCreateOrderOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Create Order
-        </Button>
+
       </div>
 
-
-      <Card className="border-0 md:border md:p-4">
-        <div className="md:flex flex-1 items-center justify-between mb-4">
-          <div className="relative w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+      <div className="md:flex grid grid-cols-1 items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Customer name or order ID..."
-              className="pl-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-3xl bg-gray-100 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-          </div>
-          <div className="mt-4 md:mt-0">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Filter className="mr-2 h-4 w-4" />
-                  {statusFilter
-                    ? `Status: ${statusFilter}`
-                    : "Filter by Status"}
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setStatusFilter(null)}>
-                  All Orders
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("PENDING")}>
-                  Pending
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("PROCESSING")}>
-                  Processing
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("SHIPPED")}>
-                  Shipped
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("DELIVERED")}>
-                  Delivered
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setStatusFilter("CANCELLED")}>
-                  Cancelled
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
 
-        {filteredOrders.length === 0 ? (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium">No orders found</h3>
-            <p className="text-muted-foreground">
-              Create some and they'll appear here
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="rounded-md border md:max-w-full max-w-[380px]">
-              <div className="overflow-x-auto">
-                <Table className="w-full">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="hidden md:table-cell text-left">
-                        Order ID
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">Date</TableHead>
-                      <TableHead className="table-cell">Customer</TableHead>
-                      <TableHead className="hidden md:table-cell text-center">
-                        Status
-                      </TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead className="md:text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
+        <div className="flex w-full items-center gap-3 md:w-auto md:justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2 bg-transparent rounded-lg">
+                <Filter className="h-4 w-4" />
+                {statusFilter ? `Status: ${statusFilter}` : "Filter by Status"}
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
 
-                    {paginatedOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium hidden md:table-cell text-left">
-                          {order.id}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {format(new Date(order.createdAt), "MMM d, yyyy")}
-                        </TableCell>
-                        <TableCell className="md:w-auto w-[100px] break-all break-words">
-                          {`${order.firstName} ${order.lastName}`}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell text-center">
-                          <Badge className={getStatusColor(order.status)}>
-                            {order.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="md:w-auto w-[100px] break-words">
-                          <div>
-                            <div>₦{(order.total).toFixed(2)}</div>
-                            {order.discount && (
-                              <span className="text-xs text-muted-foreground italic">
-                                Discount Applied ({order.discount.code})
-                              </span>
-                            )}
-                            {order.items.some((item) => item.variantId) && (
-                              <span className="text-xs text-muted-foreground">
-                                Includes variants
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="md:w-auto w-[50px]">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => handleViewOrder(order)}
-                              >
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => handleEditOrder(order)}
-                                disabled={order.status === "DELIVERED"}
-                              >
-                                Edit Order
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+            <DropdownMenuContent align="end" className="min-w-[180px]">
+              {statuses.map((status) => {
+                const isActive = statusFilter === status.value;
+                return (
+                  <DropdownMenuItem
+                    key={status.value ?? "all"}
+                    onClick={() => setStatusFilter(status.value)}
+                    className={`flex items-center justify-between ${isActive ? "bg-orange-100 text-primary" : ""
+                      }`}
+                  >
+                    <span>{status.label}</span>
+                    {isActive && <Check className="h-4 w-4" />}
+                  </DropdownMenuItem>
+                );
+              })}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-            <CardFooter className="md:flex grid justify-between pt-8">
-              <div className="text-sm text-muted-foreground">
-                Showing {paginatedOrders.length} of {filteredOrders.length} orders
-              </div>
-              <div className="flex justify-between items-center md:mt-0 mt-4">
+          <Button onClick={() => setCreateOrderOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Create Order
+          </Button>
+        </div>
+      </div>
+
+      <div className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-4 py-3 w-[100px] text-left text-sm font-medium text-muted-foreground rounded-l-xl">
+                  Order ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Customer
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Date
+                </th>
+
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Total
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[80px] rounded-r-xl">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-muted-foreground text-lg mb-2">No orders found</p>
+                      <p className="text-muted-foreground text-sm">
+                        {searchQuery || statusFilter
+                          ? "Try adjusting your filters or search terms"
+                          : "Create some and they'll appear here"}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedOrders.map((order) => (
+                  <tr key={order.id} className="border-b last:border-0">
+                    <td className="px-4 py-4 text-sm font-medium">
+                      {order.id}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {`${order.firstName} ${order.lastName}`}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {format(new Date(order.createdAt), "MMM d, yyyy")}
+                    </td>
+
+                    <td className="px-4 py-4 text-sm">
+                      <Badge className={getStatusColor(order.status)}>
+                        {order.status}
+                      </Badge>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      <div>
+                        <div>₦{(order.total).toFixed(2)}</div>
+                        {order.discount && (
+                          <span className="text-xs text-muted-foreground italic">
+                            Discount Applied ({order.discount.code})
+                          </span>
+                        )}
+                        {order.items.some((item) => item.variantId) && (
+                          <span className="text-xs text-muted-foreground block">
+                            Includes variants
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleViewOrder(order)}
+                          >
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleEditOrder(order)}
+                            disabled={order.status === "DELIVERED"}
+                          >
+                            Edit Order
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-6">
+        <Button
+          variant="ghost"
+          className="gap-2 rounded-lg border"
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+        >
+          <RiArrowLeftSLine /> Back
+        </Button>
+
+        <div className="flex items-center gap-2">
+          {(() => {
+            const buttons = []
+            const totalPages = Math.ceil(filteredOrders.length / itemsPerPage)
+            const maxVisiblePages = 5
+
+            if (totalPages <= maxVisiblePages) {
+              for (let i = 1; i <= totalPages; i++) {
+                buttons.push(
+                  <Button
+                    key={i}
+                    variant={currentPage === i ? "outline" : "ghost"}
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-transparent"
+                    onClick={() => setCurrentPage(i)}
+                  >
+                    {i}
+                  </Button>,
+                )
+              }
+            } else {
+              buttons.push(
                 <Button
-                  variant="outline"
-                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={currentPage === 1}
+                  key={1}
+                  variant={currentPage === 1 ? "outline" : "ghost"}
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-transparent"
+                  onClick={() => setCurrentPage(1)}
                 >
-                  Previous
-                </Button>
-                <span className="mx-2">
-                  Page {currentPage} of {Math.ceil(filteredOrders.length / itemsPerPage)}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    setCurrentPage((prev) =>
-                      Math.min(prev + 1, Math.ceil(filteredOrders.length / itemsPerPage))
-                    )
-                  }
-                  disabled={currentPage === Math.ceil(filteredOrders.length / itemsPerPage)}
-                >
-                  Next
-                </Button>
-              </div>
-            </CardFooter>
-          </>
-        )}
-      </Card>
+                  1
+                </Button>,
+              )
+
+              if (currentPage > 3) {
+                buttons.push(
+                  <span key="ellipsis1" className="text-muted-foreground">
+                    ...
+                  </span>,
+                )
+              }
+
+              const start = Math.max(2, currentPage - 1)
+              const end = Math.min(totalPages - 1, currentPage + 1)
+
+              for (let i = start; i <= end; i++) {
+                buttons.push(
+                  <Button
+                    key={i}
+                    variant={currentPage === i ? "outline" : "ghost"}
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-transparent"
+                    onClick={() => setCurrentPage(i)}
+                  >
+                    {i}
+                  </Button>,
+                )
+              }
+
+              if (currentPage < totalPages - 2) {
+                buttons.push(
+                  <span key="ellipsis2" className="text-muted-foreground">
+                    ...
+                  </span>,
+                )
+              }
+
+              if (totalPages > 1) {
+                buttons.push(
+                  <Button
+                    key={totalPages}
+                    variant={currentPage === totalPages ? "outline" : "ghost"}
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-transparent"
+                    onClick={() => setCurrentPage(totalPages)}
+                  >
+                    {totalPages}
+                  </Button>,
+                )
+              }
+            }
+
+            return buttons
+          })()}
+        </div>
+
+        <Button
+          variant="ghost"
+          className="gap-2 rounded-lg border"
+          onClick={() => setCurrentPage(Math.min(Math.ceil(filteredOrders.length / itemsPerPage), currentPage + 1))}
+          disabled={currentPage === Math.ceil(filteredOrders.length / itemsPerPage)}
+        >
+          Next <RiArrowRightSLine />
+        </Button>
+      </div>
 
       {/* Create Order Modal */}
       <CreateOrderModal

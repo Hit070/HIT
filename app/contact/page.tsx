@@ -2,14 +2,15 @@
 
 import { FaFacebookF, FaInstagram, FaSpotify, FaTiktok, FaYoutube } from "react-icons/fa";
 import { FaThreads } from "react-icons/fa6";
-import { BsTwitterX } from "react-icons/bs";
+import { BsTelegram, BsTwitterX } from "react-icons/bs";
 import Footer from "@/components/footer"
 import Header from "@/components/headeruser"
 import Image from "next/image"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { Phone, Mail, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
+import { motion, useInView } from "framer-motion";
 
 export default function Contact() {
 
@@ -21,6 +22,13 @@ export default function Contact() {
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+    const socialRef = useRef(null);
+    const socialInView = useInView(socialRef, {
+        once: false,
+        amount: 0,
+        margin: "-300px 0px -300px 0px" // Lenient margin for mobile
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -199,7 +207,7 @@ export default function Contact() {
                         {/* Right side - Contact Cards */}
                         <div className="space-y-6">
                             {/* Contact Us Card */}
-                            <div className="bg-rose-50 border border-[#bf5925] rounded-2xl p-8">
+                            <div className="bg-[#FFF3EA] border border-[#bf5925] rounded-2xl p-8">
                                 <h3 className="text-2xl font-cormorant text-gray-900 mb-6">Contact Us</h3>
 
                                 <div className="space-y-6">
@@ -247,21 +255,32 @@ export default function Contact() {
                 </div>
             </section>
 
-            <section className="bg-rose-50 md:py-32 mb-24 px-6 mx-5 md:mx-0 rounded-[50px] relative">
+            <section className="bg-[#FFF3EA] md:py-32 mb-24 px-6 mx-5 md:mx-0 rounded-[50px] relative">
                 <div className="max-w-[1440px] mx-auto">
                     <div className="grid md:grid-cols-2 grid-cols-1 gap-12 items-stretch">
                         {/* Left side - Image */}
-                        <div className="relative">
+                        <motion.div
+                            ref={socialRef}
+                            className="relative"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={socialInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
                             <Image
                                 src="/follow.png"
                                 alt="Four diverse women smiling together"
                                 fill
                                 className="rounded-[50px] object-cover"
                             />
-                        </div>
+                        </motion.div>
 
                         {/* Right side - Social Media Links */}
-                        <div className="flex flex-col justify-center py-6 gap-6">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={socialInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                            className="flex flex-col justify-center py-6 gap-6"
+                        >
                             <h2 className="text-4xl font-cormorant text-gray-900 mb-8">Follow Us on Social Media</h2>
 
                             <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
@@ -332,9 +351,18 @@ export default function Contact() {
                                         </div>
                                         <span className="text-gray-900">@herimmigranttales</span>
                                     </div>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="md:w-10 md:h-10 w-4 h-4 md:p-0 p-5 bg-[#bf5925] rounded-full flex items-center justify-center">
+                                            <span className="text-white font-bold text-lg">
+                                                <BsTelegram />
+                                            </span>
+                                        </div>
+                                        <span className="text-gray-900">Her Immigrant Tales (HIT) Community</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>

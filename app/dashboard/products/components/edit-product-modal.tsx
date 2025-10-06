@@ -186,129 +186,72 @@ export function EditProductModal({
           <DialogDescription>Update the product details.</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          {/* Image Upload Section */}
-          <div className="grid grid-cols-4 items-start gap-4">
-            <Label className="text-right mt-2">Product Image</Label>
-            <div className="col-span-3 space-y-2">
-              {previewImage ? (
-                <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
-                  <Image src={previewImage} alt="Product preview" fill className="object-cover" sizes="128px" />
-                  <button
-                    title="remove image"
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
-                    disabled={isUploading}
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {isUploading ? (
-                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-                  ) : (
-                    <>
-                      <ImageIcon className="w-6 h-6 text-gray-400 mb-1" />
-                      <span className="text-xs text-gray-500 text-center px-2">Click to upload</span>
-                    </>
-                  )}
-                </div>
-              )}
 
-              <input
-                title="Product Image"
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileSelect}
-                className="hidden"
-                disabled={isUploading}
-              />
-
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="w-fit"
-              >
-                {isUploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4 mr-2" />
-                    {previewImage ? "Change Image" : "Upload Image"}
-                  </>
-                )}
-              </Button>
-              <p className="text-xs text-gray-500">Optional. Max file size: 5MB. Formats: JPG, PNG, GIF, WebP</p>
-            </div>
-          </div>
 
           {/* Title */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-title" className="text-right">Title</Label>
-            <Input id="edit-title" value={productForm.title} onChange={(e) => setProductForm({ ...productForm, title: e.target.value })} className="col-span-3" />
+          <div className="space-y-2">
+            <Label htmlFor="edit-title">Title</Label>
+            <Input
+              id="edit-title"
+              value={productForm.title}
+              onChange={(e) => setProductForm({ ...productForm, title: e.target.value })}
+            />
           </div>
 
           {/* Description */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-description" className="text-right">Description</Label>
-            <Textarea id="edit-description" value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} className="col-span-3" />
+          <div className="space-y-2">
+            <Label htmlFor="edit-description">Description</Label>
+            <Textarea
+              id="edit-description"
+              value={productForm.description}
+              onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+            />
           </div>
 
           {/* Price */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-price" className="text-right">Price</Label>
-            <div className="col-span-3 space-y-1">
-              <Input
-                id="edit-price"
-                type="number"
-                value={productForm.price || 0}
-                onChange={(e) => setProductForm({ ...productForm, price: Number.parseFloat(e.target.value) })}
-                disabled={(productForm.variants?.length || 0) > 0} // disable if variants exist
-              />
-              {(productForm.variants?.length || 0) > 0 && (
-                <p className="text-xs text-gray-500">Cannot edit price when variants exist. Update variant prices instead.</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-price">Price</Label>
+            <Input
+              id="edit-price"
+              type="number"
+              value={productForm.price || 0}
+              onChange={(e) => setProductForm({ ...productForm, price: Number.parseFloat(e.target.value) })}
+              disabled={(productForm.variants?.length || 0) > 0}
+            />
+            {(productForm.variants?.length || 0) > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Cannot edit price when variants exist. Update variant prices instead.
+              </p>
+            )}
           </div>
 
           {/* Inventory */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-inventory" className="text-right">Inventory</Label>
-            <div className="col-span-3 space-y-1">
-              <Input
-                id="edit-inventory"
-                type="number"
-                value={productForm.inventory || 0}
-                onChange={(e) => setProductForm({ ...productForm, inventory: Number.parseInt(e.target.value) })}
-                disabled={(productForm.variants?.length || 0) > 0} // disable if variants exist
-              />
-              {(productForm.variants?.length || 0) > 0 && (
-                <p className="text-xs text-gray-500">Cannot edit inventory when variants exist. Update variant inventory instead.</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="edit-inventory">Inventory</Label>
+            <Input
+              id="edit-inventory"
+              type="number"
+              value={productForm.inventory || 0}
+              onChange={(e) => setProductForm({ ...productForm, inventory: Number.parseInt(e.target.value) })}
+              disabled={(productForm.variants?.length || 0) > 0}
+            />
+            {(productForm.variants?.length || 0) > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Cannot edit inventory when variants exist. Update variant inventory instead.
+              </p>
+            )}
           </div>
 
-
           {/* Category */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-category" className="text-right">Category</Label>
+          <div className="space-y-2">
+            <Label htmlFor="edit-category">Category</Label>
             <Select
               value={productForm.category}
               onValueChange={(value) => {
                 setProductForm({ ...productForm, category: value, subcategory: "" });
               }}
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger>
                 <SelectValue placeholder="Select a category" />
               </SelectTrigger>
               <SelectContent>
@@ -320,13 +263,13 @@ export function EditProductModal({
           </div>
 
           {/* Subcategory */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-subcategory" className="text-right">Subcategory</Label>
+          <div className="space-y-2">
+            <Label htmlFor="edit-subcategory">Subcategory</Label>
             <Select
               value={productForm.subcategory || ""}
               onValueChange={(value) => setProductForm({ ...productForm, subcategory: value })}
             >
-              <SelectTrigger className="col-span-3">
+              <SelectTrigger>
                 <SelectValue placeholder="Optional subcategory" />
               </SelectTrigger>
               <SelectContent>
@@ -338,26 +281,143 @@ export function EditProductModal({
           </div>
 
           {/* Tags */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="edit-tags" className="text-right">Tags</Label>
-            <Input id="edit-tags" placeholder="Comma separated tags" value={productForm.tags?.join(",") || ""} onChange={(e) => setProductForm({ ...productForm, tags: e.target.value ? e.target.value.split(",").map((tag) => tag.trim()) : [] })} className="col-span-3" />
+          <div className="space-y-2">
+            <Label htmlFor="edit-tags">Tags</Label>
+            <Input
+              id="edit-tags"
+              placeholder="Comma separated tags"
+              value={productForm.tags?.join(",") || ""}
+              onChange={(e) => setProductForm({ ...productForm, tags: e.target.value ? e.target.value.split(",").map((tag) => tag.trim()) : [] })}
+            />
+          </div>
+
+          {/* IMAGE UPLOAD */}
+          <div className="space-y-2">
+            <Label>Upload Image</Label>
+            <p className="text-sm text-gray-500">
+              Optional. Max file size: 5MB. Supported formats: JPG, PNG, GIF, WebP
+            </p>
+
+            {previewImage ? (
+              <div className="relative w-full h-48 border-2 border-dashed border-primary rounded-lg overflow-hidden bg-primary/5">
+                <Image
+                  src={previewImage}
+                  alt="Product preview"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 650px) 100vw, 650px"
+                />
+                <button
+                  title="remove image"
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 shadow-lg"
+                  disabled={isUploading}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div
+                className="w-full h-48 p-4 border-2 border-dashed border-primary rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/70 transition-colors bg-primary/5"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploading ? (
+                  <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                ) : (
+                  <>
+                    <div className="w-16 h-16 mb-4 text-primary">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                    </div>
+                    <p className="text-lg font-medium text-gray-700 mb-1">
+                      Drop file or browse
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Format: .jpeg, .png & Max file size: 5 MB
+                    </p>
+                    <Button
+                      type="button"
+                      className="mt-4 bg-primary hover:bg-primary/90 text-primary-foreground"
+                      size="default"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={isUploading}
+                    >
+                      Browse Files
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+
+            <input
+              title="Product Image"
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={isUploading}
+            />
           </div>
 
           {/* Variants */}
-          <div>
-            <Label className="mb-2 block">Variants</Label>
+          <div className="space-y-2">
+            <Label className="font-medium">Variants</Label>
             <div className="space-y-3">
               {(productForm.variants || []).map((variant, index) => (
                 <div key={variant.id} className="flex items-center gap-2 border p-2 rounded-lg">
-                  <Input placeholder="SKU" value={variant.sku || ""} onChange={(e) => updateVariant(index, "sku", e.target.value)} className="w-24" />
-                  <Input placeholder="Name" value={variant.name || ""} onChange={(e) => updateVariant(index, "name", e.target.value)} className="flex-1" />
-                  <Input placeholder="Price" type="number" value={variant.price || 0} onChange={(e) => updateVariant(index, "price", Number.parseFloat(e.target.value))} className="w-24" />
-                  <Input placeholder="Inventory" type="number" value={variant.inventory || 0} onChange={(e) => updateVariant(index, "inventory", Number.parseInt(e.target.value))} className="w-28" />
-                  <Button type="button" variant="destructive" size="icon" onClick={() => removeVariant(index)}><Trash2 className="w-4 h-4" /></Button>
+                  <Input
+                    placeholder="SKU"
+                    value={variant.sku || ""}
+                    onChange={(e) => updateVariant(index, "sku", e.target.value)}
+                    className="w-24"
+                  />
+                  <Input
+                    placeholder="Name"
+                    value={variant.name || ""}
+                    onChange={(e) => updateVariant(index, "name", e.target.value)}
+                    className="flex-1"
+                  />
+                  <Input
+                    placeholder="Price"
+                    type="number"
+                    value={variant.price || 0}
+                    onChange={(e) => updateVariant(index, "price", Number.parseFloat(e.target.value))}
+                    className="w-24"
+                  />
+                  <Input
+                    placeholder="Inventory"
+                    type="number"
+                    value={variant.inventory || 0}
+                    onChange={(e) => updateVariant(index, "inventory", Number.parseInt(e.target.value))}
+                    className="w-28"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => removeVariant(index)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               ))}
             </div>
-            <Button type="button" variant="outline" size="sm" onClick={addVariant} className="mt-2"><Plus className="w-4 h-4 mr-2" /> Add Variant</Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addVariant}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Add Variant
+            </Button>
           </div>
         </div>
 

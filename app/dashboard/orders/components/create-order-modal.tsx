@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { AlertCircle, Loader2, Plus } from "lucide-react";
+import { Loader2, Minus, Plus } from "lucide-react";
 import type { Order } from "@/types";
 import { useSettingsStore, useStore } from "@/store/store";
 import { useShallow } from "zustand/react/shallow";
@@ -442,7 +442,7 @@ export function CreateOrderModal({
           </div>
 
           <div className="grid gap-2">
-            <h3 className="text-lg font-medium">Discount</h3>
+            {/* <h3 className="text-lg font-medium">Discount</h3> */}
             <div className="grid gap-2">
               <Label htmlFor="discount">Discount</Label>
               <Select
@@ -482,7 +482,7 @@ export function CreateOrderModal({
           </div>
 
           <div className="grid gap-2">
-            <h3 className="text-lg font-medium">Shipping Option</h3>
+            {/* <h3 className="text-lg font-medium">Shipping Option</h3> */}
             <div className="grid gap-2">
               <Label htmlFor="shippingOption">Shipping Option</Label>
               <Select
@@ -641,7 +641,7 @@ export function CreateOrderModal({
                         size="icon"
                         onClick={() => removeItemFromOrder(index)}
                       >
-                        <AlertCircle className="h-4 w-4" />
+                        <Minus className="h-4 w-4" />
                       </Button>
                     </div>
 
@@ -678,7 +678,7 @@ export function CreateOrderModal({
             Cancel
           </Button>
           <Button
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-primary hover:bg-primary/90"
             onClick={handleCreateOrder}
             disabled={isCreating || !!discountError || selectedItems.length === 0 || selectedItems.some((item) => !item.productId)}
           >

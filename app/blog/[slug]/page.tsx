@@ -213,7 +213,7 @@ export default function BlogDetailsPage() {
             {/* Read Other Blogs Section */}
             {otherBlogs.length > 0 && (
                 <section className="bg-gray-50 py-16 px-6">
-                    <div className="max-w-[1536px] mx-auto">
+                    <div className="max-w-[1200px] mx-auto">
                         <h2 className="text-3xl font-bold text-gray-900 mb-8">Read Other Blogs</h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

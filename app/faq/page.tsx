@@ -6,6 +6,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { Plus, Minus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FAQ() {
     const [openFAQ, setOpenFAQ] = useState<number | null>(0)
@@ -86,17 +87,15 @@ export default function FAQ() {
 
                     <div className="space-y-6 md:px-0 px-2">
                         {faqs.map((faq, index) => {
-                            const isOpen = openFAQ === index
+                            const isOpen = openFAQ === index;
                             return (
                                 <div
                                     key={index}
-                                    className={`transition-colors rounded-lg ${isOpen ? "bg-gray-50" : ""
-                                        }`}
+                                    className={`transition-colors rounded-lg ${isOpen ? "bg-gray-50" : ""}`}
                                 >
                                     {/* Question */}
                                     <button
-                                        className={`w-full cursor-pointer flex justify-between items-center text-left ${isOpen ? "px-6 py-6" : "px-0 py-0"
-                                            }`}
+                                        className={`w-full cursor-pointer flex justify-between items-center text-left ${isOpen ? "px-6 py-6" : "px-0 py-0"}`}
                                         onClick={() => setOpenFAQ(isOpen ? null : index)}
                                     >
                                         <span className="text-lg font-medium text-[#353336] pr-4">
@@ -110,13 +109,16 @@ export default function FAQ() {
                                     </button>
 
                                     {/* Answer */}
-                                    {isOpen && (
+                                    <div
+                                        className="overflow-hidden transition-all duration-300 ease-in-out"
+                                        style={{ maxHeight: isOpen ? '500px' : '0' }}
+                                    >
                                         <div className="px-6 pb-6">
                                             <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
-                            )
+                            );
                         })}
                     </div>
 

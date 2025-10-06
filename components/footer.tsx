@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Link from "next/link"
-import { FaFacebookF, FaInstagram, FaSpotify, FaTiktok, FaYoutube } from "react-icons/fa";
+import { FaFacebookF, FaInstagram, FaSpotify, FaTelegram, FaTiktok, FaYoutube } from "react-icons/fa";
 import { FaThreads } from "react-icons/fa6";
 import { BsTwitterX } from "react-icons/bs";
 import { useState } from "react";
@@ -46,7 +46,7 @@ export default function Footer() {
     <footer className="bg-[#1a1a1a] text-white" id="footer">
       {/* Newsletter Section */}
       <div className="px-6 py-12">
-        <div className="max-w-[1536px] mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
             <div>
               <h2 className="text-3xl lg:text-4xl font-cormorant mb-2">
@@ -97,7 +97,7 @@ export default function Footer() {
 
       {/* Main Footer Content */}
       <div className="px-6 py-12 border-t border-[#404040]">
-        <div className="max-w-[1536px] mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Logo and Description */}
             <div className="lg:col-span-2">
@@ -118,37 +118,51 @@ export default function Footer() {
 
               {/* Social Media Icons */}
               <div className="flex items-center gap-4">
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="https://web.facebook.com/profile.php?id=61575319437919" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <FaFacebookF />
                   </span>
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="https://www.tiktok.com/@herimmigranttales" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <FaTiktok />
                   </span>
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="https://x.com/HIT_Champions" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <BsTwitterX />
                   </span>
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+
+                <Link href="https://t.me/+GLmIjvoo75Q0MWYx" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
+                  <span className="text-gray-400 font-bold text-lg">
+                    <FaTelegram />
+                  </span>
+                </Link>
+
+                {/* <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <FaSpotify />
                   </span>
-                </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                </Link> */}
+                <Link href="https://www.instagram.com/herimmigranttales" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <FaInstagram />
                   </span>
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="https://www.threads.com/@herimmigranttales" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <FaThreads />
                   </span>
                 </Link>
-                <Link href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="https://www.youtube.com/@herimmigranttales" target="_blank" rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors">
                   <span className="text-gray-400 font-bold text-lg">
                     <FaYoutube />
                   </span>
@@ -263,7 +277,7 @@ export default function Footer() {
 
       {/* Bottom Footer */}
       <div className="px-6 py-6 border-t border-[#404040]">
-        <div className="max-w-[1536px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-400 text-sm">&copy; {new Date().getFullYear()} Her Immigrant Tales Org. All rights reserved</p>
           <div className="flex items-center gap-6">
             <Link href="#" className="text-gray-400 hover:text-white transition-colors text-sm">

@@ -23,7 +23,7 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      router.push("/dashboard");
+      router.push("/dashboard/main");
     }
   }, [user, router]);
 
@@ -43,7 +43,7 @@ export default function LoginPage() {
         });
       }
 
-      router.push("/dashboard");
+      router.push("/dashboard/main");
     } else {
       setError("Invalid email or password");
     }

@@ -23,7 +23,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   // Redirect unauthenticated users away from protected admin pages
   useEffect(() => {
-    if (isLoading) return;
+    if (isLoading) return; // Wait until hydration is complete
 
     if (isDashboardRoute && !isLoginPage && !user) {
       router.push("/dashboard/login");

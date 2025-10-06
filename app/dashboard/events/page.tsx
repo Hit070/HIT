@@ -1,12 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, Filter, MoreHorizontal, Plus } from "lucide-react"
+import { Search, Filter, MoreHorizontal, Plus, PencilLine, StarOff, Star, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { DateRangeFilter } from "@/components/date-range-filter"
@@ -17,6 +14,8 @@ import { useEventStore } from "@/store/store"
 import { toast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { IoIosArrowDown } from "react-icons/io"
+import { RiArrowLeftSLine, RiArrowRightSLine } from "react-icons/ri"
 
 export default function EventsPage() {
   const { events, fetchEvents, updateEvent, deleteEvent } = useEventStore()
@@ -242,51 +241,57 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:px-10">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Events</h1>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-muted">
-          <TabsTrigger
-            value="All"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="Active"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Active
-          </TabsTrigger>
-          <TabsTrigger
-            value="Ended"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Ended
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex items-center gap-3">
+        <Button
+          variant={activeTab === "All" ? "default" : "outline"}
+          onClick={() => setActiveTab("All")}
+          className={activeTab === "All" ? "bg-orange-100 text-primary border border-primary px-8 rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl px-8"}
+        >
+          All
+        </Button>
+        <Button
+          variant={activeTab === "Active" ? "default" : "outline"}
+          onClick={() => setActiveTab("Active")}
+          className={activeTab === "Active" ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl"}
+        >
+          Active
+        </Button>
+        <Button
+          variant={activeTab === "Ended" ? "default" : "outline"}
+          onClick={() => setActiveTab("Ended")}
+          className={activeTab === "Ended" ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl"}
+        >
+          Ended
+        </Button>
+      </div>
 
       <div className="md:flex grid grid-cols-1 items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Search for events by title"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 rounded-3xl bg-gray-100 border-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
 
+
+        </div>
+
+        <div className="flex items-center justify-end gap-3">
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-2 bg-transparent">
+              <Button variant="outline" className="gap-2 bg-transparent rounded-lg">
                 <Filter className="h-4 w-4" />
                 Filter
+                <IoIosArrowDown className="w-4 h-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-4" align="start">
@@ -300,112 +305,151 @@ export default function EventsPage() {
               </div>
             </PopoverContent>
           </Popover>
-        </div>
 
-        <Button className="gap-2 bg-primary hover:bg-primary/90" onClick={() => setCreateModal(true)}>
-          <Plus className="h-4 w-4" />
-          Create Event
-        </Button>
+          <Button className="gap-2 bg-primary rounded-lg hover:bg-primary/90" onClick={() => setCreateModal(true)}>
+            <Plus className="h-4 w-4" />
+            Create Event
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-lg border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Event ID</TableHead>
-              <TableHead>Event Title</TableHead>
-              <TableHead className="w-[120px]">Date Created</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[120px]">Date</TableHead>
-              <TableHead className="w-[80px]">Action</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">No events found</TableCell>
-              </TableRow>
-            ) : (
-              paginatedData.map((item) => (
-                <TableRow key={item.slug}>
-                  <TableCell className="font-medium text-muted-foreground">#{item.id}</TableCell>
-                  <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell className="text-muted-foreground"> {new Date(item.dateCreated).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={item.status === "active" ? "default" : "secondary"}
-                      className={
-                        item.status === "active"
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-100"
-                      }
-                    >
-                      {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground"> {new Date(item.date).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}</TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditClick(item.slug)}>Edit</DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleMarkAsFeatured(item.slug)}
-                          >
-                            {item.featured ? "Remove as Featured" : "Mark as Featured"}
+      <div className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[100px] rounded-l-xl">
+                  Event ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Event Title
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[120px]">
+                  Date Created
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[100px]">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[120px]">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[80px]">
+                  Action
+                </th>
+                <th className="px-4 py-3 w-[50px] rounded-r-xl"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-muted-foreground text-lg mb-2">No events found</p>
+                      <p className="text-muted-foreground text-sm">
+                        {searchQuery || dateRange.from || dateRange.to || activeTab !== "All"
+                          ? "Try adjusting your filters or search terms"
+                          : "Create your first event to get started"}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedData.map((item) => (
+                  <tr key={item.slug} className="border-b last:border-0">
+                    <td className="px-4 py-4 text-sm text-muted-foreground">#{item.id}</td>
+                    <td className="px-4 py-4 text-sm font-medium">{item.title}</td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {new Date(item.dateCreated).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-4 text-sm">
+                      <div
+                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl font-medium ${item.status === "active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-700"
+                          }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${item.status === "active" ? "bg-green-500" : "bg-gray-500"
+                            }`}
+                        />
+                        <span>{item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {new Date(item.date).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleDeleteClick(item.slug)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditClick(item.slug)}>
+                            <PencilLine className="h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleMarkAsFeatured(item.slug)}
+                            className="flex items-center gap-2"
+                          >
+                            {item.featured ? (
+                              <>
+                                <StarOff className="h-4 w-4" />
+                                Remove as Featured
+                              </>
+                            ) : (
+                              <>
+                                <Star className="h-4 w-4" />
+                                Mark as Featured
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteClick(item.slug)}
+                          >
+                            <Trash2 className="h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
-          className="gap-2"
+          className="gap-2 rounded-lg border"
           onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
-          ← Back
+          <RiArrowLeftSLine /> Back
         </Button>
 
         <div className="flex items-center gap-2">{renderPaginationButtons()}</div>
 
         <Button
           variant="ghost"
-          className="gap-2"
+          className="gap-2 rounded-lg border"
           onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
         >
-          Next →
+          Next <RiArrowRightSLine />
         </Button>
       </div>
 

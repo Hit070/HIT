@@ -6,10 +6,11 @@ import Header from "@/components/headeruser"
 import Footer from "@/components/footer"
 import { ArrowRight } from "lucide-react"
 import { useContentStore } from "@/store/store"
-import { useEffect } from "react"
+import React, { useEffect } from "react"
 import { toast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import { Story } from "@/types"
+import { motion, useInView } from "framer-motion"
 
 export default function HomePage() {
   const { stories, fetchStories } = useContentStore();
@@ -36,24 +37,53 @@ export default function HomePage() {
     fetchData();
   }, []);
 
+  const leftRef = React.useRef(null);
+  const rightRef = React.useRef(null);
+  const section2Ref = React.useRef(null);
+  const joinRef = React.useRef(null);
+
+  const joinInView = useInView(joinRef, {
+    once: false,
+    amount: 0.3,
+    margin: "-100px"
+  });
+
+  const leftInView = useInView(leftRef, {
+    once: false,
+    amount: 0.3,
+    margin: "-100px"
+  });
+
+  const rightInView = useInView(rightRef, {
+    once: false,
+    amount: 0.3,
+    margin: "-100px"
+  });
+
+  const section2InView = useInView(section2Ref, {
+    once: false,
+    amount: 0.3,
+    margin: "-100px"
+  });
+
   const storyNotifications = [
     {
       name: "Li Na shared her story",
       position: "top-2 left-4 md:-top-4 md:left-4",
       rotation: "rotate-[-5.58deg]",
-      image: "/pic1.png", // Replace initial with image
+      image: "/pic1.png",
     },
     {
       name: "Li Wei shared a story",
       position: "top-0 right-4 md:-top-6 md:right-4",
       rotation: "rotate-[5.58deg]",
-      image: "/pic3.png", // Replace initial with image
+      image: "/pic3.png",
     },
     {
       name: "Kavya shared her story",
       position: "top-8 left-1/2 transform -translate-x-1/2 md:-top-2 md:left-1/2 md:transform md:-translate-x-1/2",
       rotation: "rotate-[-4.07deg]",
-      image: "/pic2.png", // Replace initial with image
+      image: "/pic2.png",
     },
   ]
   const testimonials = [
@@ -61,55 +91,75 @@ export default function HomePage() {
       quote:
         "HIT gave me a platform, but more importantly, it gave me courage. I finally believe my story matters.",
       name: "Ebere Chinemeye",
+      image: "/prof1.png",
     },
     {
-      quote: "When I felt unseen, HIT became my mirror, reflecting my strength back to me.",
+      quote:
+        "When I felt unseen, HIT became my mirror, reflecting my strength back to me.",
       name: "Maria Rodriguez",
+      image: "/who3.png",
     },
     {
       quote:
         "Every story on HIT is like a lantern in the dark. It guided me when I couldn't see my next step.",
       name: "Aisha Patel",
+      image: "/whos22.png",
     },
     {
       quote:
         "Her Immigrant Tales isn't just about storytelling — it's about healing and collective growth.",
       name: "Fatima Al-Zahra",
+      image: "/woman-profile.png",
     },
     {
       quote:
         "I've read hundreds of stories on HIT, but they all remind me of one truth — we are stronger together.",
       name: "Lila Chen",
+      image: "/prof2.png",
     },
     {
-      quote: "This platform has created a safe space to tell the truth to family.",
+      quote:
+        "This platform has created a safe space to tell the truth to family.",
       name: "Sofia Petrov",
+      image: "/joinbl.png",
     },
     {
-      quote: "HIT showed me that my struggles weren't burdens, but bridges to connect with others.",
+      quote:
+        "HIT showed me that my struggles weren't burdens, but bridges to connect with others.",
       name: "Priya Sharma",
+      image: "/left1.png",
     },
     {
-      quote: "Through HIT, I learned that vulnerability is not weakness—it's the birthplace of courage.",
+      quote:
+        "Through HIT, I learned that vulnerability is not weakness—it's the birthplace of courage.",
       name: "Amara Johnson",
+      image: "/left.png",
     },
     {
-      quote: "The stories here reminded me that home isn't just a place, it's a feeling we carry within.",
+      quote:
+        "The stories here reminded me that home isn't just a place, it's a feeling we carry within.",
       name: "Zara Hassan",
+      image: "/herosm.png",
     },
     {
-      quote: "HIT taught me that my accent isn't a flaw, it's the melody of my heritage.",
+      quote:
+        "HIT taught me that my accent isn't a flaw, it's the melody of my heritage.",
       name: "Nina Kowalski",
+      image: "/joinbr.png",
     },
     {
-      quote: "Every story I read here feels like a warm embrace from a sister I've never met.",
+      quote:
+        "Every story I read here feels like a warm embrace from a sister I've never met.",
       name: "Rosa Martinez",
+      image: "/right.png",
     },
     {
-      quote: "HIT gave me permission to be proud of my journey, not just my destination.",
+      quote:
+        "HIT gave me permission to be proud of my journey, not just my destination.",
       name: "Kenji Tanaka",
+      image: "/pic2.png",
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -135,7 +185,7 @@ export default function HomePage() {
 
       {/* Main Content */}
       <main className="relative px-6 py-16">
-        <div className="relative max-w-[1536px] mx-auto">
+        <div className="relative max-w-[1200px] mx-auto">
           <div className="absolute w-[587px] h-[740px] top-[142px] left-[427px] bg-app-primary rounded-[293.3px/369.87px] rotate-[-52.53deg] blur-[374.42px] opacity-[0.16]" />
           <div className="absolute inset-0 pointer-events-none">
             {storyNotifications.map((notification, index) => (
@@ -225,10 +275,20 @@ export default function HomePage() {
           </div>
 
           {/* Images Section */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-[1536px] mx-auto mt-24">
+          <div className="grid md:grid-cols-2 gap-6 max-w-[1200px] mx-auto mt-24">
             {/* Left Image with Quote */}
-            <div className="relative">
-              <div className="rounded-[50px] overflow-hidden">
+            <motion.div
+              ref={leftRef}
+              className="relative"
+              initial={{ opacity: 0, x: -50 }}
+              animate={leftInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.div
+                className="rounded-[50px] overflow-hidden"
+                animate={leftInView ? { scale: 1 } : { scale: 0.95 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 <Image
                   src="/hero1.png"
                   alt="Diverse women celebrating together"
@@ -236,9 +296,21 @@ export default function HomePage() {
                   height={400}
                   className="w-full h-[500px] object-cover bg-cover bg-center"
                 />
-              </div>
-              <div className="absolute bottom-6 md:left-6 left-6 md:right-0 right-6 bg-white rounded-[50px] p-6 max-w-sm">
-                <div className="text-[#bf5925] text-4xl mb-2">"</div>
+              </motion.div>
+
+              <motion.div
+                className="absolute bottom-6 md:left-6 left-6 md:right-0 right-6 bg-white rounded-[50px] p-6 max-w-sm"
+                initial={{ opacity: 0, y: 30 }}
+                animate={leftInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+              >
+                <motion.div
+                  className="text-[#bf5925] text-4xl mb-2"
+                  animate={leftInView ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                >
+                  "
+                </motion.div>
                 <p className="text-[#353336] text-md mb-4">
                   I arrived with two suitcases and no job. Today, I run my own catering business feeding other...
                 </p>
@@ -248,12 +320,22 @@ export default function HomePage() {
                   </div>
                   <span className="text-sm font-cormorant font-bold">XXX</span>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Right Image with Stats */}
-            <div className="relative">
-              <div className="rounded-[50px] overflow-hidden">
+            <motion.div
+              ref={rightRef}
+              className="relative"
+              initial={{ opacity: 0, x: 50 }}
+              animate={rightInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.div
+                className="rounded-[50px] overflow-hidden"
+                animate={rightInView ? { scale: 1 } : { scale: 0.95 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 <Image
                   src="/hero2.png"
                   alt="Three diverse women smiling"
@@ -261,27 +343,62 @@ export default function HomePage() {
                   height={400}
                   className="w-full h-[500px] object-cover bg-cover bg-center"
                 />
-              </div>
-              <div className="absolute bottom-0 right-0 bg-white rounded-tl-[50px] p-6">
+              </motion.div>
+
+              <motion.div
+                className="absolute bottom-0 right-0 bg-white rounded-tl-[50px] p-6"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={rightInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+              >
                 <div className="grid grid-cols-2 gap-8">
-                  <div className="text-center">
-                    <h1 className="text-6xl font-bold text-[#353336] mb-2">500+</h1>
+                  <motion.div
+                    className="text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={rightInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                  >
+                    <motion.h1
+                      className="text-6xl font-bold text-[#353336] mb-2"
+                      animate={rightInView ? {
+                        scale: [1, 1.1, 1],
+                        color: ['#353336', '#bf5925', '#353336']
+                      } : {}}
+                      transition={{ duration: 0.8, delay: 0.6 }}
+                    >
+                      500+
+                    </motion.h1>
                     <div className="text-sm text-[#5c5c5c]">Powerful stories shared</div>
-                  </div>
-                  <div className="text-center">
-                    <h1 className="text-6xl font-bold text-[#353336] mb-2">100+</h1>
+                  </motion.div>
+
+                  <motion.div
+                    className="text-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={rightInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                  >
+                    <motion.h1
+                      className="text-6xl font-bold text-[#353336] mb-2"
+                      animate={rightInView ? {
+                        scale: [1, 1.1, 1],
+                        color: ['#353336', '#bf5925', '#353336']
+                      } : {}}
+                      transition={{ duration: 0.8, delay: 0.7 }}
+                    >
+                      100+
+                    </motion.h1>
                     <div className="text-sm text-[#5c5c5c]">Brave Immigrant women</div>
-                  </div>
+                  </motion.div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </main>
 
       {/* Who We Are Section */}
       <section className="bg-white py-16 px-6">
-        <div className="max-w-[1536px] mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           {/* Header Content */}
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-cormorant text-[#353336] mb-6">Who We Are</h2>
@@ -301,8 +418,18 @@ export default function HomePage() {
           {/* Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Side - Large Image with Overlay */}
-            <div className="relative">
-              <div className="rounded-[50px] overflow-hidden h-full">
+            <motion.div
+              ref={section2Ref}
+              className="relative"
+              initial={{ opacity: 0, y: 50 }}
+              animate={section2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.div
+                className="rounded-[50px] overflow-hidden h-full"
+                animate={section2InView ? { scale: 1 } : { scale: 0.95 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
                 <Image
                   src="/diverse-women-celebrating-together-at-community-ev.png"
                   alt="Three diverse women laughing together"
@@ -310,13 +437,23 @@ export default function HomePage() {
                   height={600}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
-              </div>
+              </motion.div>
               {/* Overlay notification */}
-              <div className="absolute bottom-6 left-4 right-4 md:left-40 lg:left-40 md:right-auto">
-                <div className="bg-white rounded-[50px] p-4 border border-gray-100 max-w-sm md:max-w-lg mx-auto">
+              <motion.div
+                className="absolute bottom-6 left-4 right-4 md:left-20 md:right-auto"
+                initial={{ opacity: 0, y: 30 }}
+                animate={section2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+              >
+                <div className="bg-white rounded-[36px] py-4 px-8 border border-gray-100 max-w-sm md:max-w-lg mx-auto">
                   <div className="space-y-3">
                     <div className="flex -space-x-2 justify-center">
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-30">
+                      <motion.div
+                        className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-30"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={section2InView ? { opacity: 1, x: 0 } : { opacity: 0, x: -10 }}
+                        transition={{ duration: 0.4, delay: 0.5 }}
+                      >
                         <Image
                           src="/woman-profile.png"
                           alt="Profile 1"
@@ -324,8 +461,13 @@ export default function HomePage() {
                           height={40}
                           className="w-full h-full object-cover bg-cover bg-center"
                         />
-                      </div>
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-20">
+                      </motion.div>
+                      <motion.div
+                        className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-20"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={section2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+                        transition={{ duration: 0.4, delay: 0.6 }}
+                      >
                         <Image
                           src="/whos22.png"
                           alt="Profile 2"
@@ -333,8 +475,13 @@ export default function HomePage() {
                           height={40}
                           className="w-full h-full object-cover bg-cover bg-center"
                         />
-                      </div>
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-10">
+                      </motion.div>
+                      <motion.div
+                        className="w-10 h-10 rounded-full overflow-hidden border-2 border-white bg-white z-10"
+                        initial={{ opacity: 0, x: 10 }}
+                        animate={section2InView ? { opacity: 1, x: 0 } : { opacity: 0, x: 10 }}
+                        transition={{ duration: 0.4, delay: 0.7 }}
+                      >
                         <Image
                           src="/prof3.png"
                           alt="Profile 3"
@@ -342,7 +489,7 @@ export default function HomePage() {
                           height={40}
                           className="w-full h-full object-cover bg-cover bg-center"
                         />
-                      </div>
+                      </motion.div>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-[#353336] text-sm font-medium md:mr-2">
@@ -356,14 +503,24 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Right Side - Three Images Grid */}
-            <div className="flex flex-col gap-6 h-full">
+            <motion.div
+              className="flex flex-col gap-6 h-full"
+              initial={{ opacity: 0, y: 50 }}
+              animate={section2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            >
               {/* Top row = 40% height */}
               <div className="grid grid-cols-2 gap-6 h-[40%]">
-                <div className="rounded-[50px] overflow-hidden">
+                <motion.div
+                  className="rounded-[50px] overflow-hidden"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={section2InView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+                  transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+                >
                   <Image
                     src="/asian-woman-profile.png"
                     alt="Woman in traditional dress"
@@ -371,8 +528,13 @@ export default function HomePage() {
                     height={200}
                     className="w-full h-full object-cover bg-cover bg-center"
                   />
-                </div>
-                <div className="rounded-[50px] overflow-hidden">
+                </motion.div>
+                <motion.div
+                  className="rounded-[50px] overflow-hidden"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={section2InView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
+                  transition={{ duration: 0.6, delay: 0.5, ease: "easeOut" }}
+                >
                   <Image
                     src="/three-diverse-women-smiling-together-portrait.png"
                     alt="Three women celebrating"
@@ -380,29 +542,42 @@ export default function HomePage() {
                     height={200}
                     className="w-full h-full object-cover bg-cover bg-center"
                   />
-                </div>
+                </motion.div>
               </div>
 
               {/* Bottom row = 60% height */}
-              <div className="rounded-[50px] overflow-hidden h-[60%]">
-                <Image
-                  src="/globe.png"
-                  alt="Immigrant Women Across the Globe"
-                  width={400}
-                  height={400}
-                  className="w-full h-full object-cover bg-cover bg-center"
-                />
-              </div>
-            </div>
+              <motion.div
+                className="rounded-[50px] overflow-hidden h-[60%] bg-[url('/globe.png')] bg-cover bg-center"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={section2InView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+              >
+                <motion.h1
+                  className="text-3xl font-bold text-white text-center mb-2 mt-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={section2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                  transition={{ duration: 0.6, delay: 0.8 }}
+                >
+                  Immigrant Women
+                </motion.h1>
+                <motion.h1
+                  className="text-3xl text-white font-light text-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={section2InView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                  transition={{ duration: 0.6, delay: 0.9 }}
+                >
+                  Across the Globe
+                </motion.h1>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Featured Story Section */}
       {featuredStory && (
-
         <section className="bg-black py-16 px-6">
-          <div className="max-w-[1536px] mx-auto">
+          <div className="max-w-[1200px] mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               {/* Left Side - Image */}
               <div className="rounded-3xl overflow-hidden">
@@ -432,7 +607,7 @@ export default function HomePage() {
 
                       <p className="text-white/80 text-lg mb-2">by {story.author || "Anonymous Author"}</p>
 
-                      <p className="text-white/90 text-lg leading-relaxed mb-8 max-w-lg">
+                      <p className="text-white/90 text-lg leading-relaxed mb-8">
                         {story.summary}
                       </p>
 
@@ -452,7 +627,7 @@ export default function HomePage() {
 
       {/* What Our Community Says Section */}
       <section className="bg-white py-16 px-6">
-        <div className="max-w-[1536px] mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           {/* Header */}
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-cormorant text-[#353336] mb-6">What Our Community Says</h2>
@@ -478,6 +653,7 @@ export default function HomePage() {
                 type Testimonial = {
                   quote: string;
                   name: string;
+                  image: string;
                 };
                 const columns: Testimonial[][] = [[], [], [], []];
                 testimonials.forEach((testimonial: Testimonial, index) => {
@@ -502,17 +678,18 @@ export default function HomePage() {
                       >
                         <p className="text-gray-700 mb-4 leading-relaxed">"{testimonial.quote}"</p>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-[#bf5925] flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-[#bf5925] flex items-center justify-center overflow-hidden">
                               <Image
                                 width={24}
                                 height={24}
-                                src="/prof3.png"
-                                alt="Profile"
+                                src={testimonial.image}
+                                alt={testimonial.name}
                                 className="w-full h-full object-cover rounded-full"
                               />
-                            </span>
+                            </div>
                           </div>
+
                           <span className="text-gray-600 font-medium">{testimonial.name}</span>
                         </div>
                       </div>
@@ -557,38 +734,65 @@ export default function HomePage() {
 
       {/* Join the HIT Community Section */}
       <section className="bg-white pt-16 px-6">
-        <div className="max-w-[1536px] mx-auto">
+        <div className="max-w-[1200px] mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Side - Orange Content Area */}
-            <div className="bg-[url('/join.png')] bg-cover bg-center rounded-[2rem] p-8 lg:p-10 text-white flex flex-col justify-center h-full">
-              <h2 className="text-3xl lg:text-4xl font-cormorant mb-4 leading-tight">
+            <motion.div
+              ref={joinRef}
+              className="bg-[url('/join.png')] bg-cover bg-center rounded-[2rem] p-8 lg:p-10 text-white flex flex-col justify-center h-full"
+              initial={{ opacity: 0, x: -50 }}
+              animate={joinInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -50 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <motion.h2
+                className="text-3xl lg:text-4xl font-cormorant mb-4 leading-tight"
+                initial={{ opacity: 0, y: 20 }}
+                animate={joinInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+              >
                 Join the HIT Community
-              </h2>
-              <p className="text-base mb-6 leading-relaxed opacity-95">
+              </motion.h2>
+              <motion.p
+                className="text-base mb-6 leading-relaxed opacity-95"
+                initial={{ opacity: 0, y: 20 }}
+                animate={joinInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+              >
                 Get inspiring stories of immigrant women, meaningful community updates,
                 and unique opportunities to connect, learn, and grow - all delivered
                 straight to your inbox.
-              </p>
-              <Link href="#footer" className="w-fit">
-                <Button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    const footer = document.getElementById("footer");
-                    if (footer) {
-                      footer.scrollIntoView({ behavior: "smooth" });
-                    }
-                  }}
-                  className="bg-white text-[#bf5925] hover:bg-gray-50 rounded-full px-8 py-3 font-medium w-fit"
-                >
-                  Join Us
-                </Button>
-              </Link>
-            </div>
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={joinInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+              >
+                <Link href="#footer" className="w-fit">
+                  <Button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const footer = document.getElementById("footer");
+                      if (footer) {
+                        footer.scrollIntoView({ behavior: "smooth" });
+                      }
+                    }}
+                    className="bg-white text-[#bf5925] hover:bg-gray-50 rounded-full px-8 py-3 font-medium w-fit"
+                  >
+                    Join Us
+                  </Button>
+                </Link>
+              </motion.div>
+            </motion.div>
 
             {/* Right Side - 2x2 Photo Grid */}
             <div className="grid grid-cols-2 gap-4 md:gap-8 md:max-w-[80%] md:ml-10 ml-0 relative h-full">
               {/* Top Row */}
-              <div className="rounded-[50px] overflow-hidden h-full">
+              <motion.div
+                className="rounded-[50px] overflow-hidden h-full"
+                initial={{ opacity: 0, y: 30, rotate: -5 }}
+                animate={joinInView ? { opacity: 1, y: 0, rotate: 0 } : { opacity: 0, y: 30, rotate: -5 }}
+                transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+              >
                 <Image
                   src="/jointl.png"
                   alt="Asian woman in professional attire with colorful scarf"
@@ -596,8 +800,13 @@ export default function HomePage() {
                   height={300}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
-              </div>
-              <div className="rounded-[50px] overflow-hidden transform md:-rotate-[25deg] md:translate-y-4 md:scale-100 md:w-[80%] md:h-[80%]">
+              </motion.div>
+              <motion.div
+                className="rounded-[50px] overflow-hidden transform md:-rotate-[25deg] md:translate-y-4 md:scale-100"
+                initial={{ opacity: 0, y: 30, scale: 0.8 }}
+                animate={joinInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.8 }}
+                transition={{ duration: 0.7, delay: 0.4, ease: "easeOut" }}
+              >
                 <Image
                   src="/jointr.png"
                   alt="Woman in golden bronze colored clothing"
@@ -605,10 +814,15 @@ export default function HomePage() {
                   height={300}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
-              </div>
+              </motion.div>
 
               {/* Bottom Row */}
-              <div className="rounded-[50px] overflow-hidden h-full">
+              <motion.div
+                className="rounded-[50px] overflow-hidden h-full"
+                initial={{ opacity: 0, y: 30, rotate: 5 }}
+                animate={joinInView ? { opacity: 1, y: 0, rotate: 0 } : { opacity: 0, y: 30, rotate: 5 }}
+                transition={{ duration: 0.7, delay: 0.5, ease: "easeOut" }}
+              >
                 <Image
                   src="/joinbl.png"
                   alt="Woman in green top"
@@ -616,8 +830,13 @@ export default function HomePage() {
                   height={300}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
-              </div>
-              <div className="rounded-[50px] overflow-hidden h-full">
+              </motion.div>
+              <motion.div
+                className="rounded-[50px] overflow-hidden h-full"
+                initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                animate={joinInView ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 30, scale: 0.9 }}
+                transition={{ duration: 0.7, delay: 0.6, ease: "easeOut" }}
+              >
                 <Image
                   src="/joinbr.png"
                   alt="Woman in blue denim shirt"
@@ -625,7 +844,7 @@ export default function HomePage() {
                   height={300}
                   className="w-full h-full object-cover bg-cover bg-center"
                 />
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
@@ -634,7 +853,7 @@ export default function HomePage() {
       {/* HIT TALES text section */}
       <section className="px-1 overflow-hidden">
         <div className="w-full mx-auto text-center relative overflow-hidden">
-          <h2 className="text-[5rem] md:text-[16rem] lg:text-[18rem] font-cormorant text-[#353336] opacity-20 tracking-widest leading-none select-none pointer-events-none overflow-hidden">
+          <h2 className="text-[5rem] md:text-[14rem] lg:text-[16rem] font-cormorant text-gray-300 opacity-20 tracking-widest leading-none select-none pointer-events-none overflow-hidden">
             HIT Tales
           </h2>
         </div>

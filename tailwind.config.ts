@@ -60,6 +60,10 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        'custom-orange': {
+          DEFAULT: '#BF5925',
+          20: 'rgba(191, 89, 37, 0.2)',
+        },
         // tremor colors
         tremor: {
           brand: {
@@ -139,6 +143,7 @@ const config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+
     },
   },
   safelist: [

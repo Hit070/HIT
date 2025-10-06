@@ -1,12 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Search, Filter, MoreHorizontal, Plus } from "lucide-react"
+import { Search, Filter, MoreHorizontal, Plus, PencilLine, StarOff, Star, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { DateRangeFilter } from "@/components/date-range-filter"
@@ -246,28 +243,29 @@ export default function StoriesPage() {
         <h1 className="text-2xl font-semibold text-foreground">Stories</h1>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-muted">
-          <TabsTrigger
-            value="All"
-            className="data-[state=active]:bg-app-primary data-[state=active]:text-primary-foreground"
-          >
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="Published"
-            className="data-[state=active]:bg-app-primary data-[state=active]:text-primary-foreground"
-          >
-            Published
-          </TabsTrigger>
-          <TabsTrigger
-            value="Draft"
-            className="data-[state=active]:bg-app-primary data-[state=active]:text-primary-foreground"
-          >
-            Draft
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="flex items-center gap-3">
+        <Button
+          variant={activeTab === "All" ? "default" : "outline"}
+          onClick={() => setActiveTab("All")}
+          className={activeTab === "All" ? "bg-orange-100 text-primary border border-primary px-8 rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl px-8"}
+        >
+          All
+        </Button>
+        <Button
+          variant={activeTab === "Published" ? "default" : "outline"}
+          onClick={() => setActiveTab("Published")}
+          className={activeTab === "Published" ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl"}
+        >
+          Published
+        </Button>
+        <Button
+          variant={activeTab === "Draft" ? "default" : "outline"}
+          onClick={() => setActiveTab("Draft")}
+          className={activeTab === "Draft" ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl"}
+        >
+          Draft
+        </Button>
+      </div>
 
       <div className="md:flex grid grid-cols-1 items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1">
@@ -280,7 +278,9 @@ export default function StoriesPage() {
               className="pl-10"
             />
           </div>
+        </div>
 
+        <div className="flex items-center justify-end gap-3">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2 bg-transparent">
@@ -306,109 +306,147 @@ export default function StoriesPage() {
               </div>
             </PopoverContent>
           </Popover>
-        </div>
 
-        <Button className="gap-2 bg-primary hover:bg-primary/90" asChild>
-          <Link href="/dashboard/stories/create">
-            <Plus className="h-4 w-4" />
-            Create Story
-          </Link>
-        </Button>
+          <Button className="gap-2 bg-app-primary hover:bg-orange-900" asChild>
+            <Link href="/dashboard/stories/create">
+              <Plus className="h-4 w-4" />
+              Create Story
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <div className="rounded-lg border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Story ID</TableHead>
-              <TableHead>Story Title</TableHead>
-              <TableHead className="w-[100px]">Author</TableHead>
-              <TableHead className="w-[120px]">Date Created</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[120px]">Last Updated</TableHead>
-              <TableHead className="w-[80px]">Action</TableHead>
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-
-            {paginatedData.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
-                  <div className="flex flex-col items-center justify-center py-8">
-                    <p className="text-muted-foreground text-lg mb-2">No stories found</p>
-                    <p className="text-muted-foreground text-sm">
-                      {searchQuery || dateRange.from || dateRange.to || activeTab !== "All"
-                        ? "Try adjusting your filters or search terms"
-                        : "Create your first story to get started"}
-                    </p>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedData.map((item: Story) => (
-                <TableRow key={item.slug}>
-                  <TableCell className="font-medium text-muted-foreground">#{item.id}</TableCell>
-                  <TableCell className="font-medium">{item.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{item.author}</TableCell>
-                  <TableCell className="text-muted-foreground"> {new Date(item.dateCreated).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={item.status === "published" ? "default" : "secondary"}
-                      className={
-                        item.status === "published"
-                          ? "bg-green-100 text-green-800 hover:bg-green-100"
-                          : "bg-orange-100 text-orange-800 hover:bg-orange-100"
-                      }
-                    >
-                      {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground"> {new Date(item.lastUpdated).toLocaleDateString("en-GB", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}</TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" className="text-primary hover:text-primary" asChild>
-                      <Link href={`/dashboard/stories/${item.slug}/view`}>View</Link>
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/stories/${item.slug}/edit`}>Edit</Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleMarkAsFeatured(item.slug, item.isFeatured as boolean)}
-                          >
-                            {item.isFeatured ? "Remove as Featured" : "Mark as Featured"}
+      <div className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[100px] rounded-l-xl">
+                  Story ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Story Title
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+                  Author
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[120px]">
+                  Date Created
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[100px]">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[120px]">
+                  Last Updated
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground w-[80px]">
+                  Action
+                </th>
+                <th className="px-4 py-3 w-[50px] rounded-r-xl"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-8 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <p className="text-muted-foreground text-lg mb-2">No stories found</p>
+                      <p className="text-muted-foreground text-sm">
+                        {searchQuery || dateRange.from || dateRange.to || activeTab !== "All"
+                          ? "Try adjusting your filters or search terms"
+                          : "Create your first story to get started"}
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                paginatedData.map((item: Story) => (
+                  <tr key={item.slug} className="border-b last:border-0">
+                    <td className="px-4 py-4 text-sm text-muted-foreground">#{item.id}</td>
+                    <td className="px-4 py-4 text-sm font-medium">{item.title}</td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">{item.author}</td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {new Date(item.dateCreated).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-4 text-sm">
+                      <div
+                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl font-medium ${item.status === "published"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-orange-100 text-orange-700"
+                          }`}
+                      >
+                        <span
+                          className={`h-2 w-2 rounded-full ${item.status === "published" ? "bg-green-500" : "bg-orange-500"
+                            }`}
+                        />
+                        <span>{item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {new Date(item.lastUpdated).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}
+                    </td>
+                    <td className="px-4 py-4 text-sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-primary hover:text-primary h-auto p-0"
+                        asChild
+                      >
+                        <Link href={`/dashboard/stories/${item.slug}/view`}>View</Link>
+                      </Button>
+                    </td>
+                    <td className="px-4 py-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
                           </Button>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(item.slug)}>
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/stories/${item.slug}/edit`}>
+                              <PencilLine className="h-4 w-4" /> Edit Story
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleMarkAsFeatured(item.slug, item.isFeatured as boolean)}
+                            className="flex items-center gap-2"
+                          >
+                            {item.isFeatured ? (
+                              <>
+                                <StarOff className="h-4 w-4" />
+                                Remove as Featured
+                              </>
+                            ) : (
+                              <>
+                                <Star className="h-4 w-4" />
+                                Mark as Featured
+                              </>
+                            )}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={() => handleDeleteClick(item.slug)}
+                          >
+                            <Trash2 className="h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="flex items-center justify-between">

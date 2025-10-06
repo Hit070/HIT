@@ -207,3 +207,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+.border-custom-orange-20 {
+  border-color: rgba(241, 217, 209);
+}

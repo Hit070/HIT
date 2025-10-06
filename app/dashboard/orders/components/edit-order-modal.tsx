@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, AlertCircle, Plus, Loader2 } from "lucide-react";
+import { Search, Plus, Loader2, Minus } from "lucide-react";
 import { useStore, useSettingsStore } from "@/store/store";
 import { toast } from "@/components/ui/use-toast";
 import type { Order } from "@/types";
@@ -681,7 +681,7 @@ export function EditOrderModal({
                         size="icon"
                         onClick={() => removeOrderItem(index)}
                       >
-                        <AlertCircle className="h-4 w-4" />
+                        <Minus className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -702,7 +702,7 @@ export function EditOrderModal({
             Cancel
           </Button>
           <Button
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-primary hover:bg-primary/90"
             onClick={handleUpdateOrder}
             disabled={isUpdating || !!discountError || items.length === 0 || items.some((item) => !item.productId)}
           >

@@ -4,8 +4,9 @@ import Header from "@/components/headeruser"
 import Footer from "@/components/footer"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
-import { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import { motion, useInView } from 'framer-motion';
 
 function useCountUp(end: number, duration = 2000) {
     const [count, setCount] = useState(0)
@@ -58,11 +59,46 @@ function useCountUp(end: number, duration = 2000) {
 }
 
 export default function AboutPage() {
-
     const counter1 = useCountUp(500, 2000)
     const counter2 = useCountUp(20, 2000)
     const counter3 = useCountUp(100, 2000)
     const counter4 = useCountUp(5, 2000)
+
+    const aboutRef = React.useRef(null)
+    const cardsRef = React.useRef(null)
+    const gridRef = useRef(null)
+    const imageGridRef = useRef(null)
+    const charityRef = useRef(null);
+
+    const charityInView = useInView(charityRef, {
+        once: false,
+        amount: 0,
+        margin: "-300px 0px -300px 0px" // Lenient margin for mobile
+    });
+
+    const imageInView = useInView(imageGridRef, {
+        once: false,
+        amount: 0,
+        margin: "-300px 0px -300px 0px" // Extended margin for less sensitivity
+    })
+
+    const isInView = useInView(gridRef, {
+        once: false,
+        amount: 0,
+        margin: "-600px 0px -600px 0px" // More lenient margin to compensate for large bottom margin
+    });
+
+    const cardsInView = useInView(cardsRef, {
+        once: false,
+        amount: 0,
+        margin: "-300px 0px -300px 0px" // Extended margin for less sensitivity
+    })
+
+    const aboutInView = useInView(aboutRef, {
+        once: false,
+        amount: 0,
+        margin: "-300px 0px -300px 0px" // Extended margin for less sensitivity
+    })
 
     return (
         <div className="min-h-screen bg-white relative overflow-x-hidden">
@@ -83,7 +119,6 @@ export default function AboutPage() {
                 {/* Bottom circular blur */}
                 <div className="absolute bottom-[10%] left-1/2 transform -translate-x-1/2 w-[1400px] h-[400px] bg-white/60 rounded-full blur-[100px]"></div>
             </div>
-
 
             {/* Hero Section */}
             <section className="relative py-16 md:py-24 z-10">
@@ -123,63 +158,101 @@ export default function AboutPage() {
                     {/* Hero Images with Dynamic Layout */}
                     <div className="relative w-full mx-auto min-h-[500px] md:min-h-[500px]">
                         {/* Background Orange Shapes - Full Width */}
-                        <div className="absolute inset-0 w-screen scale-y-75 left-1/2 transform -translate-x-1/2 overflow-hidden">
+                        <motion.div
+                            className="absolute inset-0 w-screen scale-y-75 transform -translate-x-1/2 overflow-hidden"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={aboutInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 1, ease: "easeOut" }}
+                        >
                             <Image
                                 src="/vector.png"
                                 alt="Decorative background"
                                 fill
                                 className="object-cover object-center"
                             />
-                        </div>
+                        </motion.div>
+
                         {/* Images Container */}
-                        <div className="relative z-10 max-w-6xl mx-auto px-4">
+                        <div ref={aboutRef} className="relative z-10 max-w-6xl mx-auto px-4">
                             <div className="md:flex md:justify-between md:items-center">
                                 {/* Left Image - Brave */}
-                                <div className="relative z-20 transform md:-rotate-6 md:translate-y-8 -rotate-12 translate-y-4 mb-16 md:mb-0">
+                                <motion.div
+                                    className="relative z-20 mb-16 md:mb-0"
+                                    initial={{ opacity: 0, x: -100, rotate: -12 }}
+                                    animate={aboutInView ? { opacity: 1, x: 0, rotate: -12 } : { opacity: 0, x: -100, rotate: -12 }}
+                                    style={{
+                                        transform: aboutInView ? 'translateY(2rem) rotate(-6deg)' : 'translateY(0.5rem) rotate(-12deg)',
+                                    }}
+                                    transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                                >
                                     <div className="relative">
                                         <Image
                                             width={288}
                                             height={320}
                                             src="/aboutl.png"
                                             alt="Woman in traditional colorful dress"
-                                            className="h-80 object-cover rounded-[50px] shadow-2xl border-[10px] border-[#FFF3EA] mx-auto md:mx-0"
+                                            className="h-80 object-cover rounded-[50px] border-[10px] border-[#FFF3EA] mx-auto md:mx-0"
                                         />
-                                        <div className="absolute top-8 md:-right-10 -right-0 w-24 bg-[#0E79E5] text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                                        <motion.div
+                                            className="absolute top-8 md:-right-10 -right-0 w-24 bg-[#0E79E5] text-white px-4 py-2 rounded-full text-sm font-medium"
+                                            initial={{ opacity: 0, scale: 0, rotate: -45 }}
+                                            animate={aboutInView ? { opacity: 1, scale: 1, rotate: 0 } : { opacity: 0, scale: 0, rotate: -45 }}
+                                            transition={{ duration: 0.5, delay: 0.5, ease: "backOut" }}
+                                        >
                                             Brave
-                                        </div>
+                                        </motion.div>
                                     </div>
-                                </div>
+                                </motion.div>
+
                                 {/* Center Image - Main */}
-                                <div className="relative z-20 md:scale-110 scale-100 mb-8 md:mb-0 flex justify-center">
+                                <motion.div
+                                    className="relative z-20 mb-8 md:mb-0 flex justify-center"
+                                    initial={{ opacity: 0, y: 50, scale: 0.8 }}
+                                    animate={aboutInView ? { opacity: 1, y: 0, scale: 1.1 } : { opacity: 0, y: 50, scale: 0.8 }}
+                                    transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                                >
                                     <Image
                                         src="/abouth1.png"
                                         alt="Two women in yellow clothing smiling together"
-                                        className="md:w-96 md:h-96 w-80 h-80 object-cover rounded-[50px] shadow-2xl border-[15px] border-[#FFF3EA]"
+                                        className="md:w-96 md:h-96 w-80 h-80 object-cover rounded-[50px] border-[15px] border-[#FFF3EA]"
                                         width={384}
                                         height={384}
                                     />
-                                </div>
+                                </motion.div>
+
                                 {/* Right Image - Beautiful */}
-                                <div className="relative z-20 md:mr-0 mr-12 transform md:rotate-6 md:translate-y-12 rotate-12 translate-y-4 flex justify-end md:justify-start">
+                                <motion.div
+                                    className="relative z-20 md:mr-0 mr-12 flex justify-end md:justify-start"
+                                    initial={{ opacity: 0, x: 100, rotate: 12 }}
+                                    animate={aboutInView ? { opacity: 1, x: 0, rotate: 12 } : { opacity: 0, x: 100, rotate: 12 }}
+                                    style={{
+                                        transform: aboutInView ? 'translateY(3rem) rotate(6deg)' : 'translateY(0.5rem) rotate(12deg)',
+                                    }}
+                                    transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                                >
                                     <div className="relative">
                                         <Image
                                             src="/aboutr.png"
                                             alt="Woman in red top"
-                                            className="h-80 object-cover rounded-[50px] shadow-2xl border-[10px] border-[#FFF3EA]"
+                                            className="h-80 object-cover rounded-[50px] border-[10px] border-[#FFF3EA]"
                                             width={288}
                                             height={320}
                                         />
-                                        <div className="absolute top-8 md:-left-8 -left-10 bg-[#0B902B] text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
+                                        <motion.div
+                                            className="absolute top-8 md:-left-8 -left-10 bg-[#0B902B] text-white px-4 py-2 rounded-full text-sm font-medium"
+                                            initial={{ opacity: 0, scale: 0, rotate: 45 }}
+                                            animate={aboutInView ? { opacity: 1, scale: 1, rotate: 0 } : { opacity: 0, scale: 0, rotate: 45 }}
+                                            transition={{ duration: 0.5, delay: 0.7, ease: "backOut" }}
+                                        >
                                             Beautiful
-                                        </div>
+                                        </motion.div>
                                     </div>
-                                </div>
+                                </motion.div>
                             </div>
                         </div>
                     </div>
                 </div>
             </section>
-
 
             {/* Who We Are Section */}
             <section className="px-4 py-16 md:py-20">
@@ -200,9 +273,14 @@ export default function AboutPage() {
                     </div>
 
                     {/* Portrait Images */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8" ref={imageGridRef}>
                         {/* Left Image */}
-                        <div className="relative">
+                        <motion.div
+                            className="relative"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={imageInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                        >
                             <div className="rounded-[50px] h-80 flex items-end">
                                 <img
                                     src="/who1.png"
@@ -210,10 +288,15 @@ export default function AboutPage() {
                                     className="w-full h-full object-cover object-center rounded-[50px]"
                                 />
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Center Image */}
-                        <div className="relative">
+                        <motion.div
+                            className="relative"
+                            initial={{ opacity: 0, rotate: -10 }}
+                            animate={imageInView ? { opacity: 1, rotate: 0 } : { opacity: 0, rotate: -10 }}
+                            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+                        >
                             <div className="rounded-[50px] h-80 flex items-end">
                                 <img
                                     src="/who2.png"
@@ -221,10 +304,15 @@ export default function AboutPage() {
                                     className="w-full h-full object-cover object-center rounded-[50px]"
                                 />
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Right Image - Tilted Left */}
-                        <div className="relative">
+                        <motion.div
+                            className="relative"
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={imageInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 50 }}
+                            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+                        >
                             <div className="rounded-[50px] md:h-80 flex items-end transform -rotate-48">
                                 <img
                                     src="/try.png"
@@ -232,13 +320,13 @@ export default function AboutPage() {
                                     className="w-full h-full object-cover object-center rounded-[50px]"
                                 />
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </section>
 
             {/* Mission, Vision, and Goals Section */}
-            <section className="px-4 py-16 md:py-20 bg-[#f8f6f3]">
+            <section className="px-4 py-16 md:py-20 bg-[#FFF3EA]">
                 <div className="max-w-6xl mx-auto text-center">
                     {/* Section Header */}
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-cormorant leading-tight text-black mb-8">
@@ -250,10 +338,10 @@ export default function AboutPage() {
                     </p>
 
                     {/* Cards Container */}
-                    <div className="relative md:max-w-[1000px] mx-auto ml-8">
+                    <div ref={cardsRef} className="relative md:max-w-[1000px] mx-auto ml-8">
                         {/* Vision Card - Orange (Left) */}
                         <div className="relative md:absolute left-0 top-0 transform -translate-y-12 -rotate-6 z-30 mb-8 md:mb-0">
-                            <div className="bg-[#bf5925] text-white p-8 rounded-3xl w-80 h-96 shadow-2xl">
+                            <div className="bg-[#bf5925] text-white p-8 rounded-3xl w-80 h-96">
                                 <div className="mb-6">
                                     <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mb-4">
                                         <svg className="w-6 h-6 text-[#bf5925]" fill="currentColor" viewBox="0 0 20 20">
@@ -277,7 +365,7 @@ export default function AboutPage() {
 
                         {/* Mission Card - White (Middle) */}
                         <div className="relative md:absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-16 rotate-12 z-20 mb-8 md:mb-0">
-                            <div className="bg-white border-2 border-[#bf5925] p-8 rounded-3xl w-80 h-96 shadow-2xl">
+                            <div className="bg-white border-2 border-[#bf5925] p-8 rounded-3xl w-80 h-96">
                                 <div className="mb-6">
                                     <div className="w-12 h-12 bg-[#bf5925] rounded-full flex items-center justify-center mb-4">
                                         <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -301,7 +389,7 @@ export default function AboutPage() {
 
                         {/* Goal Card - White (Right) */}
                         <div className="relative md:absolute right-0 top-0 md:mt-0 -mt-12 transform -translate-y-12 -rotate-6 z-10">
-                            <div className="bg-white border-2 border-[#bf5925] p-8 rounded-3xl w-80 h-96 shadow-2xl">
+                            <div className="bg-white border-2 border-[#bf5925] p-8 rounded-3xl w-80 h-96">
                                 <div className="mb-6">
                                     <div className="w-12 h-12 bg-[#bf5925] rounded-full flex items-center justify-center mb-4">
                                         <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -328,7 +416,7 @@ export default function AboutPage() {
             </section>
 
             <section className="px-4 py-16 md:py-20">
-                <div className="max-w-[1536px] mx-auto text-center">
+                <div className="max-w-[1200px] mx-auto text-center">
                     {/* Section Header */}
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-cormorant leading-tight text-black mb-8">What We Do</h2>
                     <p className="text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-16 leading-relaxed">
@@ -338,16 +426,16 @@ export default function AboutPage() {
 
                     {/* Grid Container with fixed height */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[1200px] h-[800px] mx-auto">
-
                         {/* LEFT COLUMN - Fixed height */}
                         <div className="flex flex-col gap-8 h-[800px]">
                             {/* Community Building - Takes remaining space (40% of left column) */}
-                            <div className="bg-green-100 rounded-[50px] p-8 flex flex-col justify-between h-[40%]">
+                            <div
+                                className="bg-green-100 rounded-[36px] p-8 flex flex-col justify-between h-[40%]"
+                            >
                                 <div>
-                                    <h3 className="text-2xl md:text-[50px] font-cormorant text-black mb-6">Community Building</h3>
-
+                                    <h3 className="text-2xl md:text-[44px] font-cormorant text-black mb-6">Community Building</h3>
                                     {/* Overlapping Profile Images */}
-                                    <div className="flex -space-x-2 justify-center"> {/* Added justify-center to center the images */}
+                                    <div className="flex -space-x-2 justify-center">
                                         <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white bg-white z-30">
                                             <Image
                                                 src="/prof1.png"
@@ -377,7 +465,6 @@ export default function AboutPage() {
                                         </div>
                                     </div>
                                 </div>
-
                                 <p className="text-sm md:text-base text-gray-700 leading-relaxed">
                                     We build a strong, interconnected community of women who consistently uplift, encourage, and empower one
                                     another in every aspect of life.
@@ -385,10 +472,12 @@ export default function AboutPage() {
                             </div>
 
                             {/* Resources - Takes 60% of left column height */}
-                            <div className="bg-[url('/resources.png')] bg-cover bg-center rounded-[50px] p-8 flex flex-col gap-6 h-[60%]">
+                            <div
+                                className="bg-[url('/resources.png')] bg-cover bg-center rounded-[36px] p-8 flex flex-col gap-6 h-[60%]"
+                            >
                                 <div className="flex-1">
-                                    <h3 className="text-2xl text-left md:text-[50px] font-cormorant text-black mb-4">Resources</h3>
-                                    <p className="text-sm md:text-base text-left max-w-[50%] text-gray-700 leading-relaxed">
+                                    <h3 className="text-2xl text-left md:text-[44px] font-cormorant text-black mb-4">Resources</h3>
+                                    <p className="text-sm md:text-base text-left max-w-[36%] text-gray-700 leading-relaxed">
                                         We share tools, insights, and opportunities to help women thrive in their new homes.
                                     </p>
                                 </div>
@@ -398,8 +487,10 @@ export default function AboutPage() {
                         {/* RIGHT COLUMN - Fixed height */}
                         <div className="flex flex-col gap-8 h-[800px]">
                             {/* Partnerships - Takes remaining space (30% of right column) */}
-                            <div className="bg-amber-700 rounded-[50px] p-8 flex flex-col align-text-top justify-center h-[30%] text-white">
-                                <h3 className="text-2xl md:text-[50px] font-cormorant mb-6">Partnerships</h3>
+                            <div
+                                className="bg-amber-700 rounded-[36px] p-8 flex flex-col align-text-top justify-center h-[30%] text-white"
+                            >
+                                <h3 className="text-2xl md:text-[44px] font-cormorant mb-6">Partnerships</h3>
                                 <p className="text-sm md:text-base leading-relaxed">
                                     We actively partner with diverse organizations to broaden our reach, amplify our collective impact, and
                                     deliver meaningful, tangible support to those we serve.
@@ -407,9 +498,11 @@ export default function AboutPage() {
                             </div>
 
                             {/* Storytelling - Takes 70% of right column height */}
-                            <div className="bg-[url('/story.png')] bg-cover bg-center rounded-[50px] h-[70%] p-8 gap-6">
+                            <div
+                                className="bg-[url('/story.png')] bg-cover bg-center rounded-[36px] h-[70%] p-8 gap-6"
+                            >
                                 <div className="flex-1">
-                                    <h3 className="text-2xl md:text-[50px] font-cormorant text-black mb-4">Storytelling</h3>
+                                    <h3 className="text-2xl md:text-[44px] font-cormorant text-black mb-4">Storytelling</h3>
                                     <p className="text-sm md:text-base text-gray-700 leading-relaxed">
                                         We highlight powerful personal journeys from immigrant women across the globe.
                                     </p>
@@ -420,8 +513,85 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            {/* Charitable Causes & Social Justice Campaigns Section */}
+            <section className="px-4 py-16 md:py-20 md:mt-0 mt-[750px]">
+                <div className="max-w-[1200px] mx-auto">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        {/* Left - Image */}
+                        <motion.div
+                            ref={charityRef}
+                            className="w-full"
+                            initial={{ opacity: 0, x: -100 }}
+                            animate={charityInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -100 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                        >
+                            <img
+                                src="/woman-reading-to-child-charity.png"
+                                alt="Woman reading to child in charity setting"
+                                className="w-full h-auto rounded-[36px] object-cover"
+                            />
+                        </motion.div>
+
+                        {/* Right - Content */}
+                        <motion.div
+                            className=""
+                            initial={{ opacity: 0, x: 100 }}
+                            animate={charityInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
+                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                        >
+                            <h2 className="text-3xl md:text-4xl font-cormorant leading-tight text-black mb-6">
+                                Charitable Causes & Social Justice Campaigns
+                            </h2>
+                            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                                We use our platform and network to spotlight urgent needs within immigrant communities and raise funds
+                                for:
+                            </p>
+
+                            {/* Checklist */}
+                            <div className="space-y-4">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-lg text-gray-700">Emergency relief (e.g. refugee support, housing crises)</p>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-lg text-gray-700">Mental health access</p>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-lg text-gray-700">Education and legal support</p>
+                                </div>
+
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
+                                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-lg text-gray-700">Mutual aid initiatives</p>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
             {/* Our Impact Section */}
-            <section className="px-4 py-16 md:py-20 md:mt-0 mt-[800px] bg-black text-white">
+            <section className="px-4 py-16 md:py-20 bg-black text-white">
                 <div className="max-w-6xl mx-auto text-center">
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-cormorant leading-tight mb-8">Our Impact</h2>
                     <p className="text-lg md:text-xl text-gray-300 mb-16">Stories that spark change and build belonging</p>
@@ -464,7 +634,7 @@ export default function AboutPage() {
 
             {/* Join the HIT Community Section */}
             <section className="px-4 py-16 md:py-20">
-                <div className="max-w-[1536px] mx-auto">
+                <div className="max-w-[1200px] mx-auto">
                     <div className="bg-[url('/join1.png')] bg-cover bg-center rounded-[50px] p-12 md:p-16 text-center text-white">
                         <h2 className="text-4xl md:text-5xl lg:text-6xl font-cormorant leading-tight mb-8">Join the HIT Community</h2>
                         <p className="text-lg md:text-xl mb-12 leading-relaxed max-w-2xl mx-auto">

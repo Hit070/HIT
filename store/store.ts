@@ -39,6 +39,7 @@ interface AuthStore {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   setUser: (user: User | null) => void;
+  setState: (state: Partial<AuthStore>) => void;
 }
 
 // Content State for Blogs and Stories
@@ -756,7 +757,8 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       user: null,
-      isLoading: false,
+      isLoading: true, // Start with isLoading: true
+      setState: (state) => set(state),
 
       login: async (email: string, password: string) => {
         set({ isLoading: true });
@@ -791,7 +793,7 @@ export const useAuthStore = create<AuthStore>()(
         if (typeof window !== "undefined") {
           localStorage.removeItem("auth");
         }
-        window.location.href = "/login"; // force redirect
+        window.location.href = "/dashboard/login"; // force redirect
       },
 
       setUser: (user) => set({ user }),
@@ -799,6 +801,12 @@ export const useAuthStore = create<AuthStore>()(
     {
       name: "auth", // localStorage key
       partialize: (state) => ({ user: state.user }), // only persist user
+      onRehydrateStorage: () => {
+        return (state) => {
+          // Called when persist middleware has finished hydrating
+          state?.setState({ isLoading: false }); // Set isLoading to false after hydration
+        };
+      },
     }
   )
 );

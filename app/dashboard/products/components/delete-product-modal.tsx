@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import type { Product, Order } from "@/types";
+import Image from "next/image";
 
 interface DeleteProductModalProps {
   open: boolean;
@@ -81,22 +82,30 @@ export function DeleteProductModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <AlertCircle className="h-5 w-5 text-red-500" />
-            Confirm Deletion
-          </DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete this product? This action cannot be
-            undone.
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Image
+              src={"/delete.png"}
+              alt={"delete"}
+              width={100}
+              height={100}
+              className="h-40 w-40"
+            />
+
+            <DialogTitle className="flex items-center text-center text-2xl gap-2">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              Confirm Deletion
+            </DialogTitle>
+          </div>
+          <DialogDescription className="text-md">
+            Are you sure you want to delete this product? This action cannot be undone.
           </DialogDescription>
         </DialogHeader>
 
         {/* Extra warning if product has variants */}
-        {product?.variants?.length && product.variants.length > 0 && (
+        {product?.variants && product.variants.length > 0 && (
           <div className="mt-4 text-sm text-red-700 bg-red-50 p-2 rounded-md dark:bg-white dark:text-red-800">
-            ⚠️ This product has {product?.variants?.length} variant
-            {product?.variants?.length && product.variants.length > 1 ? "s" : ""}. Deleting it will remove
-            all variants as well.
+            ⚠️ This product has {product.variants.length} variant
+            {product.variants.length > 1 ? "s" : ""}. Deleting it will remove all variants as well.
           </div>
         )}
 
