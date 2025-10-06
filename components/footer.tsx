@@ -6,11 +6,13 @@ import { FaFacebookF, FaInstagram, FaSpotify, FaTelegram, FaTiktok, FaYoutube } 
 import { FaThreads } from "react-icons/fa6";
 import { BsTwitterX } from "react-icons/bs";
 import { useState } from "react";
+import DonationModal from '@/components/donate-modal';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,12 +234,10 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://paystack.shop/pay/testers"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-gray-300 hover:text-white transition-colors">
+                  <button onClick={() => setIsOpen(true)} className="text-gray-300 hover:text-white transition-colors">
                     Donate
-                  </Link>
+                  </button>
+                  <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
                 </li>
                 {/* <li>
                   <Link href="#" className="text-gray-300 hover:text-white transition-colors">

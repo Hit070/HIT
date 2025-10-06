@@ -7,6 +7,7 @@ import Image from "next/image"
 import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { motion, useInView } from 'framer-motion';
+import DonationModal from '@/components/donate-modal'
 
 function useCountUp(end: number, duration = 2000) {
     const [count, setCount] = useState(0)
@@ -59,6 +60,9 @@ function useCountUp(end: number, duration = 2000) {
 }
 
 export default function AboutPage() {
+
+    const [isOpen, setIsOpen] = useState(false);
+
     const counter1 = useCountUp(500, 2000)
     const counter2 = useCountUp(20, 2000)
     const counter3 = useCountUp(100, 2000)
@@ -148,11 +152,14 @@ export default function AboutPage() {
                                 Collaborate
                             </Button>
                         </Link>
-                        <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+                        {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
                             <Button size="lg" className="bg-[#bf5925] hover:bg-[#a04920] text-white px-8 py-3 rounded-full">
                                 Donate
                             </Button>
-                        </Link>
+                        </Link> */}
+                        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">
+                            Donate
+                        </Button>
                     </div>
 
                     {/* Hero Images with Dynamic Layout */}
@@ -657,6 +664,7 @@ export default function AboutPage() {
             </section>
 
             <Footer />
+            <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </div>
     )
 }

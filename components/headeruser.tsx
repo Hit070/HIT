@@ -6,10 +6,14 @@ import { Menu, X } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import DonationModal from '@/components/donate-modal';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+
+  const [isOpen, setIsOpen] = useState(false);
+
 
   const isActive = (path: string) => {
     if (path === "/home") return pathname === "/home"
@@ -65,9 +69,13 @@ export default function Header() {
             Collaborate
           </Button>
         </Link>
-        <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+        {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
           <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
-        </Link>
+        </Link> */}
+        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">
+          Donate
+        </Button>
+        <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
       </div>
 
       <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -94,14 +102,18 @@ export default function Header() {
               <Link href="https://herimmigranttalepartners.framer.website" target="_blank" rel="noopener noreferrer">
                 <Button
                   variant="outline"
-                  className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] hover:text-white rounded-full px-6 bg-white"
+                  className="border-[#bf5925] text-[#bf5925] hover:bg-[#bf5925] w-full hover:text-white rounded-full px-6 bg-white"
                 >
                   Collaborate
                 </Button>
               </Link>
-              <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+              {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
-              </Link>
+              </Link> */}
+              <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">
+                Donate
+              </Button>
+              <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
             </div>
           </nav>
         </div>

@@ -275,12 +275,7 @@ export default function Contact() {
                         </motion.div>
 
                         {/* Right side - Social Media Links */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={socialInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                            className="flex flex-col justify-center py-6 gap-6"
-                        >
+                        <div className="flex flex-col justify-center py-6 gap-6">
                             <h2 className="text-4xl font-cormorant text-gray-900 mb-8">Follow Us on Social Media</h2>
 
                             <div className="grid md:grid-cols-2 grid-cols-1 gap-6">
@@ -362,7 +357,7 @@ export default function Contact() {
                                     </div>
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { EventModal } from "@/components/event-modal"
 import { useEventStore } from '@/store/store'
 import { toast } from '@/components/ui/use-toast'
+import DonationModal from '@/components/donate-modal'
 
 export default function Community() {
     const { events, fetchEvents } = useEventStore()
@@ -19,6 +20,7 @@ export default function Community() {
     const [translateX, setTranslateX] = useState(0)
     const [selectedEvent, setSelectedEvent] = useState<any>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleEventClick = (event: any) => {
         setSelectedEvent(event)
@@ -109,9 +111,12 @@ export default function Community() {
                                 Collaborate
                             </Button>
                         </Link>
-                        <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+                        {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
                             <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
-                        </Link>
+                        </Link> */}
+                        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">
+                            Donate
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -462,6 +467,8 @@ export default function Community() {
             <EventModal event={selectedEvent} isOpen={isModalOpen} onClose={closeModal} />
 
             <Footer />
+            <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
+
         </div>
     )
 }

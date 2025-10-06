@@ -6,17 +6,20 @@ import Header from "@/components/headeruser"
 import Footer from "@/components/footer"
 import { ArrowRight } from "lucide-react"
 import { useContentStore } from "@/store/store"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { toast } from "@/components/ui/use-toast"
 import Link from "next/link"
 import { Story } from "@/types"
 import { motion, useInView } from "framer-motion"
+import DonationModal from '@/components/donate-modal';
 
 export default function HomePage() {
   const { stories, fetchStories } = useContentStore();
 
   const filteredStories = stories.filter(story => story.status === "published")
   const featuredStory = filteredStories.find((s: Story) => s.isFeatured)
+
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -231,9 +234,12 @@ export default function HomePage() {
                   Collaborate
                 </Button>
               </Link>
-              <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
+              {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
-              </Link>
+              </Link> */}
+              <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">
+                Donate
+              </Button>
             </div>
 
             <div className="relative">
@@ -861,6 +867,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <Footer />
+      <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </div>
   )
 }
