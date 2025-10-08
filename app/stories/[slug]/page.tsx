@@ -217,7 +217,7 @@ export default function StoryDetailPage() {
                                         href={`/stories/${otherStory.slug}`}
                                         className="group cursor-pointer block bg-white rounded-3xl hover:shadow-xl transition-shadow duration-300 overflow-hidden relative"
                                         style={{
-                                            boxShadow: '0 0 60px 20px rgba(0, 0, 0, 0.08)'
+                                            boxShadow: '0 0 60px 20px rgba(0, 0, 0, 0.04)'
                                         }}
                                     >
                                         <div className="p-4 rounded-3xl overflow-hidden">
