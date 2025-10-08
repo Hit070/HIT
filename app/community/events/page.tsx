@@ -236,7 +236,7 @@ export default function CommunityEventsPage() {
                                                             alt={event.title}
                                                             width={180}
                                                             height={120}
-                                                            className="w-full h-full rounded-4xl object-cover"
+                                                            className="w-full h-full rounded-3xl object-cover"
                                                         />
                                                     </div>
 
@@ -256,7 +256,7 @@ export default function CommunityEventsPage() {
                                 {currentEvents.map((event) => (
                                     <div key={event.id} className="relative max-w-[1440px] mx-auto">
                                         {/* Add responsive grid for mobile */}
-                                        <div className="md:hidden bg-white rounded-4xl border border-gray-200 p-6">
+                                        <div className="md:hidden bg-white rounded-3xl border border-gray-200 p-6">
                                             <div className="flex items-start gap-4">
                                                 <div className="flex-shrink-0 flex flex-col items-center gap-2">
                                                     <div className="relative w-20 h-20 flex-shrink-0">

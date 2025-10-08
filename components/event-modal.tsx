@@ -36,7 +36,7 @@ export function EventModal({ event, isOpen, onClose }: EventModalProps) {
                     <div className="p-6">
                         {/* Event Image */}
                         <div className="relative w-full h-72 mb-6 rounded-3xl overflow-hidden">
-                            <Image src={event.image || "/placeholder.svg"} alt={event.title} fill className="rounded-4xl object-cover" />
+                            <Image src={event.image || "/placeholder.svg"} alt={event.title} fill className="rounded-3xl object-cover" />
                         </div>
 
                         {/* Event Info */}

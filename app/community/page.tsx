@@ -290,7 +290,7 @@ export default function Community() {
                                                         alt={event.title}
                                                         width={180}
                                                         height={120}
-                                                        className="w-full h-full rounded-4xl object-cover"
+                                                        className="w-full h-full rounded-3xl object-cover"
                                                     />
                                                 </div>
 
