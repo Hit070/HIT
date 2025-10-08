@@ -237,7 +237,7 @@ export default function HomePage() {
               {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">Donate</Button>
               </Link> */}
-              <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">
+              <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-12 py-3">
                 Donate
               </Button>
             </div>

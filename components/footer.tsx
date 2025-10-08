@@ -105,11 +105,12 @@ export default function Footer() {
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2">
                 <Image
-                  src="/logowhite.png"
+                  src="/logo2.svg"
                   alt="HIT Logo"
                   width={200}
                   height={120}
                   className="object-contain"
+                  priority
                 />
               </div>
               <h4 className="text-2xl font-cormorant  mb-4">Her Immigrant Tales</h4>

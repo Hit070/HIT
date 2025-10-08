@@ -36,11 +36,12 @@ export default function Header() {
       <div className="flex items-center gap-2">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/logo.png"
+            src="/logo1.svg"
             alt="HIT Logo"
             width={200}
             height={120}
             className="object-contain"
+            priority
           />
         </Link>
       </div>
@@ -72,7 +73,7 @@ export default function Header() {
         {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
           <Button className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">Donate</Button>
         </Link> */}
-        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6">
+        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-12">
           Donate
         </Button>
         <DonationModal isOpen={isOpen} onClose={() => setIsOpen(false)} />

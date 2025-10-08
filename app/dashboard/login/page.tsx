@@ -65,7 +65,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="absolute top-8 left-8 z-10 pl-8">
           <Image
-            src="/logowhite.png"
+            src="/logo1.svg"
             alt="HER IMMIGRANT TALES Logo"
             width={250}
             height={50}
@@ -92,7 +92,7 @@ export default function LoginPage() {
           {/* Mobile Logo */}
           <div className="flex md:hidden absolute top-8 left-8 z-10 pl-8">
             <Image
-              src="/logo.png"
+              src="/logo1.svg"
               alt="HER IMMIGRANT TALES Logo"
               width={250}
               height={50}

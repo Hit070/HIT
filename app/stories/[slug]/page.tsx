@@ -99,7 +99,7 @@ export default function StoryDetailPage() {
             <div className="min-h-screen bg-white">
                 <Header />
                 <div className="px-4 py-16 max-w-4xl mx-auto text-center">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Story Not Found</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-4">Story Not Found</h1>
                     <p className="text-gray-600 mb-8">The story you're looking for doesn't exist.</p>
                     <Link href="/stories" className="text-[#bf5925] hover:underline">
                         ← Back to Stories
@@ -127,7 +127,7 @@ export default function StoryDetailPage() {
                 <div className="rounded-[50px] bg-gray-50 py-12 px-6 md:px-36">
                     {/* Story Header */}
                     <header className="mb-8">
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                        <h1 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
                             {story.title}
                         </h1>
 
@@ -215,9 +215,12 @@ export default function StoryDetailPage() {
                                     <Link
                                         key={otherStory.id}
                                         href={`/stories/${otherStory.slug}`}
-                                        className="group cursor-pointer block bg-white rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                                        className="group cursor-pointer block bg-white rounded-3xl hover:shadow-xl transition-shadow duration-300 overflow-hidden relative"
+                                        style={{
+                                            boxShadow: '0 0 60px 20px rgba(0, 0, 0, 0.08)'
+                                        }}
                                     >
-                                        <div className="p-4 rounded-4xl overflow-hidden">
+                                        <div className="p-4 rounded-3xl overflow-hidden">
                                             <Image
                                                 width={400}
                                                 height={300}

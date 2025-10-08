@@ -353,7 +353,7 @@ export default function Contact() {
                                                 <BsTelegram />
                                             </span>
                                         </div>
-                                        <span className="text-gray-900">Her Immigrant Tales (HIT) Community</span>
+                                        <span className="text-gray-900">Her Immigrant Tales (HIT)</span>
                                     </div>
                                 </div>
                             </div>

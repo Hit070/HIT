@@ -1,9 +1,19 @@
 "use client";
 
 import { useAuthStore } from "@/store/store";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function DashboardLayout({ children: children }: { children: React.ReactNode }) {
     const { isLoading } = useAuthStore();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (isLoading) return;
+
+        // Always redirect to main from dashboard ("/dashboard")
+        router.replace("/dashboard/main");
+    }, [isLoading, router]);
 
     // Show loading state while redirecting
     if (isLoading) {

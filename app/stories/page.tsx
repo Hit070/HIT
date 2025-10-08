@@ -173,7 +173,7 @@ export default function StoriesPage() {
                                     </span>
                                 </div>
 
-                                <h2 className="text-4xl font-bold mb-4 leading-tight">{featuredStory.title}</h2>
+                                <h2 className="text-3xl font-bold mb-4 leading-tight">{featuredStory.title}</h2>
 
                                 <p className="text-gray-300 mb-4">by {featuredStory.author}</p>
 
@@ -194,7 +194,7 @@ export default function StoriesPage() {
             {/* Recent Stories Section */}
             <section className="px-4 py-16 mx-auto bg-gray-100">
                 <div className="max-w-[1440px] mx-auto">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-12">Recent Stories</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-12">Recent Stories</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                         {otherStories.map((story: Story) => {
@@ -209,14 +209,14 @@ export default function StoriesPage() {
                                     href={`/stories/${story.slug}`}
                                     className="group cursor-pointer block"
                                 >
-                                    <div className="bg-white rounded-4xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                                        <div className="p-4 rounded-4xl overflow-hidden">
+                                    <div className="bg-white rounded-3xl hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                        <div className="p-4 rounded-3xl overflow-hidden">
                                             <Image
                                                 width={500}
                                                 height={375}
                                                 src={story.thumbnail || "/placeholder.svg"}
                                                 alt={story.title}
-                                                className="w-full h-full rounded-4xl object-cover group-hover:scale-105 transition-transform duration-300"
+                                                className="w-full h-full rounded-3xl object-cover group-hover:scale-105 transition-transform duration-300"
                                             />
                                         </div>
 

@@ -47,7 +47,6 @@ import {
 } from "@/components/ui/select";
 import { CalendarDays, BookOpen, MessageSquare } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
-import { useRouter } from "next/navigation";
 
 // Define chart data types
 interface ChartData {

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { X, CreditCard, Coffee, ExternalLink } from 'lucide-react';
 
 export default function DonationModal({ isOpen = false, onClose = () => { } }) {
@@ -88,26 +87,5 @@ export default function DonationModal({ isOpen = false, onClose = () => { } }) {
                 </div>
             </div>
         </div>
-    );
-}
-
-// Example usage component
-export function DonateButton({ className = "" }) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-
-    return (
-        <>
-            <button
-                onClick={() => setIsModalOpen(true)}
-                className={`bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-6 py-2 transition-colors ${className}`}
-            >
-                Donate
-            </button>
-
-            <DonationModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-            />
-        </>
     );
 }

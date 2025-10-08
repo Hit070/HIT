@@ -116,7 +116,7 @@ export function Sidebar({ isOpen, onClose, open, onOpenChange }: SidebarProps) {
         <div className="flex h-16 items-center px-4">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
             <Image
-              src="/logowhite.png"
+              src="/logo2.svg"
               alt="HER IMMIGRANT TALES Logo"
               width={200}
               height={50}

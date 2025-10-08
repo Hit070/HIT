@@ -142,7 +142,7 @@ export default function AboutPage() {
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row md:px-0 px-8 gap-4 justify-center mb-20">
+                    <div className="flex items-center justify-center gap-4 mb-20">
                         <Link href="https://herimmigranttalepartners.framer.website" target="_blank" rel="noopener noreferrer">
                             <Button
                                 variant="outline"
@@ -152,12 +152,7 @@ export default function AboutPage() {
                                 Collaborate
                             </Button>
                         </Link>
-                        {/* <Link href="https://paystack.shop/pay/testers" target="_blank" rel="noopener noreferrer">
-                            <Button size="lg" className="bg-[#bf5925] hover:bg-[#a04920] text-white px-8 py-3 rounded-full">
-                                Donate
-                            </Button>
-                        </Link> */}
-                        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full px-8 py-3">
+                        <Button onClick={() => setIsOpen(true)} className="bg-[#bf5925] hover:bg-[#bf5925]/90 text-white rounded-full md:w-auto w-40 px-12 py-3">
                             Donate
                         </Button>
                     </div>
