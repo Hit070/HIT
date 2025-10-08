@@ -259,13 +259,14 @@ export default function CommunityEventsPage() {
                                         <div className="md:hidden bg-white rounded-4xl border border-gray-200 p-6">
                                             <div className="flex items-start gap-4">
                                                 <div className="flex-shrink-0 flex flex-col items-center gap-2">
-                                                    <Image
-                                                        src={event.image}
-                                                        alt={event.title}
-                                                        width={80}
-                                                        height={80}
-                                                        className="rounded-full object-cover"
-                                                    />
+                                                    <div className="relative w-20 h-20 flex-shrink-0">
+                                                        <Image
+                                                            src={event.image}
+                                                            alt={event.title}
+                                                            fill
+                                                            className="rounded-2xl object-cover"
+                                                        />
+                                                    </div>
                                                     {/* QR Code for mobile */}
                                                     <div className="">
                                                         <QRCodeComponent value={event.meetingLink} size={80} />
