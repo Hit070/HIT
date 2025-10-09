@@ -163,7 +163,7 @@ export function CreateEventModal({ isOpen, onClose, onEventCreated }: CreateEven
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 hidden">
             <Label htmlFor="slug">Slug</Label>
             <Input
               id="slug"

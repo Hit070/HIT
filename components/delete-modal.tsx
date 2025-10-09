@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import Image from "next/image"
 
 interface DeleteModalProps {
   isOpen: boolean
@@ -41,19 +42,24 @@ export function DeleteModal({ isOpen, onClose, onConfirm, title, description, it
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="sm:max-w-[425px]">
         <AlertDialogHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500">
-              <Trash2 className="h-6 w-6 text-white" />
-            </div>
+          <div className="flex flex-col items-center justify-center gap-4">
+
+            <Image
+              src={"/delete.png"}
+              alt={"delete"}
+              width={100}
+              height={100}
+              className="h-40 w-40"
+            />
+            <AlertDialogTitle className="text-xl font-semibold">
+              Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Are you sure you want to delete this {itemType}?
+            </AlertDialogDescription>
           </div>
-          <AlertDialogTitle className="text-xl font-semibold">
-            Delete {itemType.charAt(0).toUpperCase() + itemType.slice(1)}?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
-            Are you sure you want to delete this {itemType}?
-          </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+        <AlertDialogFooter className="flex-col sm:flex-row sm:justify-center gap-2">
           <AlertDialogCancel onClick={onClose} disabled={isDeleting} className="w-full sm:w-auto">
             Cancel
           </AlertDialogCancel>
