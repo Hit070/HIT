@@ -48,6 +48,7 @@ export default function AnalyticsPage() {
   const { products, orders, discounts } = useStore();
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [filteredOrders, setFilteredOrders] = useState(orders);
 
   useEffect(() => {
     const orders = useStore.getState().orders;
@@ -80,6 +81,34 @@ export default function AnalyticsPage() {
       setProductsLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    const now = new Date();
+    const filtered = orders.filter((order) => {
+      const orderDate = new Date(order.createdAt);
+      let startDate = new Date();
+
+      switch (timeRange) {
+        case "week":
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case "month":
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        case "quarter":
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+        case "year":
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        default:
+          return true; // Should not happen, but as a fallback
+      }
+      return orderDate >= startDate;
+    });
+    setFilteredOrders(filtered);
+  }, [timeRange, orders]);
+
 
   if (ordersLoading || productsLoading) {
     return (
@@ -123,13 +152,13 @@ export default function AnalyticsPage() {
   }
 
   // Calculate analytics metrics with variant-aware pricing
-  const totalRevenue = orders
+  const totalRevenue = filteredOrders
     .filter((order) => order.status === "DELIVERED")
     .reduce((sum, order) => {
       return sum + order.total; // Order total already includes variant-adjusted pricing
     }, 0);
 
-  const totalOrders = orders.length;
+  const totalOrders = filteredOrders.length;
   const totalProducts = products.length;
 
   // Count total variants across all products
@@ -140,7 +169,7 @@ export default function AnalyticsPage() {
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
   // Prepare data for charts with variant-aware analytics
-  const categoryAnalytics = getCategoryAnalytics(products, orders.map((order) => ({
+  const categoryAnalytics = getCategoryAnalytics(products, filteredOrders.map((order) => ({
     ...order,
     createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : order.createdAt,
   })));
@@ -151,11 +180,11 @@ export default function AnalyticsPage() {
   }));
 
   // Calculate recent stats
-  const pendingOrders = orders.filter((order) => order.status === "PENDING").length;
-  const processingOrders = orders.filter((order) => order.status === "PROCESSING").length;
-  const shippedOrders = orders.filter((order) => order.status === "SHIPPED").length;
-  const deliveredOrders = orders.filter((order) => order.status === "DELIVERED").length;
-  const canceledOrders = orders.filter((order) => order.status === "CANCELLED").length;
+  const pendingOrders = filteredOrders.filter((order) => order.status === "PENDING").length;
+  const processingOrders = filteredOrders.filter((order) => order.status === "PROCESSING").length;
+  const shippedOrders = filteredOrders.filter((order) => order.status === "SHIPPED").length;
+  const deliveredOrders = filteredOrders.filter((order) => order.status === "DELIVERED").length;
+  const canceledOrders = filteredOrders.filter((order) => order.status === "CANCELLED").length;
 
   const statusData = [
     { name: "Pending", value: pendingOrders },
@@ -170,14 +199,14 @@ export default function AnalyticsPage() {
   const lowStockCount = lowStockAlerts.length;
 
   const salesData = getSalesData(
-    orders.map((order) => ({
+    filteredOrders.map((order) => ({
       ...order,
       createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : order.createdAt,
     }))
   );
 
   const { topByRevenue, topByQuantity } = getTopProducts(
-    orders.map((order) => ({
+    filteredOrders.map((order) => ({
       ...order,
       createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : order.createdAt,
     }))
@@ -185,7 +214,7 @@ export default function AnalyticsPage() {
 
   // Get variant-specific analytics
   const variantAnalytics = getVariantAnalytics(
-    orders.map((order) => ({
+    filteredOrders.map((order) => ({
       ...order,
       createdAt: order.createdAt instanceof Date ? order.createdAt.toISOString() : order.createdAt,
     }))
