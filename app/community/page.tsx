@@ -67,6 +67,10 @@ export default function Community() {
         "/5.png?w=400&h=600&fit=crop"
     ]
 
+    const activeEvents = events
+        .filter(event => event.status === 'active')
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 3)
 
     return (
         <div className="min-h-screen bg-white overflow-hidden">
@@ -203,7 +207,7 @@ export default function Community() {
                             together
                         </p>
                     </div>
-                    {events.length === 0 ? (
+                    {activeEvents.length === 0 ? (
                         <div className="text-center py-12">
                             <Image src="/no-events.png" alt="No Events" width={200} height={200} className="mx-auto mb-4" />
                             <div className="text-2xl font-semibold mb-4">
@@ -216,7 +220,7 @@ export default function Community() {
                     ) : (
                         <>
                             <div className="space-y-8">
-                                {events.slice(0, 3).map((event) => {
+                                {activeEvents.slice(0, 3).map((event) => {
                                     // Parse the date string to extract day and day number
                                     const eventDate = new Date(event.date);
                                     const day = eventDate.toLocaleDateString('en-US', { weekday: 'short' });
@@ -307,7 +311,7 @@ export default function Community() {
 
                             {/* Mobile Event Cards */}
                             <div className="space-y-8">
-                                {events.slice(0, 3).map((event) => (
+                                {activeEvents.slice(0, 3).map((event) => (
                                     <div key={event.id} className="relative max-w-[1440px] mx-auto">
                                         {/* Add responsive grid for mobile */}
                                         <div className="md:hidden bg-white rounded-3xl border border-gray-200 p-6">

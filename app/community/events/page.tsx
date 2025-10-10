@@ -18,8 +18,10 @@ export default function CommunityEventsPage() {
     const [currentPage, setCurrentPage] = useState(1)
     const eventsPerPage = 5
 
-    const totalPages = Math.ceil(events.length / eventsPerPage)
-    const currentEvents = events.slice(
+    const activeEvents = events.filter(event => event.status === 'active')
+
+    const totalPages = Math.ceil(activeEvents.length / eventsPerPage)
+    const currentEvents = activeEvents.slice(
         (currentPage - 1) * eventsPerPage,
         currentPage * eventsPerPage
     )
