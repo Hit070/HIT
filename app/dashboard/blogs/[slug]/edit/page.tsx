@@ -39,6 +39,9 @@ export default function EditBlogPage() {
   const [isUploadingAudio, setIsUploadingAudio] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const audioInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   const blogCategories = ["Technology", "Lifestyle", "Education", "Health", "Business"]
 
@@ -184,6 +187,92 @@ export default function EditBlogPage() {
       setIsUploadingAudio(false)
     }
   }
+
+  const handleVideoUpload = () => {
+    videoInputRef.current?.click()
+  }
+
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a video file (MP4, MOV, AVI, etc.).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Enforce 100MB limit (Cloudinary free plan)
+    if (file.size > 100 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select a video file smaller than 100MB (Cloudinary free plan limit).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    setUploadProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Create XMLHttpRequest for progress tracking
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress(percentComplete);
+        }
+      });
+
+      const uploadPromise = new Promise((resolve, reject) => {
+        xhr.addEventListener("load", () => {
+          if (xhr.status === 200) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error("Upload failed"));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+        xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
+      });
+
+      xhr.open("POST", "/api/upload/blogs");
+      xhr.send(formData);
+
+      const response: any = await uploadPromise;
+
+      // Update formData with new video URL
+      setFormData((prev) => ({
+        ...prev,
+        videoUrl: response.url,
+        videoPreview: response.url,
+      }));
+
+      toast({
+        title: "Video uploaded",
+        description: "Upload successful.",
+      });
+    } catch (error) {
+      console.error("[UPLOAD_VIDEO]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingVideo(false);
+      setUploadProgress(0);
+    }
+  };
 
   const handleVideoUrlChange = (url: string) => {
     let embedUrl = ""
@@ -397,28 +486,73 @@ export default function EditBlogPage() {
             {formData.type === "video" && (
               <div>
                 <Label htmlFor="videoUrl" className="text-sm font-medium text-gray-700 mb-2 block">
-                  Video URL
+                  Video URL or Upload
                 </Label>
                 <div className="flex gap-2">
                   <Input
                     id="videoUrl"
                     value={formData.videoUrl}
                     onChange={(e) => handleVideoUrlChange(e.target.value)}
-                    placeholder="Enter YouTube or Vimeo URL"
+                    placeholder="Enter YouTube or Vimeo URL, or upload below"
                     className="flex-1"
-                    disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+                    disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
                   />
                   {formData.videoUrl && (
                     <Button
                       variant="destructive"
                       onClick={() => setFormData({ ...formData, videoUrl: "", videoPreview: "" })}
                       className="bg-red-500 hover:bg-red-600"
-                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
                     >
                       Remove
                     </Button>
                   )}
                 </div>
+
+                {/* Video Upload Section */}
+                <div className="mt-4 space-y-4">
+                  <Label>Or Upload Video File</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">
+                      Upload video file (MP4, MOV, AVI, etc.) - Up to 100MB
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 bg-app-primary text-white border-app-primary hover:bg-orange-600"
+                      onClick={handleVideoUpload}
+                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                    >
+                      {isUploadingVideo ? `Uploading... ${uploadProgress}%` : "Browse Files"}
+                    </Button>
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      title="video"
+                      onChange={handleVideoChange}
+                    />
+
+                    {/* Progress Bar */}
+                    {isUploadingVideo && (
+                      <div className="w-full max-w-md mx-auto mt-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                          <div
+                            className="bg-app-primary h-2.5 rounded-full transition-all duration-300"
+                            style={{ width: `${uploadProgress}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 text-center">
+                          {uploadProgress}% uploaded
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Show preview based on whether it's uploaded video or embedded URL */}
                 {formData.videoUrl && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
@@ -426,13 +560,24 @@ export default function EditBlogPage() {
                       <span className="text-sm font-medium">Video Preview</span>
                     </div>
                     <div className="aspect-video bg-gray-200 rounded overflow-hidden">
-                      <iframe
-                        src={formData.videoPreview || formData.videoUrl.replace("watch?v=", "embed/")}
-                        className="w-full h-full"
-                        frameBorder="0"
-                        allowFullScreen
-                        title="Video preview"
-                      />
+                      {formData.videoPreview && (formData.videoPreview.includes('youtube.com') || formData.videoPreview.includes('vimeo.com')) ? (
+                        <iframe
+                          src={formData.videoPreview}
+                          className="w-full h-full"
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title="Video preview"
+                        />
+                      ) : (
+                        <video
+                          controls
+                          src={formData.videoUrl + '#t=0.1'}
+                          className="w-full h-full"
+                        >
+                          Your browser does not support the video element.
+                        </video>
+                      )}
                     </div>
                   </div>
                 )}

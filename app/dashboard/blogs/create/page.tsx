@@ -34,6 +34,10 @@ export default function CreateBlogPage() {
   const [isUploadingAudio, setIsUploadingAudio] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const audioInputRef = useRef<HTMLInputElement>(null)
+  const [videoFile, setVideoFile] = useState("")
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const videoInputRef = useRef<HTMLInputElement>(null)
 
   const blogCategories = ["Technology", "Lifestyle", "Education", "Health", "Business"]
 
@@ -139,6 +143,89 @@ export default function CreateBlogPage() {
     }
   }
 
+  const handleVideoUpload = () => {
+    videoInputRef.current?.click()
+  }
+
+  const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select a valid video file (MP4, MOV, AVI, etc.).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Frontend limit: 100MB (Cloudinary free plan)
+    if (file.size > 100 * 1024 * 1024) {
+      toast({
+        title: "File size out of range",
+        description: "Please select a video smaller than 100MB (Cloudinary free plan limit).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingVideo(true);
+    setUploadProgress(0);
+
+    try {
+      // Prepare FormData for backend
+      const formData = new FormData();
+      formData.append("file", file);
+
+      // Use XMLHttpRequest for progress tracking
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100);
+          setUploadProgress(percentComplete);
+        }
+      });
+
+      const uploadPromise = new Promise((resolve, reject) => {
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error("Upload failed"));
+          }
+        };
+        xhr.onerror = () => reject(new Error("Upload failed"));
+        xhr.onabort = () => reject(new Error("Upload cancelled"));
+      });
+
+      xhr.open("POST", "/api/upload/blogs");
+      xhr.send(formData);
+
+      const response: any = await uploadPromise;
+
+      // Set uploaded video URL + preview
+      setVideoFile(response.url);
+      setVideoPreview(response.url);
+
+      toast({
+        title: "Video uploaded",
+        description: "Upload successful.",
+      });
+    } catch (error) {
+      console.error("[UPLOAD_VIDEO]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingVideo(false);
+      setUploadProgress(0);
+    }
+  };
+
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -165,7 +252,7 @@ export default function CreateBlogPage() {
         content,
         category,
         type: blogType,
-        videoUrl: blogType === "video" ? videoUrl : undefined,
+        videoUrl: blogType === "video" ? (videoFile || videoUrl) : undefined,
         audioFile: blogType === "audio" ? audioFile : undefined,
         thumbnail: thumbnail || undefined,
         status,
@@ -202,7 +289,7 @@ export default function CreateBlogPage() {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Enter blog title"
             className="text-base"
-            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
           />
         </div>
 
@@ -214,7 +301,7 @@ export default function CreateBlogPage() {
             onChange={(e) => setAuthor(e.target.value)}
             placeholder="Enter author name"
             className="text-base"
-            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
           />
         </div>
 
@@ -226,14 +313,14 @@ export default function CreateBlogPage() {
             onChange={(e) => setSummary(e.target.value)}
             placeholder="Enter blog summary"
             className="min-h-[100px] text-base"
-            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="category">Category</Label>
           <Select value={category} onValueChange={setCategory}
-            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a category" />
@@ -264,7 +351,7 @@ export default function CreateBlogPage() {
                   size="sm"
                   onClick={handleFileUpload}
                   className="bg-app-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={isUploadingThumbnail || isSavingDraft || isPublishing}
+                  disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
                 >
                   {isUploadingThumbnail ? "Uploading..." : "Browse Files"}
                 </Button>
@@ -289,7 +376,7 @@ export default function CreateBlogPage() {
           <Select
             value={blogType}
             onValueChange={(value: string) => setBlogType(value as "text" | "video" | "audio")}
-            disabled={isUploadingAudio || isSavingDraft || isPublishing}
+            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -302,20 +389,87 @@ export default function CreateBlogPage() {
           </Select>
         </div>
 
-        {blogType === "video" && (
+        {blogType === "video" && ( // Use storyType for stories page
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="video-url">Video URL</Label>
+              <Label htmlFor="video-url">Video URL or Upload</Label>
               <Input
                 id="video-url"
                 value={videoUrl}
                 onChange={(e) => handleVideoUrlChange(e.target.value)}
-                placeholder="Enter YouTube or Vimeo URL"
+                placeholder="Enter YouTube or Vimeo URL, or upload a video below"
                 className="text-base"
-                disabled={isUploadingAudio || isSavingDraft || isPublishing}
+                disabled={isUploadingVideo || isUploadingAudio || isSavingDraft || isPublishing}
               />
             </div>
-            {videoPreview && (
+
+            {/* Video Upload Section */}
+            <div className="space-y-4">
+              <Label>Or Upload Video File</Label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center bg-muted/10">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="p-2 rounded-full bg-muted">
+                    <Upload className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      Upload video file (MP4, MOV, AVI, etc.) - Up to 100MB
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Videos will be automatically optimized and compressed
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleVideoUpload}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={isUploadingVideo || isUploadingAudio || isSavingDraft || isPublishing}
+                    >
+                      {isUploadingVideo ? `Uploading... ${uploadProgress}%` : "Browse Files"}
+                    </Button>
+                    <input
+                      ref={videoInputRef}
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      title="video"
+                      onChange={handleVideoChange}
+                    />
+                  </div>
+
+                  {/* Upload Progress Bar */}
+                  {isUploadingVideo && (
+                    <div className="w-full max-w-md">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          className="bg-app-primary h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 text-center">
+                        {uploadProgress}% uploaded
+                      </p>
+                    </div>
+                  )}
+
+                  {videoFile && (
+                    <div className="mt-4 w-full max-w-md">
+                      <p className="text-sm text-muted-foreground mb-2">Uploaded video:</p>
+                      <video
+                        controls
+                        src={videoFile}
+                        className="w-full rounded-lg"
+                      >
+                        Your browser does not support the video element.
+                      </video>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Preview for URL-based videos (YouTube/Vimeo) */}
+            {videoPreview && !videoFile && (
               <div className="space-y-2">
                 <Label>Video Preview</Label>
                 <div className="aspect-video rounded-lg overflow-hidden border">
@@ -323,8 +477,6 @@ export default function CreateBlogPage() {
                     title="video-preview"
                     src={videoPreview}
                     className="w-full h-full"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   />
                 </div>
@@ -348,7 +500,7 @@ export default function CreateBlogPage() {
                     size="sm"
                     onClick={handleAudioUpload}
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    disabled={isUploadingAudio || isSavingDraft || isPublishing}
+                    disabled={isUploadingAudio || isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingVideo}
                   >
                     {isUploadingAudio ? "Uploading..." : "Browse Files"}
                   </Button>
@@ -377,7 +529,7 @@ export default function CreateBlogPage() {
             content={content}
             onChange={setContent}
             placeholder="Write your blog content here..."
-            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
           />
         </div>
 
@@ -386,7 +538,7 @@ export default function CreateBlogPage() {
             variant="outline"
             size="lg"
             onClick={() => handleSubmit("draft")}
-            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
           >
             {isSavingDraft ? "Saving..." : "Save as draft"}
           </Button>
@@ -394,7 +546,7 @@ export default function CreateBlogPage() {
             size="lg"
             className="bg-app-primary hover:bg-primary/90"
             onClick={() => handleSubmit("published")}
-            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio}
+            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingVideo || isUploadingAudio}
           >
             {isPublishing ? "Publishing..." : "Publish"}
           </Button>

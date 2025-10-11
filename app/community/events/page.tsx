@@ -193,6 +193,7 @@ export default function CommunityEventsPage() {
                                                     <div className="flex-shrink-0 mr-6 text-center w-[80px]">
                                                         <div className="text-2xl font-bold text-[#353336]">{day}</div>
                                                         <div className="text-3xl font-bold text-[#353336]">{dayNumber}</div>
+                                                        <div className="text-2xl font-bold text-[#353336]">{event.time}</div>
                                                     </div>
 
                                                     {/* Event Details Section */}

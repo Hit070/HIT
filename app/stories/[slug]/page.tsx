@@ -172,19 +172,43 @@ export default function StoryDetailPage() {
                     </article>
 
                     {/* Media Content */}
-                    {story.type === "video" && story.videoUrl && (
+                    {story.type === "video" && story.videoUrl ? (
                         <div className="mb-8">
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">Watch Video</h2>
                             <div className="aspect-video rounded-xl overflow-hidden">
-                                <iframe
-                                    src={story.videoUrl}
-                                    className="w-full h-full"
-                                    allowFullScreen
-                                    title={story.title}
-                                />
+                                {story.videoUrl.includes('youtube.com') || story.videoUrl.includes('youtu.be') || story.videoUrl.includes('vimeo.com') ? (
+                                    <iframe
+                                        src={
+                                            story.videoUrl.includes('youtube.com') || story.videoUrl.includes('youtu.be')
+                                                ? `https://www.youtube.com/embed/${story.videoUrl.split('v=')[1]?.split('&')[0] || story.videoUrl.split('youtu.be/')[1]?.split('?')[0]}`
+                                                : `https://player.vimeo.com/video/${story.videoUrl.split('vimeo.com/')[1]?.split('?')[0]}`
+                                        }
+                                        className="w-full h-full"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                        title={story.title}
+                                    />
+                                ) : (
+                                    <video
+                                        controls
+                                        src={story.videoUrl + '#t=0.1'}
+                                        className="w-full h-full"
+                                        poster={story.thumbnail || undefined}
+                                    >
+                                        Your browser does not support the video element.
+                                    </video>
+                                )}
                             </div>
                         </div>
-                    )}
+                    ) : story.type === "video" ? (
+                        <div className="mb-8">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-4">Watch Video</h2>
+                            <div className="aspect-video rounded-xl bg-gray-200 flex items-center justify-center">
+                                <p className="text-gray-500">Video unavailable</p>
+                            </div>
+                        </div>
+                    ) : null}
 
                     {story.type === "audio" && story.audioFile && (
                         <div className="mb-8">

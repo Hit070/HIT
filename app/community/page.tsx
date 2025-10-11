@@ -249,6 +249,7 @@ export default function Community() {
                                                 <div className="flex-shrink-0 mr-6 text-center w-[80px]">
                                                     <div className="text-2xl font-bold text-[#353336]">{day}</div>
                                                     <div className="text-3xl font-bold text-[#353336]">{dayNumber}</div>
+                                                    <div className="text-2xl font-bold text-[#353336]">{event.time}</div>
                                                 </div>
 
                                                 {/* Event Details Section */}
@@ -338,6 +339,7 @@ export default function Community() {
                                                     <p className="text-sm text-gray-600 mb-2">
                                                         {event.date} • {event.location}
                                                     </p>
+                                                    <div className="text-sm text-gray-600">At {event.time}</div>
                                                     <p className="text-sm text-gray-500 mb-3 line-clamp-2">
                                                         {event.description}
                                                     </p>

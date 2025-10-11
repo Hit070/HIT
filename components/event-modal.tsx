@@ -78,6 +78,7 @@ export function EventModal({ event, isOpen, onClose }: EventModalProps) {
                                     />
                                 </svg>
                                 {event.location}
+                                <div className="text-gray-600 ml-1"> at {event.time}</div>
                             </div>
 
                             <p className="text-gray-700 leading-relaxed">{event.description}</p>

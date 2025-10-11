@@ -184,19 +184,43 @@ export default function BlogDetailsPage() {
                 </article>
 
                 {/* Media Content */}
-                {blog.type === "video" && blog.videoUrl && (
+                {blog.type === "video" && blog.videoUrl ? (
                     <div className="mb-8">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">Watch Video</h2>
                         <div className="aspect-video rounded-xl overflow-hidden">
-                            <iframe
-                                src={blog.videoUrl}
-                                className="w-full h-full"
-                                allowFullScreen
-                                title={blog.title}
-                            />
+                            {blog.videoUrl.includes('youtube.com') || blog.videoUrl.includes('youtu.be') || blog.videoUrl.includes('vimeo.com') ? (
+                                <iframe
+                                    src={
+                                        blog.videoUrl.includes('youtube.com') || blog.videoUrl.includes('youtu.be')
+                                            ? `https://www.youtube.com/embed/${blog.videoUrl.split('v=')[1]?.split('&')[0] || blog.videoUrl.split('youtu.be/')[1]?.split('?')[0]}`
+                                            : `https://player.vimeo.com/video/${blog.videoUrl.split('vimeo.com/')[1]?.split('?')[0]}`
+                                    }
+                                    className="w-full h-full"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    title={blog.title}
+                                />
+                            ) : (
+                                <video
+                                    controls
+                                    src={blog.videoUrl + '#t=0.1'}
+                                    className="w-full h-full"
+                                    poster={blog.thumbnail || undefined}
+                                >
+                                    Your browser does not support the video element.
+                                </video>
+                            )}
                         </div>
                     </div>
-                )}
+                ) : blog.type === "video" ? (
+                    <div className="mb-8">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Watch Video</h2>
+                        <div className="aspect-video rounded-xl bg-gray-200 flex items-center justify-center">
+                            <p className="text-gray-500">Video unavailable</p>
+                        </div>
+                    </div>
+                ) : null}
 
                 {blog.type === "audio" && blog.audioFile && (
                     <div className="mb-8">
