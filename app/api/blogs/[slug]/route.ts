@@ -1,7 +1,22 @@
-// Updated blogs/[slug] API route
+// app/api/blogs/[slug]/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { v2 as cloudinary } from "cloudinary";
 import { Blog } from "@/types";
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Extract public_id from Cloudinary URL
+const getPublicIdFromUrl = (url: string): string | null => {
+    if (!url.includes("res.cloudinary.com")) return null;
+    const parts = url.split("/upload/")[1]?.split(".")[0];
+    return parts ? parts.split("/").slice(1).join("/") : null;
+};
 
 // GET /api/blogs/[slug]
 export async function GET(request: Request, context: { params: Promise<{ slug: string }> }) {
@@ -24,7 +39,7 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
         if (data.isFeatured) {
             await prisma.blog.updateMany({
                 where: { slug: { not: params.slug } },
-                data: { isFeatured: false }
+                data: { isFeatured: false },
             });
         }
 
@@ -54,11 +69,39 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
 
 // DELETE /api/blogs/[slug]
 export async function DELETE(request: Request, context: { params: Promise<{ slug: string }> }) {
-    const params = await context.params;
     try {
+        const params = await context.params;
+        const blog = await prisma.blog.findUnique({ where: { slug: params.slug } });
+        if (!blog) {
+            return NextResponse.json({ error: "Blog not found" }, { status: 404 });
+        }
+
+        // Delete media from Cloudinary
+        const mediaFields = [
+            { url: blog.thumbnail, resourceType: "image" },
+            { url: blog.videoUrl, resourceType: "video" },
+            { url: blog.audioFile, resourceType: "video" },
+        ];
+
+        for (const { url, resourceType } of mediaFields) {
+            if (url && url.includes("res.cloudinary.com")) {
+                const publicId = getPublicIdFromUrl(url);
+                if (publicId) {
+                    try {
+                        await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+                        console.log(`[DELETE_BLOG_MEDIA] Deleted ${resourceType}: ${publicId}`);
+                    } catch (error) {
+                        console.error(`[DELETE_BLOG_MEDIA] Failed to delete ${resourceType} ${publicId}:`, error);
+                    }
+                }
+            }
+        }
+
+        // Delete blog from database
         await prisma.blog.delete({ where: { slug: params.slug } });
         return NextResponse.json({ message: "Blog deleted" });
     } catch (error) {
+        console.error("[DELETE_BLOG]", error);
         return NextResponse.json({ error: "Failed to delete blog" }, { status: 500 });
     }
 }

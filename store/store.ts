@@ -152,12 +152,23 @@ export const useStore = create<StoreState>((set, get) => ({
   },
 
   deleteProduct: async (id) => {
-    await fetch(`/api/products/${id}`, {
-      method: "DELETE",
-    });
-    set((state) => ({
-      products: state.products.filter((p) => p.id !== id),
-    }));
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete product");
+      }
+
+      set((state) => ({
+        products: state.products.filter((p) => p.id !== id),
+      }));
+    } catch (error) {
+      console.error("[DELETE_PRODUCT]", error);
+      throw error;
+    }
   },
 
   // Orders
@@ -1336,8 +1347,15 @@ export const useContentStore = create<ContentState>((set) => ({
 
   deleteBlog: async (slug) => {
     try {
-      const res = await fetch(`/api/blogs/${slug}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(`Failed to delete blog: ${res.statusText}`);
+      const res = await fetch(`/api/blogs/${slug}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete blog");
+      }
+
       set((state) => ({
         blogs: state.blogs.filter((b) => b.slug !== slug),
       }));
@@ -1349,8 +1367,15 @@ export const useContentStore = create<ContentState>((set) => ({
 
   deleteStory: async (slug) => {
     try {
-      const res = await fetch(`/api/stories/${slug}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(`Failed to delete story: ${res.statusText}`);
+      const res = await fetch(`/api/stories/${slug}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete story");
+      }
+
       set((state) => ({
         stories: state.stories.filter((s) => s.slug !== slug),
       }));
@@ -1439,8 +1464,15 @@ export const useEventStore = create<EventState>((set) => ({
 
   deleteEvent: async (slug) => {
     try {
-      const res = await fetch(`/api/events/${slug}`, { method: "DELETE" });
-      if (!res.ok) throw new Error(`Failed to delete event: ${res.statusText}`);
+      const res = await fetch(`/api/events/${slug}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete event");
+      }
+
       set((state) => ({
         events: state.events.filter((e) => e.slug !== slug),
       }));
