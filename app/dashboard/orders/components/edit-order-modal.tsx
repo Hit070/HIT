@@ -297,6 +297,7 @@ export function EditOrderModal({
         description: "Please fill in all customer details",
         variant: "destructive",
       });
+      setIsUpdating(false);
       return;
     }
 
@@ -306,6 +307,7 @@ export function EditOrderModal({
         description: "Please fill in all required address details",
         variant: "destructive",
       });
+      setIsUpdating(false);
       return;
     }
 
@@ -315,6 +317,7 @@ export function EditOrderModal({
         description: "Please ensure all items have a valid product",
         variant: "destructive",
       });
+      setIsUpdating(false);
       return;
     }
 
@@ -324,8 +327,31 @@ export function EditOrderModal({
         description: discountError,
         variant: "destructive",
       });
+      setIsUpdating(false);
       return;
     }
+
+    // Calculate subtotal for each item
+    const itemsWithSubtotal = items.map((item) => {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product) {
+        throw new Error(`Product ${item.productId} not found`);
+      }
+
+      const variant = item.variantId
+        ? product.variants?.find((v) => v.id === item.variantId) || null
+        : null;
+
+      const price = variant?.price ?? product.price ?? 0;
+      const itemSubtotal = price * item.quantity;
+
+      return {
+        productId: item.productId,
+        variantId: item.variantId || null,
+        quantity: item.quantity,
+        subtotal: itemSubtotal,
+      };
+    });
 
     const payload: Partial<Order> = {
       firstName,
@@ -338,12 +364,7 @@ export function EditOrderModal({
       postalCode,
       country,
       status: status || "PENDING",
-      items: items.map((item) => ({
-        productId: item.productId,
-        variantId: item.variantId || null,
-        quantity: item.quantity,
-
-      })),
+      items: itemsWithSubtotal,
       subtotal,
       shippingCost,
       total,
@@ -351,7 +372,12 @@ export function EditOrderModal({
       shippingOptionId: selectedShippingOptionId || null,
     };
 
+    // Only include paymentReference if it exists and has changed
+    // Don't include it at all if it hasn't changed to avoid the validation error
+    // The API will keep the existing value if paymentReference is undefined
+
     try {
+      console.log("[UPDATE_ORDER] Payload:", JSON.stringify(payload, null, 2));
       await onUpdateOrder(order.id, payload);
       await fetchOrders();
       onOpenChange(false);
@@ -360,7 +386,7 @@ export function EditOrderModal({
         description: `Order #${order.id} has been updated successfully`,
       });
     } catch (err) {
-      console.error("[UPDATE_ORDER]", err);
+      console.error("[UPDATE_ORDER] Full error:", err);
       toast({
         variant: "destructive",
         title: "Error",
@@ -686,11 +712,27 @@ export function EditOrderModal({
                     </div>
                   </div>
                 ))}
-                <div className="flex justify-end gap-4 text-sm font-medium">
-                  <div>Subtotal: ₦{subtotal.toFixed(2)}</div>
-                  {shippingCost > 0 && <div>Shipping: ₦{shippingCost.toFixed(2)}</div>}
-                  {discountAmount > 0 && <div>Discount: ₦{discountAmount.toFixed(2)}</div>}
-                  <div>Total: ₦{total.toFixed(2)}</div>
+                <div className="grid gap-2">
+                  <div className="flex justify-between">
+                    <span>Subtotal: </span>
+                    <span>{subtotal.toFixed(2)}</span>
+                  </div>
+                  {shippingCost > 0 && (
+                    <div className="flex justify-between">
+                      <span>Shipping: </span>
+                      <span>{shippingCost.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between">
+                      <span>Discount: </span>
+                      <span className="text-green-600">-₦{discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Total: </span>
+                    <span>₦{total.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
             )}

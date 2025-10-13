@@ -109,7 +109,6 @@ export default function AnalyticsPage() {
     setFilteredOrders(filtered);
   }, [timeRange, orders]);
 
-
   if (ordersLoading || productsLoading) {
     return (
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -574,7 +573,14 @@ export default function AnalyticsPage() {
                     {productPerformance.map((product) => (
                       <TableRow key={product.title}>
                         <TableCell className="font-medium">
-                          {product.title}
+                          <div className="flex items-center gap-2">
+                            {product.title}
+                            {product.title.includes('[Deleted') && (
+                              <Badge variant="outline" className="text-xs">
+                                Deleted
+                              </Badge>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           {product.sales}
@@ -698,10 +704,24 @@ export default function AnalyticsPage() {
                         {variantAnalytics.topVariantsByRevenue.map((variant, index) => (
                           <TableRow key={`${variant.productTitle}-${variant.variantName}-${index}`}>
                             <TableCell className="font-medium">
-                              {variant.productTitle}
+                              <div className="flex items-center gap-2">
+                                {variant.productTitle}
+                                {variant.productTitle.includes('[Deleted') && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Deleted
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell>
-                              {variant.variantName}
+                              <div className="flex items-center gap-2">
+                                {variant.variantName}
+                                {variant.variantName.includes('[Deleted') && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Deleted
+                                  </Badge>
+                                )}
+                              </div>
                             </TableCell>
                             <TableCell className="text-right">
                               {variant.totalSold}

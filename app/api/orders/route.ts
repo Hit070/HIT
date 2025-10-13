@@ -63,6 +63,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Order must include at least one item" }, { status: 400 });
         }
 
+        console.log("[ORDER_ITEMS_RECEIVED]", items);
+
         const orderItems: {
             product: { connect: { id: string } };
             variant?: { connect: { id: string } };
@@ -73,6 +75,7 @@ export async function POST(req: Request) {
         let calculatedSubtotal = 0;
 
         for (const item of items) {
+            console.log("[PROCESSING_ITEM]", { productId: item.productId, variantId: item.variantId, quantity: item.quantity });
             // require productId always for linking (variant must belong to product)
             if (!item.productId || !item.quantity || item.quantity <= 0) {
                 return NextResponse.json({ error: "Invalid item format" }, { status: 400 });
@@ -112,6 +115,8 @@ export async function POST(req: Request) {
                 subtotal: itemSubtotal,
             });
         }
+
+        console.log("[ORDER_ITEMS_TO_CREATE]", orderItems);
 
         if (providedSubtotal !== calculatedSubtotal) {
             return NextResponse.json({ error: "Provided subtotal does not match calculated subtotal" }, { status: 400 });
