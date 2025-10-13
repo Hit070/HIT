@@ -1,3 +1,5 @@
+// app/api/products/route.ts
+
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { ProductVariant } from "@prisma/client";
