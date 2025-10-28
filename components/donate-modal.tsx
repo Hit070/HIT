@@ -5,6 +5,13 @@ export default function DonationModal({ isOpen = false, onClose = () => { } }) {
 
     const donationOptions = [
         {
+            name: 'PayPal',
+            description: 'Donate securely via PayPal',
+            icon: CreditCard,
+            url: 'https://www.paypal.com/donate/?hosted_button_id=Z6N3YYXCE5PVY',
+            color: 'from-[#0070ba] to-[#1546a0]'
+        },
+        {
             name: 'Paystack',
             description: 'Secure payment via Paystack',
             icon: CreditCard,
