@@ -218,11 +218,11 @@ export default function Footer() {
                     FAQ
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link href="/stories" className="text-gray-300 hover:text-white transition-colors">
                     Store
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
 
