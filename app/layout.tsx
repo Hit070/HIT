@@ -21,7 +21,7 @@ const quicksand = Quicksand({
 
 export const metadata: Metadata = {
   title: "HIT - Tales",
-  description: "A comprehensive eCommerce admin dashboard",
+  description: "Discover powerful stories, connect with a vibrant community, and help us honor the voices of immigrant women everywhere.",
   icons: {
     icon: "/favicon.png",
   }
