@@ -193,72 +193,93 @@ export default function BlogPage() {
             )}
 
             <section className="px-4 py-16 max-w-[1440px] mx-auto">
-                <h2 className="text-4xl font-bold text-gray-900 mb-12">
-                    Recent Blogs
-                </h2>
+                {filteredBlogs.length > 0 && (
+                    <h2 className="text-4xl font-bold text-gray-900 mb-12">
+                        Recent Blogs
+                    </h2>
+                )}
+                {filteredBlogs.length === 0 ? (
+                    <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-12 flex flex-col items-center text-center">
+                        <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-tr from-[#fff1e6] to-[#fff7ed] mb-6">
+                            <CircleArrowRight className="w-8 h-8 text-primary" />
+                        </div>
+                        <h3 className="text-2xl font-semibold mb-2 text-gray-900">No blogs published yet</h3>
+                        <p className="text-gray-500 mb-6 max-w-xl">
+                            We don't have any published blog posts at the moment. Check back later for updates or consider contributing a post to share your story.
+                        </p>
+                        <div className="flex gap-3">
+                            <Link href="/home" className="inline-flex items-center px-5 py-3 bg-primary text-white rounded-full hover:bg-primary/80 transition-colors">
+                                Go to Homepage
+                            </Link>
+                            <Link href="/contact" className="inline-flex items-center px-5 py-3 border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition-colors">
+                                Contact us
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                        {otherBlogs.map((blog) => {
+                            const isTruncated = blog.summary && blog.summary.length > MAX_DESC_LENGTH
+                            const preview = isTruncated
+                                ? blog.summary.slice(0, MAX_DESC_LENGTH) + "..."
+                                : (blog.summary || '')
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                    {otherBlogs.map((blog) => {
-                        const isTruncated = blog.summary && blog.summary.length > MAX_DESC_LENGTH
-                        const preview = isTruncated
-                            ? blog.summary.slice(0, MAX_DESC_LENGTH) + "..."
-                            : (blog.summary || '')
+                            const color = getCategoryColor(blog.category)
 
-                        const color = getCategoryColor(blog.category)
-
-                        return (
-                            <Link
-                                key={blog.id}
-                                href={`/blog/${blog.slug}`}
-                                className="group cursor-pointer block"
-                            >
-                                <div className="rounded-2xl transition-shadow duration-300 overflow-hidden h-full">
-                                    <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-4">
-                                        <Image
-                                            width={500}
-                                            height={375}
-                                            src={blog.thumbnail || "/placeholder.svg"}
-                                            alt={blog.title || 'Blog post'}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <h3 className="text-2xl line-clamp-1 font-bold text-gray-900 leading-tight group-hover:text-[#bf5925] transition-colors">
-                                            {blog.title || 'Untitled'}
-                                        </h3>
-
-                                        <div className="flex items-center gap-3">
-                                            <span
-                                                className={`${color.text} ${color.border} ${color.bg} border px-3 py-1 rounded-full text-sm font-medium`}
-                                            >
-                                                {blog.category || 'Uncategorized'}
-                                            </span>
-                                            <span className="text-gray-500 text-sm">
-                                                {new Date(blog.dateCreated).toLocaleDateString("en-GB", {
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric",
-                                                })}
-                                            </span>
+                            return (
+                                <Link
+                                    key={blog.id}
+                                    href={`/blog/${blog.slug}`}
+                                    className="group cursor-pointer block"
+                                >
+                                    <div className="rounded-2xl transition-shadow duration-300 overflow-hidden h-full">
+                                        <div className="aspect-[4/3] rounded-2xl overflow-hidden mb-4">
+                                            <Image
+                                                width={500}
+                                                height={375}
+                                                src={blog.thumbnail || "/placeholder.svg"}
+                                                alt={blog.title || 'Blog post'}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                            />
                                         </div>
 
-                                        <p className="text-md text-gray-700 leading-relaxed">
-                                            {preview}
-                                        </p>
-                                        {isTruncated && (
-                                            <div className="mt-1">
-                                                <span className="text-blue-600 hover:underline text-sm">
-                                                    See more
+                                        <div className="space-y-3">
+                                            <h3 className="text-2xl line-clamp-1 font-bold text-gray-900 leading-tight group-hover:text-[#bf5925] transition-colors">
+                                                {blog.title || 'Untitled'}
+                                            </h3>
+
+                                            <div className="flex items-center gap-3">
+                                                <span
+                                                    className={`${color.text} ${color.border} ${color.bg} border px-3 py-1 rounded-full text-sm font-medium`}
+                                                >
+                                                    {blog.category || 'Uncategorized'}
+                                                </span>
+                                                <span className="text-gray-500 text-sm">
+                                                    {new Date(blog.dateCreated).toLocaleDateString("en-GB", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })}
                                                 </span>
                                             </div>
-                                        )}
+
+                                            <p className="text-md text-gray-700 leading-relaxed">
+                                                {preview}
+                                            </p>
+                                            {isTruncated && (
+                                                <div className="mt-1">
+                                                    <span className="text-blue-600 hover:underline text-sm">
+                                                        See more
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            </Link>
-                        )
-                    })}
-                </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
+                )}
 
                 <div className="text-center">
                     {hasMore ? (

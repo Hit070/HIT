@@ -194,64 +194,85 @@ export default function StoriesPage() {
             {/* Recent Stories Section */}
             <section className="px-4 py-16 mx-auto bg-gray-100">
                 <div className="max-w-[1440px] mx-auto">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-12">Recent Stories</h2>
+                    {filteredStories.length > 0 && (
+                        <h2 className="text-3xl font-bold text-gray-900 mb-12">Recent Stories</h2>
+                    )}
+                    {filteredStories.length === 0 ? (
+                        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm p-12 flex flex-col items-center text-center">
+                            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-tr from-[#fff1e6] to-[#fff7ed] mb-6">
+                                <ArrowRight className="w-8 h-8 text-primary" />
+                            </div>
+                            <h3 className="text-2xl font-semibold mb-2 text-gray-900">No stories available</h3>
+                            <p className="text-gray-500 mb-6 max-w-xl">
+                                There are no published stories right now. We're working on curating voices from the community — check back soon or share your story with us.
+                            </p>
+                            <div className="flex gap-3">
+                                <Link href="/home" className="inline-flex items-center px-5 py-3 bg-primary text-white rounded-full hover:bg-primary/80 transition-colors">
+                                    Visit Homepage
+                                </Link>
+                                <Link href="/contact" className="inline-flex items-center px-5 py-3 border border-gray-200 rounded-full text-gray-700 hover:bg-gray-50 transition-colors">
+                                    Share your story
+                                </Link>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                            {otherStories.map((story: Story) => {
+                                const isTruncated = story.summary && story.summary.length > MAX_DESC_LENGTH
+                                const preview = isTruncated
+                                    ? story.summary.slice(0, MAX_DESC_LENGTH) + "..."
+                                    : (story.summary || '')
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                        {otherStories.map((story: Story) => {
-                            const isTruncated = story.summary && story.summary.length > MAX_DESC_LENGTH
-                            const preview = isTruncated
-                                ? story.summary.slice(0, MAX_DESC_LENGTH) + "..."
-                                : (story.summary || '')
-
-                            return (
-                                <Link
-                                    key={story.id}
-                                    href={`/stories/${story.slug}`}
-                                    className="group cursor-pointer block"
-                                >
-                                    <div className="bg-white rounded-3xl hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-                                        <div className="p-4 rounded-3xl overflow-hidden">
-                                            <Image
-                                                width={500}
-                                                height={375}
-                                                src={story.thumbnail || "/placeholder.svg"}
-                                                alt={story.title}
-                                                className="w-full h-full rounded-3xl object-cover group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        </div>
-
-                                        <div className="p-6 space-y-3">
-                                            <h3 className="text-xl line-clamp-1 font-bold text-gray-900 leading-tight group-hover:text-[#bf5925] transition-colors">
-                                                {story.title || 'Untitled'}
-                                            </h3>
-
-                                            <p className="text-sm text-gray-700 leading-relaxed">
-                                                {preview}
-                                                {isTruncated && (
-                                                    <span className="text-blue-600 hover:underline text-sm"> See more</span>
-                                                )}
-                                            </p>
-
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-gray-500 text-sm"> {new Date(story.dateCreated).toLocaleDateString("en-GB", {
-                                                    day: "numeric",
-                                                    month: "long",
-                                                    year: "numeric",
-                                                })}</span>
-                                                <span className="text-gray-400 text-sm">By {story.author}</span>
+                                return (
+                                    <Link
+                                        key={story.id}
+                                        href={`/stories/${story.slug}`}
+                                        className="group cursor-pointer block"
+                                    >
+                                        <div className="bg-white rounded-3xl hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                                            <div className="p-4 rounded-3xl overflow-hidden">
+                                                <Image
+                                                    width={500}
+                                                    height={375}
+                                                    src={story.thumbnail || "/placeholder.svg"}
+                                                    alt={story.title}
+                                                    className="w-full h-full rounded-3xl object-cover group-hover:scale-105 transition-transform duration-300"
+                                                />
                                             </div>
 
-                                            <div className="flex justify-between items-center pt-2">
-                                                <div className="ml-auto p-2 bg-gray-100 rounded-full">
-                                                    <ArrowUpRight className="w-5 h-5 text-black group-hover:text-[#bf5925] transition-colors" />
+                                            <div className="p-6 space-y-3">
+                                                <h3 className="text-xl line-clamp-1 font-bold text-gray-900 leading-tight group-hover:text-[#bf5925] transition-colors">
+                                                    {story.title || 'Untitled'}
+                                                </h3>
+
+                                                <p className="text-sm text-gray-700 leading-relaxed">
+                                                    {preview}
+                                                    {isTruncated && (
+                                                        <span className="text-blue-600 hover:underline text-sm"> See more</span>
+                                                    )}
+                                                </p>
+
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-gray-500 text-sm"> {new Date(story.dateCreated).toLocaleDateString("en-GB", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })}</span>
+                                                    <span className="text-gray-400 text-sm">By {story.author}</span>
+                                                </div>
+
+                                                <div className="flex justify-between items-center pt-2">
+                                                    <div className="ml-auto p-2 bg-gray-100 rounded-full">
+                                                        <ArrowUpRight className="w-5 h-5 text-black group-hover:text-[#bf5925] transition-colors" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </Link>
-                            )
-                        })}
-                    </div>
+                                    </Link>
+                                )
+                            })}
+                        </div>
+                    )}
 
                     <div className="text-center">
                         {hasMore ? (
