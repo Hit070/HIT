@@ -520,26 +520,26 @@ export default function AboutPage() {
                 <div className="max-w-[1200px] mx-auto">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         {/* Left - Image */}
-                        <motion.div
-                            ref={charityRef}
+                        <div
+                            // ref={charityRef}
                             className="w-full"
-                            initial={{ opacity: 0, x: -100 }}
-                            animate={charityInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -100 }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
+                        // initial={{ opacity: 0, x: -100 }}
+                        // animate={charityInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -100 }}
+                        // transition={{ duration: 0.8, ease: "easeOut" }}
                         >
                             <img
                                 src="/woman-reading-to-child-charity.png"
                                 alt="Woman reading to child in charity setting"
                                 className="w-full h-auto rounded-[36px] object-cover"
                             />
-                        </motion.div>
+                        </div>
 
                         {/* Right - Content */}
-                        <motion.div
+                        <div
                             className=""
-                            initial={{ opacity: 0, x: 100 }}
-                            animate={charityInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
-                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                        // initial={{ opacity: 0, x: 100 }}
+                        // animate={charityInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
+                        // transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                         >
                             <h2 className="text-3xl md:text-4xl font-cormorant leading-tight text-black mb-6">
                                 Charitable Causes & Social Justice Campaigns
@@ -587,7 +587,7 @@ export default function AboutPage() {
                                     <p className="text-lg text-gray-700">Mutual aid initiatives</p>
                                 </div>
                             </div>
-                        </motion.div>
+                        </div>
                     </div>
                 </div>
             </section>
