@@ -451,23 +451,25 @@ function slateToHtml(value: Descendant[]): string {
         }
 
         const children = node.children.map(serialize).join('')
+        // If children is empty or just whitespace, use a non-breaking space to preserve spacing
+        const content = children.trim() === '' ? '&nbsp;' : children
         const align = node.align ? ` style="text-align: ${node.align}"` : ''
 
         switch (node.type) {
             case 'paragraph':
-                return `<p${align}>${children}</p>`
+                return `<p${align}>${content}</p>`
             case 'heading-one':
-                return `<h1${align}>${children}</h1>`
+                return `<h1${align}>${content}</h1>`
             case 'heading-two':
-                return `<h2${align}>${children}</h2>`
+                return `<h2${align}>${content}</h2>`
             case 'block-quote':
-                return `<blockquote${align}>${children}</blockquote>`
+                return `<blockquote${align}>${content}</blockquote>`
             case 'bulleted-list':
                 return `<ul>${children}</ul>`
             case 'numbered-list':
                 return `<ol>${children}</ol>`
             case 'list-item':
-                return `<li>${children}</li>`
+                return `<li>${content}</li>`
             default:
                 return children
         }
