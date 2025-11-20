@@ -273,20 +273,58 @@ export default function EditStoryPage() {
     }
   };
 
-  const handleVideoUrlChange = (url: string) => {
-    let embedUrl = ""
-    if (url.includes("youtube.com/watch?v=")) {
-      const videoId = url.split("v=")[1]?.split("&")[0]
-      embedUrl = `https://www.youtube.com/embed/${videoId}`
-    } else if (url.includes("youtu.be/")) {
-      const videoId = url.split("youtu.be/")[1]?.split("?")[0]
-      embedUrl = `https://www.youtube.com/embed/${videoId}`
-    } else if (url.includes("vimeo.com/")) {
-      const videoId = url.split("vimeo.com/")[1]?.split("?")[0]
-      embedUrl = `https://player.vimeo.com/video/${videoId}`
-    }
-    setFormData((prev) => ({ ...prev, videoUrl: url, videoPreview: embedUrl }))
-  }
+ const handleVideoUrlChange = (url: string) => {
+   const processVideoUrl = (url: string) => {
+     if (url.includes("youtube.com") || url.includes("youtu.be")) {
+       const videoId =
+         url.split("v=")[1]?.split("&")[0] ||
+         url.split("youtu.be/")[1]?.split("?")[0];
+       return {
+         embedUrl: `https://www.youtube.com/embed/${videoId}`,
+         platform: "youtube",
+       };
+     } else if (url.includes("vimeo.com")) {
+       const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+       return {
+         embedUrl: `https://player.vimeo.com/video/${videoId}`,
+         platform: "vimeo",
+       };
+     } else if (
+       url.includes("instagram.com/p/") ||
+       url.includes("instagram.com/reel/")
+     ) {
+       const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
+       if (match) {
+         return {
+           embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+           platform: "instagram",
+         };
+       }
+     } else if (url.includes("facebook.com") || url.includes("fb.watch")) {
+       const encodedUrl = encodeURIComponent(url);
+       return {
+         embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+         platform: "facebook",
+       };
+     } else if (url.includes("tiktok.com")) {
+       const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+       if (match) {
+         return {
+           embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+           platform: "tiktok",
+         };
+       }
+     }
+     return { embedUrl: "", platform: "upload" };
+   };
+
+   const { embedUrl } = processVideoUrl(url);
+   setFormData((prev) => ({
+     ...prev,
+     videoUrl: url,
+     videoPreview: embedUrl || url,
+   }));
+ };
 
   const handleSubmit = async (status: "published" | "draft") => {
     if (!user) {
@@ -360,7 +398,9 @@ export default function EditStoryPage() {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 className="w-full"
               />
             </div>
@@ -373,43 +413,69 @@ export default function EditStoryPage() {
               <Input
                 id="slug"
                 value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, slug: e.target.value })
+                }
                 placeholder="Enter story slug"
                 className="w-full"
-                disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                disabled={
+                  isSavingDraft ||
+                  isPublishing ||
+                  isUploadingThumbnail ||
+                  isUploadingAudio ||
+                  isUploadingVideo
+                }
               />
             </div>
 
             {/* Story Author */}
             <div>
-              <Label htmlFor="author" className="text-sm font-medium mb-2 block">
+              <Label
+                htmlFor="author"
+                className="text-sm font-medium mb-2 block"
+              >
                 Author
               </Label>
               <Input
                 id="author"
                 value={formData.author}
-                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, author: e.target.value })
+                }
                 className="w-full"
-                disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                disabled={
+                  isSavingDraft ||
+                  isPublishing ||
+                  isUploadingThumbnail ||
+                  isUploadingAudio ||
+                  isUploadingVideo
+                }
               />
             </div>
 
             {/* Story Summary */}
             <div>
-              <Label htmlFor="summary" className="text-sm font-medium mb-2 block">
+              <Label
+                htmlFor="summary"
+                className="text-sm font-medium mb-2 block"
+              >
                 Story Summary/Abstract
               </Label>
               <Textarea
                 id="summary"
                 value={formData.summary}
-                onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, summary: e.target.value })
+                }
                 className="w-full h-24 resize-none"
               />
             </div>
 
             {/* Upload Thumbnail */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">Upload Thumbnail</Label>
+              <Label className="text-sm font-medium mb-2 block">
+                Upload Thumbnail
+              </Label>
               {formData.thumbnail ? (
                 <div className="mb-4">
                   <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
@@ -422,8 +488,16 @@ export default function EditStoryPage() {
                       variant="destructive"
                       size="sm"
                       className="absolute top-1 right-1 bg-red-500 hover:bg-red-600"
-                      onClick={() => setFormData({ ...formData, thumbnail: "" })}
-                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                      onClick={() =>
+                        setFormData({ ...formData, thumbnail: "" })
+                      }
+                      disabled={
+                        isSavingDraft ||
+                        isPublishing ||
+                        isUploadingThumbnail ||
+                        isUploadingAudio ||
+                        isUploadingVideo
+                      }
                     >
                       ×
                     </Button>
@@ -433,15 +507,24 @@ export default function EditStoryPage() {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-500 mb-2">
-                    Upload your files, JPG or PNG format, we recommend 1024 x 1024
+                    Upload your files, JPG or PNG format, we recommend 1024 x
+                    1024
                   </p>
-                  <p className="text-xs text-gray-400 mb-4">Drag file or browse</p>
+                  <p className="text-xs text-gray-400 mb-4">
+                    Drag file or browse
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"
                     className="bg-app-primary text-white border-app-primary hover:bg-orange-600"
                     onClick={handleFileUpload}
-                    disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                    disabled={
+                      isSavingDraft ||
+                      isPublishing ||
+                      isUploadingThumbnail ||
+                      isUploadingAudio ||
+                      isUploadingVideo
+                    }
                   >
                     {isUploadingThumbnail ? "Uploading..." : "Browse Files"}
                   </Button>
@@ -459,11 +542,24 @@ export default function EditStoryPage() {
 
             {/* Story Type */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">Story Type</Label>
+              <Label className="text-sm font-medium mb-2 block">
+                Story Type
+              </Label>
               <Select
                 value={formData.type}
-                onValueChange={(value: string) => setFormData({ ...formData, type: value as "text" | "video" | "audio" })}
-                disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                onValueChange={(value: string) =>
+                  setFormData({
+                    ...formData,
+                    type: value as "text" | "video" | "audio",
+                  })
+                }
+                disabled={
+                  isSavingDraft ||
+                  isPublishing ||
+                  isUploadingThumbnail ||
+                  isUploadingAudio ||
+                  isUploadingVideo
+                }
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -479,7 +575,10 @@ export default function EditStoryPage() {
             {/* Conditional Video URL Input */}
             {formData.type === "video" && (
               <div>
-                <Label htmlFor="videoUrl" className="text-sm font-medium text-gray-700 mb-2 block">
+                <Label
+                  htmlFor="videoUrl"
+                  className="text-sm font-medium text-gray-700 mb-2 block"
+                >
                   Video URL or Upload
                 </Label>
                 <div className="flex gap-2">
@@ -487,16 +586,34 @@ export default function EditStoryPage() {
                     id="videoUrl"
                     value={formData.videoUrl}
                     onChange={(e) => handleVideoUrlChange(e.target.value)}
-                    placeholder="Enter YouTube or Vimeo URL, or upload below"
+                    placeholder="Enter YouTube, Vimeo, Instagram, Facebook, or TikTok URL, or upload below"
                     className="flex-1"
-                    disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                    disabled={
+                      isSavingDraft ||
+                      isPublishing ||
+                      isUploadingThumbnail ||
+                      isUploadingAudio ||
+                      isUploadingVideo
+                    }
                   />
                   {formData.videoUrl && (
                     <Button
                       variant="destructive"
-                      onClick={() => setFormData({ ...formData, videoUrl: "", videoPreview: "" })}
+                      onClick={() =>
+                        setFormData({
+                          ...formData,
+                          videoUrl: "",
+                          videoPreview: "",
+                        })
+                      }
                       className="bg-red-500 hover:bg-red-600"
-                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                      disabled={
+                        isSavingDraft ||
+                        isPublishing ||
+                        isUploadingThumbnail ||
+                        isUploadingAudio ||
+                        isUploadingVideo
+                      }
                     >
                       Remove
                     </Button>
@@ -516,9 +633,17 @@ export default function EditStoryPage() {
                       size="sm"
                       className="mt-2 bg-app-primary text-white border-app-primary hover:bg-orange-600"
                       onClick={handleVideoUpload}
-                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                      disabled={
+                        isSavingDraft ||
+                        isPublishing ||
+                        isUploadingThumbnail ||
+                        isUploadingAudio ||
+                        isUploadingVideo
+                      }
                     >
-                      {isUploadingVideo ? `Uploading... ${uploadProgress}%` : "Browse Files"}
+                      {isUploadingVideo
+                        ? `Uploading... ${uploadProgress}%`
+                        : "Browse Files"}
                     </Button>
                     <input
                       ref={videoInputRef}
@@ -546,33 +671,145 @@ export default function EditStoryPage() {
                   </div>
                 </div>
 
-                {/* Show preview based on whether it's uploaded video or embedded URL */}
+                {/* Video Preview */}
                 {formData.videoUrl && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <Play className="w-4 h-4" />
                       <span className="text-sm font-medium">Video Preview</span>
                     </div>
-                    <div className="aspect-video bg-gray-200 rounded overflow-hidden">
-                      {formData.videoPreview && (formData.videoPreview.includes('youtube.com') || formData.videoPreview.includes('vimeo.com')) ? (
-                        <iframe
-                          src={formData.videoPreview}
-                          className="w-full h-full"
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          title="Video preview"
-                        />
-                      ) : (
-                        <video
-                          controls
-                          src={formData.videoUrl + '#t=0.1'}
-                          className="w-full h-full"
-                        >
-                          Your browser does not support the video element.
-                        </video>
-                      )}
-                    </div>
+                    {(() => {
+                      const processVideoUrl = (url: string) => {
+                        if (
+                          url.includes("youtube.com") ||
+                          url.includes("youtu.be")
+                        ) {
+                          const videoId =
+                            url.split("v=")[1]?.split("&")[0] ||
+                            url.split("youtu.be/")[1]?.split("?")[0];
+                          return {
+                            embedUrl: `https://www.youtube.com/embed/${videoId}`,
+                            platform: "youtube",
+                          };
+                        } else if (url.includes("vimeo.com")) {
+                          const videoId = url
+                            .split("vimeo.com/")[1]
+                            ?.split("?")[0];
+                          return {
+                            embedUrl: `https://player.vimeo.com/video/${videoId}`,
+                            platform: "vimeo",
+                          };
+                        } else if (
+                          url.includes("instagram.com/p/") ||
+                          url.includes("instagram.com/reel/")
+                        ) {
+                          const match = url.match(
+                            /\/(p|reel)\/([A-Za-z0-9_-]+)/
+                          );
+                          if (match) {
+                            return {
+                              embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+                              platform: "instagram",
+                            };
+                          }
+                        } else if (
+                          url.includes("facebook.com") ||
+                          url.includes("fb.watch")
+                        ) {
+                          const encodedUrl = encodeURIComponent(url);
+                          return {
+                            embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+                            platform: "facebook",
+                          };
+                        } else if (url.includes("tiktok.com")) {
+                          const match = url.match(
+                            /tiktok\.com\/.*\/video\/(\d+)/
+                          );
+                          if (match) {
+                            return {
+                              embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+                              platform: "tiktok",
+                            };
+                          }
+                        }
+                        return { embedUrl: "", platform: "upload" };
+                      };
+
+                      const { embedUrl, platform } = processVideoUrl(
+                        formData.videoUrl
+                      );
+
+                      const getContainerClass = () => {
+                        switch (platform) {
+                          case "instagram":
+                            return "w-full max-w-[540px] mx-auto rounded overflow-hidden";
+                          case "tiktok":
+                            return "w-full max-w-[325px] mx-auto rounded overflow-hidden";
+                          case "facebook":
+                          case "youtube":
+                          case "vimeo":
+                            return "aspect-video bg-gray-200 rounded overflow-hidden";
+                          default:
+                            return "aspect-video bg-gray-200 rounded overflow-hidden";
+                        }
+                      };
+
+                      const getIframeClass = () => {
+                        if (platform === "instagram") return "w-full h-[600px]";
+                        if (platform === "tiktok") return "w-full h-[740px]";
+                        return "w-full h-full";
+                      };
+
+                      return (
+                        <div className={getContainerClass()}>
+                          {platform === "youtube" || platform === "vimeo" ? (
+                            <iframe
+                              src={embedUrl}
+                              className={getIframeClass()}
+                              frameBorder="0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              title="Video preview"
+                            />
+                          ) : platform === "instagram" ? (
+                            <iframe
+                              src={embedUrl}
+                              className={getIframeClass()}
+                              frameBorder="0"
+                              scrolling="no"
+                              allowTransparency
+                              title="Video preview"
+                            />
+                          ) : platform === "facebook" ? (
+                            <iframe
+                              src={embedUrl}
+                              className={getIframeClass()}
+                              frameBorder="0"
+                              scrolling="no"
+                              allowFullScreen
+                              title="Video preview"
+                            />
+                          ) : platform === "tiktok" ? (
+                            <iframe
+                              src={embedUrl}
+                              className={getIframeClass()}
+                              frameBorder="0"
+                              scrolling="no"
+                              allowFullScreen
+                              title="Video preview"
+                            />
+                          ) : platform === "upload" ? (
+                            <video
+                              controls
+                              src={formData.videoUrl + "#t=0.1"}
+                              className="w-full h-full"
+                            >
+                              Your browser does not support the video element.
+                            </video>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -581,17 +818,29 @@ export default function EditStoryPage() {
             {/* Conditional Audio Upload */}
             {formData.type === "audio" && (
               <div>
-                <Label className="text-sm font-medium text-gray-700 mb-2 block">Upload Audio File</Label>
+                <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Upload Audio File
+                </Label>
                 {formData.audioFile ? (
                   <div className="border border-gray-200 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-medium">Audio File Attached</span>
+                      <span className="text-sm font-medium">
+                        Audio File Attached
+                      </span>
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => setFormData({ ...formData, audioFile: "" })}
+                        onClick={() =>
+                          setFormData({ ...formData, audioFile: "" })
+                        }
                         className="bg-red-500 hover:bg-red-600"
-                        disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                        disabled={
+                          isSavingDraft ||
+                          isPublishing ||
+                          isUploadingThumbnail ||
+                          isUploadingAudio ||
+                          isUploadingVideo
+                        }
                       >
                         Remove
                       </Button>
@@ -604,13 +853,21 @@ export default function EditStoryPage() {
                 ) : (
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                     <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Upload audio file (MP3, WAV)</p>
+                    <p className="text-sm text-gray-500">
+                      Upload audio file (MP3, WAV)
+                    </p>
                     <Button
                       variant="outline"
                       size="sm"
                       className="mt-2 bg-app-primary text-white border-app-primary hover:bg-orange-600"
                       onClick={handleAudioUpload}
-                      disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                      disabled={
+                        isSavingDraft ||
+                        isPublishing ||
+                        isUploadingThumbnail ||
+                        isUploadingAudio ||
+                        isUploadingVideo
+                      }
                     >
                       {isUploadingAudio ? "Uploading..." : "Browse Files"}
                     </Button>
@@ -629,13 +886,21 @@ export default function EditStoryPage() {
 
             {/* Rich Text Editor */}
             <div>
-              <Label className="text-sm font-medium mb-2 block">Story Content</Label>
+              <Label className="text-sm font-medium mb-2 block">
+                Story Content
+              </Label>
               <div className="border border-gray-300 rounded-lg">
                 <RichTextEditor
                   content={formData.content}
                   onChange={handleContentChange}
                   placeholder="Write your story content here..."
-                  disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                  disabled={
+                    isSavingDraft ||
+                    isPublishing ||
+                    isUploadingThumbnail ||
+                    isUploadingAudio ||
+                    isUploadingVideo
+                  }
                 />
               </div>
             </div>
@@ -645,14 +910,26 @@ export default function EditStoryPage() {
               <Button
                 variant="outline"
                 onClick={() => handleSubmit("draft")}
-                disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                disabled={
+                  isSavingDraft ||
+                  isPublishing ||
+                  isUploadingThumbnail ||
+                  isUploadingAudio ||
+                  isUploadingVideo
+                }
               >
                 {isSavingDraft ? "Saving..." : "Save as draft"}
               </Button>
               <Button
                 onClick={() => handleSubmit("published")}
                 className="bg-app-primary hover:bg-primary/90"
-                disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+                disabled={
+                  isSavingDraft ||
+                  isPublishing ||
+                  isUploadingThumbnail ||
+                  isUploadingAudio ||
+                  isUploadingVideo
+                }
               >
                 {isPublishing ? "Updating..." : "Update and Publish"}
               </Button>
@@ -661,6 +938,6 @@ export default function EditStoryPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 

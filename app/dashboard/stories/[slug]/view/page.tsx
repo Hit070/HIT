@@ -64,11 +64,15 @@ export default function ViewStoryPage() {
               </Button>
             </Link>
             <Link href={`/dashboard/stories/${story.slug}/edit`}>
-              <Button className="bg-primary hover:bg-primary/90">Edit Story</Button>
+              <Button className="bg-primary hover:bg-primary/90">
+                Edit Story
+              </Button>
             </Link>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{story.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            {story.title}
+          </h1>
           {/* Story Summary */}
           <div className="mb-8">
             {/* <h2 className="text-2xl font-bold mb-4">Summary</h2> */}
@@ -85,12 +89,17 @@ export default function ViewStoryPage() {
             >
               {story.status.charAt(0).toUpperCase() + story.status.slice(1)}
             </Badge>
-            <span className="text-gray-500"> {new Date(story.dateCreated).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}</span>
-            <span className="text-gray-500">Type: {story.type.charAt(0).toUpperCase() + story.type.slice(1)}</span>
+            <span className="text-gray-500">
+              {" "}
+              {new Date(story.dateCreated).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+            <span className="text-gray-500">
+              Type: {story.type.charAt(0).toUpperCase() + story.type.slice(1)}
+            </span>
           </div>
 
           {/* Hero Image */}
@@ -108,31 +117,128 @@ export default function ViewStoryPage() {
 
           {/* Video Embed */}
           {story.type === "video" && story.videoUrl ? (
-            <div className="aspect-video rounded-2xl overflow-hidden mb-8">
-              {story.videoUrl.includes('youtube.com') || story.videoUrl.includes('youtu.be') || story.videoUrl.includes('vimeo.com') ? (
-                <iframe
-                  src={
-                    story.videoUrl.includes('youtube.com') || story.videoUrl.includes('youtu.be')
-                      ? `https://www.youtube.com/embed/${story.videoUrl.split('v=')[1]?.split('&')[0] || story.videoUrl.split('youtu.be/')[1]?.split('?')[0]}`
-                      : `https://player.vimeo.com/video/${story.videoUrl.split('vimeo.com/')[1]?.split('?')[0]}`
+            (() => {
+              const processVideoUrl = (url: string) => {
+                if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                  const videoId =
+                    url.split("v=")[1]?.split("&")[0] ||
+                    url.split("youtu.be/")[1]?.split("?")[0];
+                  return {
+                    embedUrl: `https://www.youtube.com/embed/${videoId}`,
+                    platform: "youtube",
+                  };
+                } else if (url.includes("vimeo.com")) {
+                  const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+                  return {
+                    embedUrl: `https://player.vimeo.com/video/${videoId}`,
+                    platform: "vimeo",
+                  };
+                } else if (
+                  url.includes("instagram.com/p/") ||
+                  url.includes("instagram.com/reel/")
+                ) {
+                  const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
+                  if (match) {
+                    return {
+                      embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+                      platform: "instagram",
+                    };
                   }
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={story.title}
-                />
-              ) : (
-                <video
-                  controls
-                  src={story.videoUrl + '#t=0.1'}
-                  className="w-full h-full"
-                  poster={story.thumbnail || undefined}
-                >
-                  Your browser does not support the video element.
-                </video>
-              )}
-            </div>
+                } else if (
+                  url.includes("facebook.com") ||
+                  url.includes("fb.watch")
+                ) {
+                  const encodedUrl = encodeURIComponent(url);
+                  return {
+                    embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+                    platform: "facebook",
+                  };
+                } else if (url.includes("tiktok.com")) {
+                  const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+                  if (match) {
+                    return {
+                      embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+                      platform: "tiktok",
+                    };
+                  }
+                }
+                return { embedUrl: "", platform: "upload" };
+              };
+
+              const { embedUrl, platform } = processVideoUrl(story.videoUrl);
+
+              const getContainerClass = () => {
+                switch (platform) {
+                  case "instagram":
+                    return "w-full max-w-[540px] mx-auto rounded-2xl overflow-hidden mb-8";
+                  case "tiktok":
+                    return "w-full max-w-[325px] mx-auto rounded-2xl overflow-hidden mb-8";
+                  case "facebook":
+                  case "youtube":
+                  case "vimeo":
+                    return "aspect-video rounded-2xl overflow-hidden mb-8";
+                  default:
+                    return "aspect-video rounded-2xl overflow-hidden mb-8";
+                }
+              };
+
+              const getIframeClass = () => {
+                if (platform === "instagram") return "w-full h-[600px]";
+                if (platform === "tiktok") return "w-full h-[740px]";
+                return "w-full h-full";
+              };
+
+              return (
+                <div className={getContainerClass()}>
+                  {platform === "youtube" || platform === "vimeo" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={story.title}
+                    />
+                  ) : platform === "instagram" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      scrolling="no"
+                      allowTransparency
+                      title={story.title}
+                    />
+                  ) : platform === "facebook" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      scrolling="no"
+                      allowFullScreen
+                      title={story.title}
+                    />
+                  ) : platform === "tiktok" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      scrolling="no"
+                      allowFullScreen
+                      title={story.title}
+                    />
+                  ) : (
+                    <video
+                      controls
+                      src={story.videoUrl + "#t=0.1"}
+                      className="w-full h-full"
+                      poster={story.thumbnail || undefined}
+                    >
+                      Your browser does not support the video element.
+                    </video>
+                  )}
+                </div>
+              );
+            })()
           ) : story.type === "video" ? (
             <div className="aspect-video rounded-2xl bg-gray-200 flex items-center justify-center mb-8">
               <p className="text-gray-500">Video unavailable</p>
@@ -159,5 +265,5 @@ export default function ViewStoryPage() {
         </article>
       </main>
     </div>
-  )
+  );
 }

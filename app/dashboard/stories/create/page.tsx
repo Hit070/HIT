@@ -42,23 +42,55 @@ export default function CreateStoryPage() {
   const videoInputRef = useRef<HTMLInputElement>(null)
 
   const handleVideoUrlChange = (url: string) => {
-    setVideoUrl(url)
+    setVideoUrl(url);
 
-    // Generate preview for common video platforms
-    let embedUrl = ""
-    if (url.includes("youtube.com/watch?v=")) {
-      const videoId = url.split("v=")[1]?.split("&")[0]
-      embedUrl = `https://www.youtube.com/embed/${videoId}`
-    } else if (url.includes("youtu.be/")) {
-      const videoId = url.split("youtu.be/")[1]?.split("?")[0]
-      embedUrl = `https://www.youtube.com/embed/${videoId}`
-    } else if (url.includes("vimeo.com/")) {
-      const videoId = url.split("vimeo.com/")[1]?.split("?")[0]
-      embedUrl = `https://player.vimeo.com/video/${videoId}`
-    }
+    const processVideoUrl = (url: string) => {
+      if (url.includes("youtube.com") || url.includes("youtu.be")) {
+        const videoId =
+          url.split("v=")[1]?.split("&")[0] ||
+          url.split("youtu.be/")[1]?.split("?")[0];
+        return {
+          embedUrl: `https://www.youtube.com/embed/${videoId}`,
+          platform: "youtube",
+        };
+      } else if (url.includes("vimeo.com")) {
+        const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+        return {
+          embedUrl: `https://player.vimeo.com/video/${videoId}`,
+          platform: "vimeo",
+        };
+      } else if (
+        url.includes("instagram.com/p/") ||
+        url.includes("instagram.com/reel/")
+      ) {
+        const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
+        if (match) {
+          return {
+            embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+            platform: "instagram",
+          };
+        }
+      } else if (url.includes("facebook.com") || url.includes("fb.watch")) {
+        const encodedUrl = encodeURIComponent(url);
+        return {
+          embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+          platform: "facebook",
+        };
+      } else if (url.includes("tiktok.com")) {
+        const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+        if (match) {
+          return {
+            embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+            platform: "tiktok",
+          };
+        }
+      }
+      return { embedUrl: "", platform: "upload" };
+    };
 
-    setVideoPreview(embedUrl)
-  }
+    const { embedUrl } = processVideoUrl(url);
+    setVideoPreview(embedUrl || url);
+  };
 
   const handleFileUpload = () => {
     fileInputRef.current?.click()
@@ -302,7 +334,13 @@ export default function CreateStoryPage() {
             onChange={(e) => setAuthor(e.target.value)}
             placeholder="Enter author name"
             className="text-base"
-            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
+            disabled={
+              isUploadingVideo ||
+              isUploadingAudio ||
+              isUploadingThumbnail ||
+              isSavingDraft ||
+              isPublishing
+            }
           />
         </div>
 
@@ -314,7 +352,13 @@ export default function CreateStoryPage() {
             onChange={(e) => setSummary(e.target.value)}
             placeholder="Enter story summary"
             className="min-h-[100px] text-base"
-            disabled={isUploadingAudio || isUploadingVideo || isUploadingThumbnail || isSavingDraft || isPublishing}
+            disabled={
+              isUploadingAudio ||
+              isUploadingVideo ||
+              isUploadingThumbnail ||
+              isSavingDraft ||
+              isPublishing
+            }
           />
         </div>
 
@@ -327,14 +371,21 @@ export default function CreateStoryPage() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  Upload your files. PNG or JPG format, we recommend 1200x630 px.
+                  Upload your files. PNG or JPG format, we recommend 1200x630
+                  px.
                 </p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleFileUpload}
                   className="bg-app-primary text-primary-foreground hover:bg-primary/90"
-                  disabled={isUploadingThumbnail || isSavingDraft || isPublishing || isUploadingAudio || isUploadingVideo}
+                  disabled={
+                    isUploadingThumbnail ||
+                    isSavingDraft ||
+                    isPublishing ||
+                    isUploadingAudio ||
+                    isUploadingVideo
+                  }
                 >
                   {isUploadingThumbnail ? "Uploading..." : "Browse Files"}
                 </Button>
@@ -348,7 +399,11 @@ export default function CreateStoryPage() {
                 />
               </div>
               {thumbnail && (
-                <img src={thumbnail} alt="Thumbnail preview" className="mt-4 h-24 w-24 object-cover rounded" />
+                <img
+                  src={thumbnail}
+                  alt="Thumbnail preview"
+                  className="mt-4 h-24 w-24 object-cover rounded"
+                />
               )}
             </div>
           </div>
@@ -358,8 +413,16 @@ export default function CreateStoryPage() {
           <Label htmlFor="story-type">Story Type</Label>
           <Select
             value={storyType}
-            onValueChange={(value: string) => setStoryType(value as "text" | "video" | "audio")}
-            disabled={isUploadingAudio || isUploadingVideo || isUploadingThumbnail || isSavingDraft || isPublishing}
+            onValueChange={(value: string) =>
+              setStoryType(value as "text" | "video" | "audio")
+            }
+            disabled={
+              isUploadingAudio ||
+              isUploadingVideo ||
+              isUploadingThumbnail ||
+              isSavingDraft ||
+              isPublishing
+            }
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -372,7 +435,7 @@ export default function CreateStoryPage() {
           </Select>
         </div>
 
-        {storyType === "video" && ( // Use storyType for stories page
+        {storyType === "video" && (
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="video-url">Video URL or Upload</Label>
@@ -380,9 +443,14 @@ export default function CreateStoryPage() {
                 id="video-url"
                 value={videoUrl}
                 onChange={(e) => handleVideoUrlChange(e.target.value)}
-                placeholder="Enter YouTube or Vimeo URL, or upload a video below"
+                placeholder="Enter YouTube, Vimeo, Instagram, Facebook, or TikTok URL, or upload a video below"
                 className="text-base"
-                disabled={isUploadingAudio || isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingVideo}
+                disabled={
+                  isUploadingVideo ||
+                  isUploadingAudio ||
+                  isSavingDraft ||
+                  isPublishing
+                }
               />
             </div>
 
@@ -406,9 +474,16 @@ export default function CreateStoryPage() {
                       size="sm"
                       onClick={handleVideoUpload}
                       className="bg-primary text-primary-foreground hover:bg-primary/90"
-                      disabled={isUploadingVideo || isUploadingAudio || isSavingDraft || isPublishing}
+                      disabled={
+                        isUploadingVideo ||
+                        isUploadingAudio ||
+                        isSavingDraft ||
+                        isPublishing
+                      }
                     >
-                      {isUploadingVideo ? `Uploading... ${uploadProgress}%` : "Browse Files"}
+                      {isUploadingVideo
+                        ? `Uploading... ${uploadProgress}%`
+                        : "Browse Files"}
                     </Button>
                     <input
                       ref={videoInputRef}
@@ -434,35 +509,140 @@ export default function CreateStoryPage() {
                       </p>
                     </div>
                   )}
-
-                  {videoFile && (
-                    <div className="mt-4 w-full max-w-md">
-                      <p className="text-sm text-muted-foreground mb-2">Uploaded video:</p>
-                      <video
-                        controls
-                        src={videoFile}
-                        className="w-full rounded-lg"
-                      >
-                        Your browser does not support the video element.
-                      </video>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
 
-            {/* Preview for URL-based videos (YouTube/Vimeo) */}
-            {videoPreview && !videoFile && (
+            {/* Video Preview - Shows for both URL and uploaded videos */}
+            {(videoUrl || videoFile) && (
               <div className="space-y-2">
                 <Label>Video Preview</Label>
-                <div className="aspect-video rounded-lg overflow-hidden border">
-                  <iframe
-                    title="video-preview"
-                    src={videoPreview}
-                    className="w-full h-full"
-                    allowFullScreen
-                  />
-                </div>
+                {(() => {
+                  const processVideoUrl = (url: string) => {
+                    if (
+                      url.includes("youtube.com") ||
+                      url.includes("youtu.be")
+                    ) {
+                      const videoId =
+                        url.split("v=")[1]?.split("&")[0] ||
+                        url.split("youtu.be/")[1]?.split("?")[0];
+                      return {
+                        embedUrl: `https://www.youtube.com/embed/${videoId}`,
+                        platform: "youtube",
+                      };
+                    } else if (url.includes("vimeo.com")) {
+                      const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+                      return {
+                        embedUrl: `https://player.vimeo.com/video/${videoId}`,
+                        platform: "vimeo",
+                      };
+                    } else if (
+                      url.includes("instagram.com/p/") ||
+                      url.includes("instagram.com/reel/")
+                    ) {
+                      const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
+                      if (match) {
+                        return {
+                          embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+                          platform: "instagram",
+                        };
+                      }
+                    } else if (
+                      url.includes("facebook.com") ||
+                      url.includes("fb.watch")
+                    ) {
+                      const encodedUrl = encodeURIComponent(url);
+                      return {
+                        embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+                        platform: "facebook",
+                      };
+                    } else if (url.includes("tiktok.com")) {
+                      const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+                      if (match) {
+                        return {
+                          embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+                          platform: "tiktok",
+                        };
+                      }
+                    }
+                    return { embedUrl: "", platform: "upload" };
+                  };
+
+                  // Use videoFile if available, otherwise use videoUrl
+                  const urlToProcess = videoFile || videoUrl;
+                  const { embedUrl, platform } = processVideoUrl(urlToProcess);
+
+                  const getContainerClass = () => {
+                    switch (platform) {
+                      case "instagram":
+                        return "w-full max-w-[540px] mx-auto rounded-lg overflow-hidden border";
+                      case "tiktok":
+                        return "w-full max-w-[325px] mx-auto rounded-lg overflow-hidden border";
+                      case "facebook":
+                      case "youtube":
+                      case "vimeo":
+                        return "aspect-video rounded-lg overflow-hidden border";
+                      default:
+                        return "aspect-video rounded-lg overflow-hidden border";
+                    }
+                  };
+
+                  const getIframeClass = () => {
+                    if (platform === "instagram") return "w-full h-[600px]";
+                    if (platform === "tiktok") return "w-full h-[740px]";
+                    return "w-full h-full";
+                  };
+
+                  return (
+                    <div className={getContainerClass()}>
+                      {platform === "youtube" || platform === "vimeo" ? (
+                        <iframe
+                          title="video-preview"
+                          src={embedUrl}
+                          className={getIframeClass()}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : platform === "instagram" ? (
+                        <iframe
+                          title="video-preview"
+                          src={embedUrl}
+                          className={getIframeClass()}
+                          frameBorder="0"
+                          scrolling="no"
+                          allowTransparency
+                        />
+                      ) : platform === "facebook" ? (
+                        <iframe
+                          title="video-preview"
+                          src={embedUrl}
+                          className={getIframeClass()}
+                          frameBorder="0"
+                          scrolling="no"
+                          allowFullScreen
+                        />
+                      ) : platform === "tiktok" ? (
+                        <iframe
+                          title="video-preview"
+                          src={embedUrl}
+                          className={getIframeClass()}
+                          frameBorder="0"
+                          scrolling="no"
+                          allowFullScreen
+                        />
+                      ) : platform === "upload" && videoFile ? (
+                        <video
+                          controls
+                          src={videoFile}
+                          className="w-full h-full"
+                        >
+                          Your browser does not support the video element.
+                        </video>
+                      ) : null}
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
@@ -477,13 +657,21 @@ export default function CreateStoryPage() {
                   <Upload className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Upload audio file (MP3, WAV, etc.)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Upload audio file (MP3, WAV, etc.)
+                  </p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleAudioUpload}
                     className="bg-primary text-primary-foreground hover:bg-primary/90"
-                    disabled={isUploadingAudio || isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingVideo}
+                    disabled={
+                      isUploadingAudio ||
+                      isSavingDraft ||
+                      isPublishing ||
+                      isUploadingThumbnail ||
+                      isUploadingVideo
+                    }
                   >
                     {isUploadingAudio ? "Uploading..." : "Browse Files"}
                   </Button>
@@ -497,7 +685,11 @@ export default function CreateStoryPage() {
                   />
                 </div>
                 {audioFile && (
-                  <audio controls src={audioFile} className="mt-4 w-full max-w-md">
+                  <audio
+                    controls
+                    src={audioFile}
+                    className="mt-4 w-full max-w-md"
+                  >
                     Your browser does not support the audio element.
                   </audio>
                 )}
@@ -512,7 +704,13 @@ export default function CreateStoryPage() {
             content={content}
             onChange={setContent}
             placeholder="Write your story content here..."
-            disabled={isUploadingVideo || isUploadingAudio || isUploadingThumbnail || isSavingDraft || isPublishing}
+            disabled={
+              isUploadingVideo ||
+              isUploadingAudio ||
+              isUploadingThumbnail ||
+              isSavingDraft ||
+              isPublishing
+            }
           />
         </div>
 
@@ -521,7 +719,13 @@ export default function CreateStoryPage() {
             variant="outline"
             size="lg"
             onClick={() => handleSubmit("draft")}
-            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+            disabled={
+              isSavingDraft ||
+              isPublishing ||
+              isUploadingThumbnail ||
+              isUploadingAudio ||
+              isUploadingVideo
+            }
           >
             {isSavingDraft ? "Saving..." : "Save as draft"}
           </Button>
@@ -529,12 +733,18 @@ export default function CreateStoryPage() {
             size="lg"
             className="bg-app-primary hover:bg-primary/90"
             onClick={() => handleSubmit("published")}
-            disabled={isSavingDraft || isPublishing || isUploadingThumbnail || isUploadingAudio || isUploadingVideo}
+            disabled={
+              isSavingDraft ||
+              isPublishing ||
+              isUploadingThumbnail ||
+              isUploadingAudio ||
+              isUploadingVideo
+            }
           >
             {isPublishing ? "Publishing..." : "Publish"}
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
