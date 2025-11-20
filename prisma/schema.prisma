@@ -184,6 +184,11 @@ model Blog {
   slug        String   @unique
   dateCreated DateTime @default(now())
   lastUpdated DateTime @updatedAt
+  metaTitle       String?   // new
+  metaDescription String?   // new
+  metaImage       String?   // new (use thumbnail or separate)
+  faq             Json?     // new – store as [{question: "", answer: ""}]
+  primaryKeyword  String?   // new – optional
 }
 
 model Story {
@@ -201,6 +206,11 @@ model Story {
   slug        String   @unique
   dateCreated DateTime @default(now())
   lastUpdated DateTime @updatedAt
+  metaTitle       String?   // new
+  metaDescription String?   // new
+  metaImage       String?   // new (use thumbnail or separate)
+  faq             Json?     // new – store as [{question: "", answer: ""}]
+  primaryKeyword  String?   // new – optional
 }
 
 model Event {

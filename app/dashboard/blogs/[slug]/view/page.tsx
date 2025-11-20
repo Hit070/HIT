@@ -76,11 +76,15 @@ export default function ViewBlogPage() {
               </Button>
             </Link>
             <Link href={`/dashboard/blogs/${blog.slug}/edit`}>
-              <Button className="bg-primary hover:bg-primary/90">Edit Blog</Button>
+              <Button className="bg-primary hover:bg-primary/90">
+                Edit Blog
+              </Button>
             </Link>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{blog.title}</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            {blog.title}
+          </h1>
           {/* Blog Summary */}
           <div className="mb-8">
             {/* <h2 className="text-2xl font-bold mb-4">Summary</h2> */}
@@ -103,11 +107,14 @@ export default function ViewBlogPage() {
             >
               {blog.category}
             </span>
-            <span> {new Date(blog.dateCreated).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}</span>
+            <span>
+              {" "}
+              {new Date(blog.dateCreated).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
           </div>
 
           {blog.thumbnail && (
@@ -123,31 +130,128 @@ export default function ViewBlogPage() {
           )}
 
           {blog.type === "video" && blog.videoUrl ? (
-            <div className="aspect-video rounded-2xl overflow-hidden mb-8">
-              {blog.videoUrl.includes('youtube.com') || blog.videoUrl.includes('youtu.be') || blog.videoUrl.includes('vimeo.com') ? (
-                <iframe
-                  src={
-                    blog.videoUrl.includes('youtube.com') || blog.videoUrl.includes('youtu.be')
-                      ? `https://www.youtube.com/embed/${blog.videoUrl.split('v=')[1]?.split('&')[0] || blog.videoUrl.split('youtu.be/')[1]?.split('?')[0]}`
-                      : `https://player.vimeo.com/video/${blog.videoUrl.split('vimeo.com/')[1]?.split('?')[0]}`
+            (() => {
+              const processVideoUrl = (url: string) => {
+                if (url.includes("youtube.com") || url.includes("youtu.be")) {
+                  const videoId =
+                    url.split("v=")[1]?.split("&")[0] ||
+                    url.split("youtu.be/")[1]?.split("?")[0];
+                  return {
+                    embedUrl: `https://www.youtube.com/embed/${videoId}`,
+                    platform: "youtube",
+                  };
+                } else if (url.includes("vimeo.com")) {
+                  const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+                  return {
+                    embedUrl: `https://player.vimeo.com/video/${videoId}`,
+                    platform: "vimeo",
+                  };
+                } else if (
+                  url.includes("instagram.com/p/") ||
+                  url.includes("instagram.com/reel/")
+                ) {
+                  const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
+                  if (match) {
+                    return {
+                      embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+                      platform: "instagram",
+                    };
                   }
-                  className="w-full h-full"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={blog.title}
-                />
-              ) : (
-                <video
-                  controls
-                  src={blog.videoUrl + '#t=0.1'}
-                  className="w-full h-full"
-                  poster={blog.thumbnail || undefined}
-                >
-                  Your browser does not support the video element.
-                </video>
-              )}
-            </div>
+                } else if (
+                  url.includes("facebook.com") ||
+                  url.includes("fb.watch")
+                ) {
+                  const encodedUrl = encodeURIComponent(url);
+                  return {
+                    embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+                    platform: "facebook",
+                  };
+                } else if (url.includes("tiktok.com")) {
+                  const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+                  if (match) {
+                    return {
+                      embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+                      platform: "tiktok",
+                    };
+                  }
+                }
+                return { embedUrl: "", platform: "upload" };
+              };
+
+              const { embedUrl, platform } = processVideoUrl(blog.videoUrl);
+
+              const getContainerClass = () => {
+                switch (platform) {
+                  case "instagram":
+                    return "w-full max-w-[540px] mx-auto rounded-2xl overflow-hidden mb-8";
+                  case "tiktok":
+                    return "w-full max-w-[325px] mx-auto rounded-2xl overflow-hidden mb-8";
+                  case "facebook":
+                  case "youtube":
+                  case "vimeo":
+                    return "aspect-video rounded-2xl overflow-hidden mb-8";
+                  default:
+                    return "aspect-video rounded-2xl overflow-hidden mb-8";
+                }
+              };
+
+              const getIframeClass = () => {
+                if (platform === "instagram") return "w-full h-[600px]";
+                if (platform === "tiktok") return "w-full h-[740px]";
+                return "w-full h-full";
+              };
+
+              return (
+                <div className={getContainerClass()}>
+                  {platform === "youtube" || platform === "vimeo" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={blog.title}
+                    />
+                  ) : platform === "instagram" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      scrolling="no"
+                      allowTransparency
+                      title={blog.title}
+                    />
+                  ) : platform === "facebook" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      scrolling="no"
+                      allowFullScreen
+                      title={blog.title}
+                    />
+                  ) : platform === "tiktok" ? (
+                    <iframe
+                      src={embedUrl}
+                      className={getIframeClass()}
+                      frameBorder="0"
+                      scrolling="no"
+                      allowFullScreen
+                      title={blog.title}
+                    />
+                  ) : (
+                    <video
+                      controls
+                      src={blog.videoUrl + "#t=0.1"}
+                      className="w-full h-full"
+                      poster={blog.thumbnail || undefined}
+                    >
+                      Your browser does not support the video element.
+                    </video>
+                  )}
+                </div>
+              );
+            })()
           ) : blog.type === "video" ? (
             <div className="aspect-video rounded-2xl bg-gray-200 flex items-center justify-center mb-8">
               <p className="text-gray-500">Video unavailable</p>
@@ -172,5 +276,5 @@ export default function ViewBlogPage() {
         </article>
       </main>
     </div>
-  )
+  );
 }

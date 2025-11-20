@@ -1,4 +1,4 @@
-import type React from "react";
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Cormorant, Quicksand } from "next/font/google";
 import "./globals.css";
@@ -6,41 +6,52 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { CartProvider } from "@/contexts/cart-context";
 import { Toaster } from "@/components/toaster";
 import { MainLayout } from "@/components/main-layout";
+import Script from "next/script";
 
-const cormorant = Cormorant({
-  subsets: ["latin"],
-  variable: "--font-cormorant",
-  display: 'swap',
-});
-
-const quicksand = Quicksand({
-  subsets: ["latin"],
-  variable: "--font-quicksand",
-  display: 'swap',
-});
+const cormorant = Cormorant({ subsets: ["latin"], variable: "--font-cormorant", display: 'swap' });
+const quicksand = Quicksand({ subsets: ["latin"], variable: "--font-quicksand", display: 'swap' });
 
 export const metadata: Metadata = {
-  title: "HIT - Tales",
+  metadataBase: new URL("https://www.herimmigranttales.org"),
+  title: {
+    default: "Her Immigrant Tales | Immigrant Women Stories",
+    template: "%s | Her Immigrant Tales",
+  },
   description: "Discover powerful stories, connect with a vibrant community, and help us honor the voices of immigrant women everywhere.",
-  icons: {
-    icon: "/favicon.png",
-  }
+  openGraph: {
+    images: "/favicon.png", // put a 1200x630 image in public/
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   return (
-    <html lang="en" className={`${cormorant.variable} ${quicksand.variable}`} suppressHydrationWarning >
+    <html lang="en" className={`${cormorant.variable} ${quicksand.variable}`} suppressHydrationWarning>
+      <head>
+        <meta name="google-site-verification" content="B3IWgJs4tw2ngICyBC4RIVca-uT2cPwAe_KL5zISANI" />
+        <link rel="canonical" href="https://www.herimmigranttales.org" />
+        {/* Google Analytics */}
+        {GA_ID ? (
+          <>
+            <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+            <Script id="gtag-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);} 
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+              `}
+            </Script>
+          </>
+        ) : null}
+      </head>
       <body className="font-quicksand antialiased">
         <script src="https://js.paystack.co/v1/inline.js" async></script>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-        >
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
           <CartProvider>
             <MainLayout>{children}</MainLayout>
             <Toaster />
