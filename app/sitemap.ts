@@ -1,19 +1,19 @@
 // app/sitemap.ts
-import { MetadataRoute } from 'next';
-import prisma from '@/lib/prisma';
+import type { MetadataRoute } from "next";
+import prisma from "@/lib/prisma";
 
-export async function GET() {
-  const baseUrl = 'https://www.herimmigranttales.org';
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const baseUrl = "https://www.herimmigranttales.org";
 
   const staticPages = [
-    '/home',
-    '/about',
-    '/blog',
-    '/stories',
-    '/community',
-    '/community/events',
-    '/faq',
-    '/contact',
+    "/home",
+    "/about",
+    "/blog",
+    "/stories",
+    "/community",
+    "/community/events",
+    "/faq",
+    "/contact",
   ];
 
   const [blogs, stories] = await Promise.all([
@@ -29,9 +29,14 @@ export async function GET() {
   return allRoutes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: route === '' ? 1.0 : route.includes('/blog/') || route.includes('/stories/') ? 0.8 : 0.7,
+    changeFrequency: "weekly",
+    priority:
+      route === ""
+        ? 1.0
+        : route.includes("/blog/") || route.includes("/stories/")
+        ? 0.8
+        : 0.7,
   }));
 }
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
