@@ -56,9 +56,9 @@ export default function Footer() {
               <h2 className="text-3xl lg:text-4xl font-cormorant mb-2">
                 Join Our Newsletter to
               </h2>
-              <h2 className="text-3xl lg:text-4xl font-cormorant">
+              <h3 className="text-3xl lg:text-4xl font-cormorant">
                 Keep Up to Date With Us!
-              </h2>
+              </h3>
             </div>
             <form onSubmit={handleSubscribe} className="flex flex-col items-end gap-4 w-full lg:w-auto">
               <div className="flex items-center gap-4 w-full lg:w-auto">

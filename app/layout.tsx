@@ -8,8 +8,16 @@ import { Toaster } from "@/components/toaster";
 import { MainLayout } from "@/components/main-layout";
 import Script from "next/script";
 
-const cormorant = Cormorant({ subsets: ["latin"], variable: "--font-cormorant", display: 'swap' });
-const quicksand = Quicksand({ subsets: ["latin"], variable: "--font-quicksand", display: 'swap' });
+const cormorant = Cormorant({
+  subsets: ["latin"],
+  variable: "--font-cormorant",
+  display: "swap",
+});
+const quicksand = Quicksand({
+  subsets: ["latin"],
+  variable: "--font-quicksand",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.herimmigranttales.org"),
@@ -17,39 +25,25 @@ export const metadata: Metadata = {
     default: "Her Immigrant Tales | Immigrant Women Stories",
     template: "%s | Her Immigrant Tales",
   },
-  description:
-    "Discover powerful stories, connect with a vibrant community, and help us honor the voices of immigrant women everywhere.",
-  keywords:
-    "immigrant women, immigrant women health, immigrant stories, women empowerment",
+  icons: {
+    icon: "/favicon.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.herimmigranttales.org",
     siteName: "Her Immigrant Tales",
-    images: [
-      {
-        url: "/favicon.png",
-        width: 512,
-        height: 512,
-        alt: "Her Immigrant Tales",
-      },
-      {
-        url: "/logo1.svg",
-        width: 1200,
-        height: 630,
-        alt: "Her Immigrant Tales",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
-    images: ["/favicon.png"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://www.herimmigranttales.org" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   return (
     <html
@@ -62,7 +56,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           name="google-site-verification"
           content="B3IWgJs4tw2ngICyBC4RIVca-uT2cPwAe_KL5zISANI"
         />
-        <link rel="canonical" href="https://www.herimmigranttales.org" />
         {/* Google Analytics */}
         {GA_ID ? (
           <>

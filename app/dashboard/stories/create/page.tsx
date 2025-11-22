@@ -1,45 +1,126 @@
-"use client"
+"use client";
 
-import { useState, useRef } from "react"
+import { useState, useRef } from "react";
+import { ArrowLeft, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowLeft,
-  Upload,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import Link from "next/link"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { useContentStore, useAuthStore } from "@/store/store"
-import { toast } from "@/components/ui/use-toast"
-import { Story } from "@/types"
-import { useRouter } from "next/navigation"
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import Link from "next/link";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { useContentStore, useAuthStore } from "@/store/store";
+import { toast } from "@/components/ui/use-toast";
+import { Story } from "@/types";
+import { useRouter } from "next/navigation";
+
+const FAQItem = ({
+  item,
+  onQuestionChange,
+  onAnswerChange,
+  onRemove,
+}: {
+  item: { id: string; question: string; answer: string };
+  onQuestionChange: (value: string) => void;
+  onAnswerChange: (value: string) => void;
+  onRemove: () => void;
+}) => (
+  <div className="flex gap-3 items-start border-b pb-4 mb-4">
+    <div className="flex-1 space-y-3">
+      <Input
+        placeholder="Question"
+        value={item.question}
+        onChange={(e) => onQuestionChange(e.target.value)}
+      />
+      <Textarea
+        placeholder="Answer"
+        value={item.answer}
+        rows={3}
+        onChange={(e) => onAnswerChange(e.target.value)}
+      />
+    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onRemove}
+      className="text-red-600"
+    >
+      Remove
+    </Button>
+  </div>
+);
 
 export default function CreateStoryPage() {
-  const router = useRouter()
-  const { addStory } = useContentStore()
-  const { user } = useAuthStore()
-  const [storyType, setStoryType] = useState<"text" | "video" | "audio">("text")
-  const [videoUrl, setVideoUrl] = useState("")
-  const [videoPreview, setVideoPreview] = useState("")
-  const [title, setTitle] = useState("")
-  const [summary, setSummary] = useState("")
-  const [content, setContent] = useState<Record<string, any>>({})
-  const [author, setAuthor] = useState(user?.name || "")
-  const [thumbnail, setThumbnail] = useState("")
-  const [audioFile, setAudioFile] = useState("")
-  const [isSavingDraft, setIsSavingDraft] = useState(false)
-  const [isPublishing, setIsPublishing] = useState(false)
-  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
-  const [isUploadingAudio, setIsUploadingAudio] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const audioInputRef = useRef<HTMLInputElement>(null)
-  const [videoFile, setVideoFile] = useState("")
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const videoInputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter();
+  const { addStory } = useContentStore();
+  const { user } = useAuthStore();
+  const [storyType, setStoryType] = useState<"text" | "video" | "audio">(
+    "text"
+  );
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoPreview, setVideoPreview] = useState("");
+  const [title, setTitle] = useState("");
+  const [summary, setSummary] = useState("");
+  const [content, setContent] = useState<Record<string, any>>({});
+  const [author, setAuthor] = useState(user?.name || "");
+  const [thumbnail, setThumbnail] = useState("");
+  const [audioFile, setAudioFile] = useState("");
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const [videoFile, setVideoFile] = useState("");
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+
+  // SEO fields
+  const [metaTitle, setMetaTitle] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");
+  const [metaImage, setMetaImage] = useState("");
+  const [primaryKeyword, setPrimaryKeyword] = useState("");
+  const [faq, setFaq] = useState<
+    { id: string; question: string; answer: string }[]
+  >([]);
+
+  // Slug and edit-tracking for auto-generated fields
+  const [slug, setSlug] = useState("");
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [metaTitleEdited, setMetaTitleEdited] = useState(false);
+  const [metaDescriptionEdited, setMetaDescriptionEdited] = useState(false);
+  const [metaImageEdited, setMetaImageEdited] = useState(false);
+
+  // generators for auto-filled fields
+  const generateMetaTitle = (t: string) => t || "";
+  const generateMetaDescription = (s: string) => {
+    const desc = (s || "").trim();
+    return desc.length > 160 ? desc.slice(0, 157) + "..." : desc;
+  };
+  const generateMetaImage = (img: string) => img || "";
+
+  // helper for stable IDs for FAQ items
+  const uid = () => Math.random().toString(36).slice(2, 9);
+
+  // Instead of useEffect auto-sync, update auto-filled fields inline in handlers
+  const handleTitleChange = (val: string) => {
+    setTitle(val);
+    if (!slugEdited) setSlug(generateSlug(val));
+    if (!metaTitleEdited) setMetaTitle(generateMetaTitle(val));
+  };
+
+  const handleSummaryChange = (val: string) => {
+    setSummary(val);
+    if (!metaDescriptionEdited)
+      setMetaDescription(generateMetaDescription(val));
+  };
 
   const handleVideoUrlChange = (url: string) => {
     setVideoUrl(url);
@@ -93,94 +174,105 @@ export default function CreateStoryPage() {
   };
 
   const handleFileUpload = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const handleAudioUpload = () => {
-    audioInputRef.current?.click()
-  }
+    audioInputRef.current?.click();
+  };
 
-  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Invalid file type",
         description: "Please select an image file (PNG or JPG).",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
         description: "Please select an image smaller than 5MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    setIsUploadingThumbnail(true)
+    setIsUploadingThumbnail(true);
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const formData = new FormData();
+      formData.append("file", file);
       const response = await fetch("/api/upload/stories", {
         method: "POST",
         body: formData,
-      })
-      if (!response.ok) throw new Error("Upload failed")
-      const { url } = await response.json()
-      setThumbnail(url)
-      toast({ title: "Thumbnail uploaded", description: "Upload successful." })
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+      setThumbnail(url);
+      if (!metaImageEdited) setMetaImage(generateMetaImage(url));
+      toast({ title: "Thumbnail uploaded", description: "Upload successful." });
     } catch (error) {
-      console.error("[UPLOAD_THUMBNAIL]", error)
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+      console.error("[UPLOAD_THUMBNAIL]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsUploadingThumbnail(false)
+      setIsUploadingThumbnail(false);
     }
-  }
+  };
 
   const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith("audio/")) {
       toast({
         title: "Invalid file type",
         description: "Please select an audio file (MP3, WAV).",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
     if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "File too large",
         description: "Please select an audio file smaller than 10MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    setIsUploadingAudio(true)
+    setIsUploadingAudio(true);
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const formData = new FormData();
+      formData.append("file", file);
       const response = await fetch("/api/upload/stories", {
         method: "POST",
         body: formData,
-      })
-      if (!response.ok) throw new Error("Upload failed")
-      const { url } = await response.json()
-      setAudioFile(url)
-      toast({ title: "Audio uploaded", description: "Upload successful." })
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+      setAudioFile(url);
+      toast({ title: "Audio uploaded", description: "Upload successful." });
     } catch (error) {
-      console.error("[UPLOAD_AUDIO]", error)
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+      console.error("[UPLOAD_AUDIO]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsUploadingAudio(false)
+      setIsUploadingAudio(false);
     }
-  }
+  };
 
   const handleVideoUpload = () => {
-    videoInputRef.current?.click()
-  }
+    videoInputRef.current?.click();
+  };
 
   const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -199,7 +291,8 @@ export default function CreateStoryPage() {
     if (file.size > 100 * 1024 * 1024) {
       toast({
         title: "File size out of range",
-        description: "Please select a video smaller than 100MB (Cloudinary free plan limit).",
+        description:
+          "Please select a video smaller than 100MB (Cloudinary free plan limit).",
         variant: "destructive",
       });
       return;
@@ -261,47 +354,81 @@ export default function CreateStoryPage() {
     }
   };
 
-  const generateSlug = (title: string) => {
+  function generateSlug(title: string) {
     return title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
+      .replace(/^-+|-+$/g, "");
   }
+
+  const updateFaqQuestion = (id: string, question: string) => {
+    setFaq((prev) => prev.map((f) => (f.id === id ? { ...f, question } : f)));
+  };
+
+  const updateFaqAnswer = (id: string, answer: string) => {
+    setFaq((prev) => prev.map((f) => (f.id === id ? { ...f, answer } : f)));
+  };
+
+  const removeFaq = (id: string) => {
+    setFaq((prev) => prev.filter((f) => f.id !== id));
+  };
 
   const handleSubmit = async (status: "published" | "draft") => {
     if (!user) {
-      toast({ title: "Please log in to create a story", variant: "destructive" })
-      return
+      toast({
+        title: "Please log in to create a story",
+        variant: "destructive",
+      });
+      return;
     }
     if (!title || !summary || Object.keys(content).length === 0) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" })
-      return
+      toast({
+        title: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
     }
-    const setLoading = status === "draft" ? setIsSavingDraft : setIsPublishing
-    setLoading(true)
+    const setLoading = status === "draft" ? setIsSavingDraft : setIsPublishing;
+    setLoading(true);
     try {
-      const story: Omit<Story, "id" | "dateCreated" | "lastUpdated" | "isFeatured"> = {
+      const story: Omit<
+        Story,
+        "id" | "dateCreated" | "lastUpdated" | "isFeatured"
+      > = {
         title,
         author,
         summary,
         content,
         type: storyType,
-        videoUrl: storyType === "video" ? (videoFile || videoUrl) : undefined,
+        videoUrl: storyType === "video" ? videoFile || videoUrl : undefined,
         audioFile: storyType === "audio" ? audioFile : undefined,
         thumbnail: thumbnail || undefined,
         status,
-        slug: generateSlug(title),
-      }
-      await addStory(story)
-      toast({ title: `Story ${status === "published" ? "published" : "saved as draft"} successfully`, variant: "default" })
-      router.push("/dashboard/stories")
+        slug: slug || generateSlug(title),
+        metaTitle: metaTitle || title,
+        metaDescription: metaDescription || summary.slice(0, 160),
+        metaImage: metaImage || thumbnail,
+        faq:
+          faq.length > 0
+            ? faq.filter((f) => f.question && f.answer)
+            : undefined,
+        primaryKeyword: primaryKeyword || undefined,
+      };
+      await addStory(story);
+      toast({
+        title: `Story ${
+          status === "published" ? "published" : "saved as draft"
+        } successfully`,
+        variant: "default",
+      });
+      router.push("/dashboard/stories");
     } catch (error) {
-      console.error("[CREATE_STORY]", error)
-      toast({ title: "Failed to create story", variant: "destructive" })
+      console.error("[CREATE_STORY]", error);
+      toast({ title: "Failed to create story", variant: "destructive" });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="md:px-20 space-y-6">
@@ -320,9 +447,39 @@ export default function CreateStoryPage() {
           <Input
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Enter story title"
             className="text-base"
+            disabled={
+              isUploadingVideo ||
+              isUploadingAudio ||
+              isUploadingThumbnail ||
+              isSavingDraft ||
+              isPublishing
+            }
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="slug">
+            Slug (auto-generated from title — editable)
+          </Label>
+          <Input
+            id="slug"
+            value={slug}
+            onChange={(e) => {
+              setSlug(e.target.value);
+              setSlugEdited(true);
+            }}
+            placeholder="auto-generated-slug"
+            className="text-base"
+            disabled={
+              isUploadingVideo ||
+              isUploadingAudio ||
+              isUploadingThumbnail ||
+              isSavingDraft ||
+              isPublishing
+            }
           />
         </div>
 
@@ -349,7 +506,7 @@ export default function CreateStoryPage() {
           <Textarea
             id="summary"
             value={summary}
-            onChange={(e) => setSummary(e.target.value)}
+            onChange={(e) => handleSummaryChange(e.target.value)}
             placeholder="Enter story summary"
             className="min-h-[100px] text-base"
             disabled={
@@ -360,6 +517,105 @@ export default function CreateStoryPage() {
               isPublishing
             }
           />
+        </div>
+
+        <div className="space-y-6 pt-8 border-t">
+          <h2 className="text-xl font-semibold">SEO Settings</h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label>Meta Title (recommended: 50–60 chars)</Label>
+              <Input
+                value={metaTitle}
+                onChange={(e) => {
+                  setMetaTitle(e.target.value);
+                  setMetaTitleEdited(true);
+                }}
+                placeholder="Same as story title by default"
+                maxLength={70}
+              />
+              <p className="text-sm text-muted-foreground">
+                {metaTitle.length}/70
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Primary Keywords (optional, comma spaced; i.e. keyword1,
+                keyword2...)
+              </Label>
+              <Input
+                value={primaryKeyword}
+                onChange={(e) => setPrimaryKeyword(e.target.value)}
+                placeholder="e.g. immigrant women stories"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Meta Description (recommended: 150–160 chars)</Label>
+            <Textarea
+              value={metaDescription}
+              onChange={(e) => {
+                setMetaDescription(e.target.value);
+                setMetaDescriptionEdited(true);
+              }}
+              placeholder="Auto-filled from summary"
+              rows={3}
+              maxLength={320}
+            />
+            <p className="text-sm text-muted-foreground">
+              {metaDescription.length}/320
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Social Share Image (OG Image)</Label>
+            <Input
+              value={metaImage}
+              onChange={(e) => {
+                setMetaImage(e.target.value);
+                setMetaImageEdited(true);
+              }}
+              placeholder="Defaults to thumbnail"
+            />
+            {metaImage && (
+              <img
+                src={metaImage}
+                alt="OG preview"
+                className="w-full max-w-md rounded border"
+              />
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <Label>FAQ Schema (optional but great for rich results)</Label>
+              <Button
+                size="sm"
+                onClick={() =>
+                  setFaq([...faq, { id: uid(), question: "", answer: "" }])
+                }
+              >
+                + Add FAQ
+              </Button>
+            </div>
+            {faq.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No FAQs added yet</p>
+            ) : (
+              faq.map((item) => (
+                <FAQItem
+                  key={item.id}
+                  item={item}
+                  onQuestionChange={(value) =>
+                    updateFaqQuestion(item.id, value)
+                  }
+                  onAnswerChange={(value) => updateFaqAnswer(item.id, value)}
+                  onRemove={() => removeFaq(item.id)}
+                />
+              ))
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -699,7 +955,9 @@ export default function CreateStoryPage() {
         )}
 
         <div className="space-y-4">
-          <Label>Story Content</Label>
+          <Label className="text-sm font-medium mb-2 block">
+            Story Content
+          </Label>
           <RichTextEditor
             content={content}
             onChange={setContent}

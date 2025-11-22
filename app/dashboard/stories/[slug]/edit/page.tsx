@@ -1,28 +1,69 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, Upload, Play } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useContentStore, useAuthStore } from "@/store/store"
-import { toast } from "@/components/ui/use-toast"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { Story } from "@/types"
+import { useState, useRef, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Upload, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useContentStore, useAuthStore } from "@/store/store";
+import { toast } from "@/components/ui/use-toast";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { Story } from "@/types";
+
+const FAQItem = ({
+  item,
+  onQuestionChange,
+  onAnswerChange,
+  onRemove,
+}: {
+  item: { id: string; question: string; answer: string };
+  onQuestionChange: (v: string) => void;
+  onAnswerChange: (v: string) => void;
+  onRemove: () => void;
+}) => (
+  <div className="flex gap-3 items-start border-b pb-4 mb-4">
+    <div className="flex-1 space-y-3">
+      <Input
+        placeholder="Question"
+        value={item.question}
+        onChange={(e) => onQuestionChange(e.target.value)}
+      />
+      <Textarea
+        placeholder="Answer"
+        value={item.answer}
+        rows={3}
+        onChange={(e) => onAnswerChange(e.target.value)}
+      />
+    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={onRemove}
+      className="text-red-600"
+    >
+      Remove
+    </Button>
+  </div>
+);
 
 export default function EditStoryPage() {
-  const router = useRouter()
-  const params = useParams<{ slug: string }>()
-  const storySlug = params.slug
+  const router = useRouter();
+  const params = useParams<{ slug: string }>();
+  const storySlug = params.slug;
 
-  const { stories, fetchStories, updateStory } = useContentStore()
-
-  const { user } = useAuthStore()
-  const [loading, setLoading] = useState(true)
+  const { stories, fetchStories, updateStory } = useContentStore();
+  const { user } = useAuthStore();
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -34,44 +75,60 @@ export default function EditStoryPage() {
     audioFile: "",
     thumbnail: "",
     author: "",
-  })
-  const [isSavingDraft, setIsSavingDraft] = useState(false)
-  const [isPublishing, setIsPublishing] = useState(false)
-  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
-  const [isUploadingAudio, setIsUploadingAudio] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const audioInputRef = useRef<HTMLInputElement>(null)
-  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
-  const [uploadProgress, setUploadProgress] = useState(0)
-  const videoInputRef = useRef<HTMLInputElement>(null)
+    metaTitle: "",
+    metaDescription: "",
+    metaImage: "",
+    primaryKeyword: "",
+    faq: [] as { id: string; question: string; answer: string }[],
+  });
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
+  const [isUploadingAudio, setIsUploadingAudio] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const lastLoadedSlug = useRef<string | null>(null);
+
+  // helpers & edit-tracking
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [metaTitleEdited, setMetaTitleEdited] = useState(false);
+  const [metaDescriptionEdited, setMetaDescriptionEdited] = useState(false);
+  const [metaImageEdited, setMetaImageEdited] = useState(false);
+
+  const generateMetaTitle = (t: string) => t || "";
+  const generateMetaDescription = (s: string) => {
+    const desc = (s || "").trim();
+    return desc.length > 160 ? desc.slice(0, 157) + "..." : desc;
+  };
+  const generateMetaImage = (img: string) => img || "";
 
   useEffect(() => {
-    if (stories.length === 0) {
-      fetchStories()
-        .then(() => {
-          const story = stories.find((s: Story) => s.slug === storySlug)
-          if (story) {
-            setFormData({
-              title: story.title,
-              slug: story.slug,
-              author: story.author,
-              summary: story.summary,
-              content: story.content,
-              type: story.type,
-              videoUrl: story.videoUrl || "",
-              videoPreview: story.videoUrl || "",
-              audioFile: story.audioFile || "",
-              thumbnail: story.thumbnail || "",
-            })
-          }
-        }).catch(() => {
-          toast({ title: "Failed to fetch story", variant: "destructive" })
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-    } else {
-      const story = stories.find((s: Story) => s.slug === storySlug)
+    const init = async () => {
+      // If we already loaded this slug once, don't overwrite local edits
+      if (lastLoadedSlug.current === storySlug) {
+        setLoading(false);
+        return;
+      }
+
+      // If no stories yet, ask store to fetch them and wait for the next render
+      if (stories.length === 0) {
+        try {
+          await fetchStories();
+        } catch (err) {
+          toast({ title: "Failed to fetch stories", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
+        // After fetch, effect will re-run and pick up the story from the store
+        setLoading(false);
+        return;
+      }
+
+      const story = stories.find((s: Story) => s.slug === storySlug);
       if (story) {
         setFormData({
           title: story.title,
@@ -84,112 +141,158 @@ export default function EditStoryPage() {
           videoPreview: story.videoUrl || "",
           audioFile: story.audioFile || "",
           thumbnail: story.thumbnail || "",
-        })
+          metaTitle: story.metaTitle || story.title || "",
+          metaDescription: story.metaDescription || story.summary || "",
+          metaImage: story.metaImage || story.thumbnail || "",
+          primaryKeyword: story.primaryKeyword || "",
+          faq: (story.faq || []).map((f: any) => ({
+            id: f.id || uid(),
+            question: f.question || "",
+            answer: f.answer || "",
+          })),
+        });
+        lastLoadedSlug.current = storySlug;
       }
-      setLoading(false)
-    }
-  }, [stories, storySlug, fetchStories])
+      setLoading(false);
+    };
+
+    init();
+  }, [stories, storySlug, fetchStories]);
 
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-  }
+      .replace(/^-+|-+$/g, "");
+  };
 
   const handleContentChange = (newContent: Record<string, any>) => {
-    setFormData((prev) => ({ ...prev, content: newContent }))
-  }
+    setFormData((prev) => ({ ...prev, content: newContent }));
+  };
+
+  // Inline handlers to mirror create page behavior
+  const handleTitleChange = (val: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      title: val,
+      slug: !slugEdited ? generateSlug(val) : prev.slug,
+      metaTitle: !metaTitleEdited ? generateMetaTitle(val) : prev.metaTitle,
+    }));
+  };
+
+  const handleSummaryChange = (val: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      summary: val,
+      metaDescription: !metaDescriptionEdited
+        ? generateMetaDescription(val)
+        : prev.metaDescription,
+    }));
+  };
 
   const handleFileUpload = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const handleAudioUpload = () => {
-    audioInputRef.current?.click()
-  }
+    audioInputRef.current?.click();
+  };
 
-  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Invalid file type",
         description: "Please select an image file (PNG or JPG).",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
         description: "Please select an image smaller than 5MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    setIsUploadingThumbnail(true)
+    setIsUploadingThumbnail(true);
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
       const response = await fetch("/api/upload/stories", {
         method: "POST",
-        body: formData,
-      })
-      if (!response.ok) throw new Error("Upload failed")
-      const { url } = await response.json()
-      setFormData((prev) => ({ ...prev, thumbnail: url }))
-      toast({ title: "Thumbnail uploaded", description: "Upload successful." })
+        body: formDataUpload,
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+      setFormData((prev) => ({
+        ...prev,
+        thumbnail: url,
+        metaImage: !metaImageEdited ? generateMetaImage(url) : prev.metaImage,
+      }));
+      toast({ title: "Thumbnail uploaded", description: "Upload successful." });
     } catch (error) {
-      console.error("[UPLOAD_THUMBNAIL]", error)
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+      console.error("[UPLOAD_THUMBNAIL]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsUploadingThumbnail(false)
+      setIsUploadingThumbnail(false);
     }
-  }
+  };
 
   const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith("audio/")) {
       toast({
         title: "Invalid file type",
         description: "Please select an audio file (MP3, WAV).",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
     if (file.size > 10 * 1024 * 1024) {
       toast({
         title: "File too large",
         description: "Please select an audio file smaller than 10MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    setIsUploadingAudio(true)
+    setIsUploadingAudio(true);
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
       const response = await fetch("/api/upload/stories", {
         method: "POST",
-        body: formData,
-      })
-      if (!response.ok) throw new Error("Upload failed")
-      const { url } = await response.json()
-      setFormData((prev) => ({ ...prev, audioFile: url }))
-      toast({ title: "Audio uploaded", description: "Upload successful." })
+        body: formDataUpload,
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+      setFormData((prev) => ({ ...prev, audioFile: url }));
+      toast({ title: "Audio uploaded", description: "Upload successful." });
     } catch (error) {
-      console.error("[UPLOAD_AUDIO]", error)
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+      console.error("[UPLOAD_AUDIO]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsUploadingAudio(false)
+      setIsUploadingAudio(false);
     }
-  }
+  };
 
   const handleVideoUpload = () => {
-    videoInputRef.current?.click()
-  }
+    videoInputRef.current?.click();
+  };
 
   const handleVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -208,7 +311,8 @@ export default function EditStoryPage() {
     if (file.size > 100 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please select a video file smaller than 100MB (Cloudinary free plan limit).",
+        description:
+          "Please select a video file smaller than 100MB (Cloudinary free plan limit).",
         variant: "destructive",
       });
       return;
@@ -218,8 +322,8 @@ export default function EditStoryPage() {
     setUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const formDataUpload = new FormData();
+      formDataUpload.append("file", file);
 
       // Create XMLHttpRequest for progress tracking
       const xhr = new XMLHttpRequest();
@@ -241,11 +345,13 @@ export default function EditStoryPage() {
         });
 
         xhr.addEventListener("error", () => reject(new Error("Upload failed")));
-        xhr.addEventListener("abort", () => reject(new Error("Upload cancelled")));
+        xhr.addEventListener("abort", () =>
+          reject(new Error("Upload cancelled"))
+        );
       });
 
       xhr.open("POST", "/api/upload/stories");
-      xhr.send(formData);
+      xhr.send(formDataUpload);
 
       const response: any = await uploadPromise;
 
@@ -273,74 +379,111 @@ export default function EditStoryPage() {
     }
   };
 
- const handleVideoUrlChange = (url: string) => {
-   const processVideoUrl = (url: string) => {
-     if (url.includes("youtube.com") || url.includes("youtu.be")) {
-       const videoId =
-         url.split("v=")[1]?.split("&")[0] ||
-         url.split("youtu.be/")[1]?.split("?")[0];
-       return {
-         embedUrl: `https://www.youtube.com/embed/${videoId}`,
-         platform: "youtube",
-       };
-     } else if (url.includes("vimeo.com")) {
-       const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
-       return {
-         embedUrl: `https://player.vimeo.com/video/${videoId}`,
-         platform: "vimeo",
-       };
-     } else if (
-       url.includes("instagram.com/p/") ||
-       url.includes("instagram.com/reel/")
-     ) {
-       const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
-       if (match) {
-         return {
-           embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
-           platform: "instagram",
-         };
-       }
-     } else if (url.includes("facebook.com") || url.includes("fb.watch")) {
-       const encodedUrl = encodeURIComponent(url);
-       return {
-         embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
-         platform: "facebook",
-       };
-     } else if (url.includes("tiktok.com")) {
-       const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
-       if (match) {
-         return {
-           embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
-           platform: "tiktok",
-         };
-       }
-     }
-     return { embedUrl: "", platform: "upload" };
-   };
+  const handleVideoUrlChange = (url: string) => {
+    const processVideoUrl = (url: string) => {
+      if (url.includes("youtube.com") || url.includes("youtu.be")) {
+        const videoId =
+          url.split("v=")[1]?.split("&")[0] ||
+          url.split("youtu.be/")[1]?.split("?")[0];
+        return {
+          embedUrl: `https://www.youtube.com/embed/${videoId}`,
+          platform: "youtube",
+        };
+      } else if (url.includes("vimeo.com")) {
+        const videoId = url.split("vimeo.com/")[1]?.split("?")[0];
+        return {
+          embedUrl: `https://player.vimeo.com/video/${videoId}`,
+          platform: "vimeo",
+        };
+      } else if (
+        url.includes("instagram.com/p/") ||
+        url.includes("instagram.com/reel/")
+      ) {
+        const match = url.match(/\/(p|reel)\/([A-Za-z0-9_-]+)/);
+        if (match) {
+          return {
+            embedUrl: `https://www.instagram.com/p/${match[2]}/embed`,
+            platform: "instagram",
+          };
+        }
+      } else if (url.includes("facebook.com") || url.includes("fb.watch")) {
+        const encodedUrl = encodeURIComponent(url);
+        return {
+          embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=false&width=560`,
+          platform: "facebook",
+        };
+      } else if (url.includes("tiktok.com")) {
+        const match = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
+        if (match) {
+          return {
+            embedUrl: `https://www.tiktok.com/embed/v2/${match[1]}`,
+            platform: "tiktok",
+          };
+        }
+      }
+      return { embedUrl: "", platform: "upload" };
+    };
 
-   const { embedUrl } = processVideoUrl(url);
-   setFormData((prev) => ({
-     ...prev,
-     videoUrl: url,
-     videoPreview: embedUrl || url,
-   }));
- };
+    const { embedUrl } = processVideoUrl(url);
+    setFormData((prev) => ({
+      ...prev,
+      videoUrl: url,
+      videoPreview: embedUrl || url,
+    }));
+  };
+
+  // FAQ helpers (stable ids + immutable updates)
+  const updateFaqQuestion = (id: string, question: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: prev.faq.map((f) => (f.id === id ? { ...f, question } : f)),
+    }));
+  };
+
+  const updateFaqAnswer = (id: string, answer: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: prev.faq.map((f) => (f.id === id ? { ...f, answer } : f)),
+    }));
+  };
+
+  const removeFaq = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      faq: prev.faq.filter((f) => f.id !== id),
+    }));
+  };
 
   const handleSubmit = async (status: "published" | "draft") => {
     if (!user) {
-      toast({ title: "Please log in to update a story", variant: "destructive" })
-      return
+      toast({
+        title: "Please log in to update a story",
+        variant: "destructive",
+      });
+      return;
     }
-    if (!formData.title || !formData.summary || Object.keys(formData.content).length === 0) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" })
-      return
+    if (
+      !formData.title ||
+      !formData.summary ||
+      Object.keys(formData.content).length === 0
+    ) {
+      toast({
+        title: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
     }
     if (!formData.slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug)) {
-      toast({ title: "Invalid slug format", description: "Use lowercase letters, numbers, and hyphens only.", variant: "destructive" })
-      return
+      toast({
+        title: "Invalid slug format",
+        description: "Use lowercase letters, numbers, and hyphens only.",
+        variant: "destructive",
+      });
+      return;
     }
-    const setLoading = status === "draft" ? setIsSavingDraft : setIsPublishing
-    setLoading(true)
+    const setLoadingState =
+      status === "draft" ? setIsSavingDraft : setIsPublishing;
+    setLoadingState(true);
     try {
       const updatedStory: Partial<Story> = {
         title: formData.title,
@@ -351,27 +494,41 @@ export default function EditStoryPage() {
         videoUrl: formData.type === "video" ? formData.videoUrl : undefined,
         audioFile: formData.type === "audio" ? formData.audioFile : undefined,
         thumbnail: formData.thumbnail || undefined,
+        metaTitle: formData.metaTitle || undefined,
+        metaDescription: formData.metaDescription || undefined,
+        metaImage: formData.metaImage || undefined,
+        primaryKeyword: formData.primaryKeyword || undefined,
+        faq:
+          formData.faq && formData.faq.length > 0
+            ? formData.faq.map((f) => ({
+                question: f.question,
+                answer: f.answer,
+              }))
+            : undefined,
         status,
-      }
-      await updateStory(storySlug, updatedStory)
-      toast({ title: `Story ${status === "published" ? "updated and published" : "saved as draft"} successfully`, variant: "default" })
-      router.push("/dashboard/stories")
+      };
+      await updateStory(storySlug, updatedStory);
+      toast({
+        title: `Story ${
+          status === "published" ? "updated and published" : "saved as draft"
+        } successfully`,
+        variant: "default",
+      });
+      router.push("/dashboard/stories");
     } catch (error) {
-      console.error("[UPDATE_STORY]", error)
-      toast({ title: "Failed to update story", variant: "destructive" })
+      console.error("[UPDATE_STORY]", error);
+      toast({ title: "Failed to update story", variant: "destructive" });
     } finally {
-      setLoading(false)
+      setLoadingState(false);
     }
-  }
+  };
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   if (!stories.find((s: Story) => s.slug === storySlug)) {
-    {
-      return <div>Story not found</div>
-    }
+    return <div>Story not found</div>;
   }
 
   return (
@@ -380,15 +537,15 @@ export default function EditStoryPage() {
         {/* Header */}
         <div className="flex items-center gap-4 md:pl-6">
           <Link href="/dashboard/stories">
-            <Button variant="ghost" size="sm" className=" hover:bg-gray-100">
+            <Button variant="ghost" size="sm" className="hover:bg-gray-100">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back
             </Button>
           </Link>
-          <h1 className="text-2xl font-semibold text-gray-900">Edit Story</h1>
+          <h1 className="text-2xl font-semibold">Edit Story</h1>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm md:p-8 p-2">
+        <div className="rounded-lg shadow-sm md:p-8 p-2">
           <div className="space-y-6">
             {/* Story Title */}
             <div>
@@ -398,9 +555,7 @@ export default function EditStoryPage() {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
+                onChange={(e) => handleTitleChange(e.target.value)}
                 className="w-full"
               />
             </div>
@@ -408,14 +563,15 @@ export default function EditStoryPage() {
             {/* Story Slug */}
             <div>
               <Label htmlFor="slug" className="text-sm font-medium mb-2 block">
-                Story Slug
+                Slug
               </Label>
               <Input
                 id="slug"
                 value={formData.slug}
-                onChange={(e) =>
-                  setFormData({ ...formData, slug: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData((prev) => ({ ...prev, slug: e.target.value }));
+                  setSlugEdited(true);
+                }}
                 placeholder="Enter story slug"
                 className="w-full"
                 disabled={
@@ -440,7 +596,7 @@ export default function EditStoryPage() {
                 id="author"
                 value={formData.author}
                 onChange={(e) =>
-                  setFormData({ ...formData, author: e.target.value })
+                  setFormData((prev) => ({ ...prev, author: e.target.value }))
                 }
                 className="w-full"
                 disabled={
@@ -464,11 +620,135 @@ export default function EditStoryPage() {
               <Textarea
                 id="summary"
                 value={formData.summary}
-                onChange={(e) =>
-                  setFormData({ ...formData, summary: e.target.value })
-                }
+                onChange={(e) => handleSummaryChange(e.target.value)}
                 className="w-full h-24 resize-none"
               />
+            </div>
+
+            {/* SEO Settings */}
+            <div className="space-y-6 pt-8 border-t">
+              <h2 className="text-xl font-semibold">SEO Settings</h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Meta Title (recommended: 50–60 chars)</Label>
+                  <Input
+                    value={formData.metaTitle}
+                    onChange={(e) => {
+                      setFormData((prev) => ({
+                        ...prev,
+                        metaTitle: e.target.value,
+                      }));
+                      setMetaTitleEdited(true);
+                    }}
+                    placeholder="Same as story title by default"
+                    maxLength={70}
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    {formData.metaTitle.length}/70
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>
+                    Primary Keywords (optional, comma spaced; i.e. keyword1,
+                    keyword2...)
+                  </Label>
+                  <Input
+                    value={formData.primaryKeyword}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        primaryKeyword: e.target.value,
+                      }))
+                    }
+                    placeholder="e.g. immigrant women stories"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Meta Description (recommended: 150–160 chars)</Label>
+                <Textarea
+                  value={formData.metaDescription}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      metaDescription: e.target.value,
+                    }));
+                    setMetaDescriptionEdited(true);
+                  }}
+                  placeholder="Auto-filled from summary"
+                  rows={3}
+                  maxLength={320}
+                />
+                <p className="text-sm text-muted-foreground">
+                  {formData.metaDescription.length}/320
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Social Share Image (OG Image)</Label>
+                <Input
+                  value={formData.metaImage}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      metaImage: e.target.value,
+                    }));
+                    setMetaImageEdited(true);
+                  }}
+                  placeholder="Defaults to thumbnail"
+                />
+                {formData.metaImage && (
+                  <img
+                    src={formData.metaImage}
+                    alt="OG preview"
+                    className="w-full max-w-md rounded border"
+                  />
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>
+                    FAQ Schema (optional but great for rich results)
+                  </Label>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        faq: [
+                          ...prev.faq,
+                          { id: uid(), question: "", answer: "" },
+                        ],
+                      }))
+                    }
+                  >
+                    + Add FAQ
+                  </Button>
+                </div>
+                {formData.faq.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No FAQs added yet
+                  </p>
+                ) : (
+                  formData.faq.map((item) => (
+                    <FAQItem
+                      key={item.id}
+                      item={item}
+                      onQuestionChange={(value) =>
+                        updateFaqQuestion(item.id, value)
+                      }
+                      onAnswerChange={(value) =>
+                        updateFaqAnswer(item.id, value)
+                      }
+                      onRemove={() => removeFaq(item.id)}
+                    />
+                  ))
+                )}
+              </div>
             </div>
 
             {/* Upload Thumbnail */}
@@ -489,7 +769,7 @@ export default function EditStoryPage() {
                       size="sm"
                       className="absolute top-1 right-1 bg-red-500 hover:bg-red-600"
                       onClick={() =>
-                        setFormData({ ...formData, thumbnail: "" })
+                        setFormData((prev) => ({ ...prev, thumbnail: "" }))
                       }
                       disabled={
                         isSavingDraft ||
@@ -548,10 +828,10 @@ export default function EditStoryPage() {
               <Select
                 value={formData.type}
                 onValueChange={(value: string) =>
-                  setFormData({
-                    ...formData,
+                  setFormData((prev) => ({
+                    ...prev,
                     type: value as "text" | "video" | "audio",
-                  })
+                  }))
                 }
                 disabled={
                   isSavingDraft ||
@@ -600,11 +880,11 @@ export default function EditStoryPage() {
                     <Button
                       variant="destructive"
                       onClick={() =>
-                        setFormData({
-                          ...formData,
+                        setFormData((prev) => ({
+                          ...prev,
                           videoUrl: "",
                           videoPreview: "",
-                        })
+                        }))
                       }
                       className="bg-red-500 hover:bg-red-600"
                       disabled={
@@ -831,7 +1111,7 @@ export default function EditStoryPage() {
                         variant="destructive"
                         size="sm"
                         onClick={() =>
-                          setFormData({ ...formData, audioFile: "" })
+                          setFormData((prev) => ({ ...prev, audioFile: "" }))
                         }
                         className="bg-red-500 hover:bg-red-600"
                         disabled={
@@ -940,4 +1220,3 @@ export default function EditStoryPage() {
     </div>
   );
 }
-
