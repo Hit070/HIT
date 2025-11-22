@@ -138,6 +138,18 @@ export default function BlogDetailsPage() {
       if (blog.primaryKeyword) {
         updateMetaTag("keywords", blog.primaryKeyword);
       }
+      updateMetaTag("author", blog.author);
+
+      // Article meta tags
+      updateMetaTag("article:author", blog.author);
+      updateMetaTag("article:published_time", blog.dateCreated);
+      updateMetaTag(
+        "article:modified_time",
+        blog.lastUpdated || blog.dateCreated
+      );
+      if (blog.category) {
+        updateMetaTag("article:section", blog.category);
+      }
 
       // Open Graph tags
       updatePropertyTag("og:title", blog.metaTitle || blog.title || "");
@@ -147,10 +159,17 @@ export default function BlogDetailsPage() {
       );
       updatePropertyTag("og:image", blog.metaImage || blog.thumbnail || "");
       updatePropertyTag("og:type", "article");
-     updatePropertyTag(
-       "og:url",
-       `https://herimmigranttales.org/blog/${blog.slug}`
-     );
+      updatePropertyTag(
+        "og:url",
+        `https://herimmigranttales.org/blog/${blog.slug}`
+      );
+      updatePropertyTag("og:site_name", "Her Immigrant Tales");
+      updatePropertyTag("article:author", blog.author);
+      updatePropertyTag("article:published_time", blog.dateCreated);
+      updatePropertyTag(
+        "article:modified_time",
+        blog.lastUpdated || blog.dateCreated
+      );
 
       // Twitter Card tags
       updateMetaTag("twitter:card", "summary_large_image");
@@ -160,6 +179,7 @@ export default function BlogDetailsPage() {
         blog.metaDescription || blog.summary || ""
       );
       updateMetaTag("twitter:image", blog.metaImage || blog.thumbnail || "");
+      updateMetaTag("twitter:creator", blog.author);
     }
   }, [blog]);
 
@@ -211,7 +231,7 @@ export default function BlogDetailsPage() {
         name: "Her Immigrant Tales",
         logo: {
           "@type": "ImageObject",
-          url: "/logo1.svg",
+          url: "https://herimmigranttales.org/logo1.svg",
         },
       },
       datePublished: blog.dateCreated,
