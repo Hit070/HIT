@@ -30,14 +30,24 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
   return (
-    <html lang="en" className={`${cormorant.variable} ${quicksand.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${cormorant.variable} ${quicksand.variable}`}
+      suppressHydrationWarning
+    >
       <head>
-        <meta name="google-site-verification" content="B3IWgJs4tw2ngICyBC4RIVca-uT2cPwAe_KL5zISANI" />
+        <meta
+          name="google-site-verification"
+          content="B3IWgJs4tw2ngICyBC4RIVca-uT2cPwAe_KL5zISANI"
+        />
         <link rel="canonical" href="https://www.herimmigranttales.org" />
         {/* Google Analytics */}
         {GA_ID ? (
           <>
-            <Script strategy="afterInteractive" src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+            />
             <Script id="gtag-init" strategy="afterInteractive">
               {`
                 window.dataLayer = window.dataLayer || [];
@@ -48,10 +58,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Script>
           </>
         ) : null}
+
+        {/* Block indexing on admin/maintainance paths */}
+        {process.env.NODE_ENV === "production" && (
+          <>
+            {["/dashboard", "/maintainance"].some(
+              (path) =>
+                typeof window !== "undefined" &&
+                window.location.pathname.startsWith(path)
+            ) && (
+              <>
+                <meta name="robots" content="noindex, nofollow" />
+                <meta name="googlebot" content="noindex" />
+              </>
+            )}
+          </>
+        )}
       </head>
       <body className="font-quicksand antialiased">
         <script src="https://js.paystack.co/v1/inline.js" async></script>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+        >
           <CartProvider>
             <MainLayout>{children}</MainLayout>
             <Toaster />

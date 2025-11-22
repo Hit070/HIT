@@ -1,19 +1,19 @@
 // Product Types
 export interface Product {
-  id: string
-  title: string
-  description: string
-  price?: number
-  inventory?: number
-  category: string
-  subcategory?: string    // optional
-  variants?: ProductVariant[]
-  tags: string[]
-  barcode: String
-  createdAt: Date
-  updatedAt: Date
-  imageUrl?: string
-  imagePublicId?: string
+  id: string;
+  title: string;
+  description: string;
+  price?: number;
+  inventory?: number;
+  category: string;
+  subcategory?: string; // optional
+  variants?: ProductVariant[];
+  tags: string[];
+  barcode: String;
+  createdAt: Date;
+  updatedAt: Date;
+  imageUrl?: string;
+  imagePublicId?: string;
 }
 
 // ProductVariant Types
@@ -33,8 +33,8 @@ export interface OrderItem {
   id: string;
   productId: string;
   product: Product;
-  variantId?: string | null;        // (nullable for backward compatibility)
-  variant?: ProductVariant | null;  // (optional populated relation)
+  variantId?: string | null; // (nullable for backward compatibility)
+  variant?: ProductVariant | null; // (optional populated relation)
   quantity: number;
   subtotal: number; // product.price * quantity
   total: number;
@@ -69,35 +69,35 @@ export interface Order {
 
 // Discount Types
 export interface Discount {
-  id: string
-  code: string
+  id: string;
+  code: string;
   description?: string | null;
-  type: "percentage" | "fixed_amount" | "free_shipping"
-  value: number
-  usageLimit?: number | null
-  usageCount: number
-  startsAt: Date
-  endsAt?: Date | null
-  minSubtotal?: number | null
-  products?: Product[]
-  variants?: ProductVariant[]
-  isActive: boolean
-  createdAt: Date
-  updatedAt: Date
+  type: "percentage" | "fixed_amount" | "free_shipping";
+  value: number;
+  usageLimit?: number | null;
+  usageCount: number;
+  startsAt: Date;
+  endsAt?: Date | null;
+  minSubtotal?: number | null;
+  products?: Product[];
+  variants?: ProductVariant[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Analytics Types
 export interface SalesData {
-  date: string
-  revenue: number
-  orders: number
+  date: string;
+  revenue: number;
+  orders: number;
 }
 
 export interface ProductPerformance {
-  id: string
-  title: string
-  sales: number
-  revenue: number
+  id: string;
+  title: string;
+  sales: number;
+  revenue: number;
 }
 
 export type ProductItem = {
@@ -181,7 +181,7 @@ export interface CategoryAnalytics {
 export interface LowStockAlert {
   productId: string;
   productTitle: string;
-  type: 'product' | 'variant';
+  type: "product" | "variant";
   variantId?: string;
   variantName?: string;
   currentStock: number;
@@ -196,11 +196,14 @@ export interface ProductPerformance {
   revenue: number;
   avgPrice: number;
   performance: "High" | "Medium" | "Low";
-  variantBreakdown?: Record<string, {
-    name: string;
-    sold: number;
-    revenue: number;
-  }>;
+  variantBreakdown?: Record<
+    string,
+    {
+      name: string;
+      sold: number;
+      revenue: number;
+    }
+  >;
 }
 
 //User Types
@@ -272,53 +275,68 @@ export interface ResetPasswordData {
   password: string;
 }
 
+export type FAQItem = {
+  question: string;
+  answer: string;
+};
+
 export interface Story {
-  id: string
-  title: string
-  author: string
-  summary: string
+  id: string;
+  title: string;
+  author: string;
+  summary: string;
   content: Record<string, any>;
-  type: "text" | "video" | "audio"
-  videoUrl?: string
-  audioFile?: string
-  thumbnail?: string
-  isFeatured?: boolean
-  status: "published" | "draft"
-  dateCreated: string
-  lastUpdated: string
+  type: "text" | "video" | "audio";
+  videoUrl?: string;
+  audioFile?: string;
+  thumbnail?: string;
+  isFeatured?: boolean;
+  status: "published" | "draft";
+  dateCreated: string;
+  lastUpdated: string;
   slug: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaImage?: string;
+  faq?: FAQItem[]; // primaryKeyword?: string;
+  primaryKeyword?: string | null;
 }
 
 export interface Blog {
-  id: string
-  title: string
-  author: string
-  summary: string
+  id: string;
+  title: string;
+  author: string;
+  summary: string;
   content: Record<string, any>;
-  category: string
-  type: "text" | "video" | "audio"
-  videoUrl?: string
-  audioFile?: string
-  thumbnail?: string
-  isFeatured?: boolean
-  status: "published" | "draft"
-  dateCreated: string
-  lastUpdated: string
+  category: string;
+  type: "text" | "video" | "audio";
+  videoUrl?: string;
+  audioFile?: string;
+  thumbnail?: string;
+  isFeatured?: boolean;
+  status: "published" | "draft";
+  dateCreated: string;
+  lastUpdated: string;
   slug: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  metaImage?: string;
+  faq?: FAQItem[]; // primaryKeyword?: string;
+  primaryKeyword?: string | null;
 }
 
 export interface Event {
-  id: string
-  title: string
-  date: string
-  location: string
-  description: string
-  featured: boolean
-  image: string
-  meetingLink: string
-  status: "active" | "ended"
-  time: string
-  dateCreated: string
-  lastUpdated: string
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  description: string;
+  featured: boolean;
+  image: string;
+  meetingLink: string;
+  status: "active" | "ended";
+  time: string;
+  dateCreated: string;
+  lastUpdated: string;
   slug: string;
 }

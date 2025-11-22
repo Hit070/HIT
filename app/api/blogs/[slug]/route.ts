@@ -44,21 +44,26 @@ export async function PUT(request: Request, context: { params: Promise<{ slug: s
         }
 
         const blog = await prisma.blog.update({
-            where: { slug: params.slug },
-            data: {
-                title: data.title,
-                author: data.author,
-                summary: data.summary,
-                content: data.content,
-                category: data.category,
-                type: data.type,
-                videoUrl: data.videoUrl,
-                audioFile: data.audioFile,
-                thumbnail: data.thumbnail,
-                status: data.status,
-                slug: data.slug,
-                isFeatured: data.isFeatured,
-            },
+          where: { slug: params.slug },
+          data: {
+            title: data.title,
+            author: data.author,
+            summary: data.summary,
+            content: data.content,
+            category: data.category,
+            type: data.type,
+            videoUrl: data.videoUrl,
+            audioFile: data.audioFile,
+            thumbnail: data.thumbnail,
+            status: data.status,
+            slug: data.slug,
+            isFeatured: data.isFeatured,
+            metaTitle: data.metaTitle,
+            metaDescription: data.metaDescription,
+            metaImage: data.metaImage,
+            primaryKeyword: data.primaryKeyword,
+            faq: data.faq ?? [],
+          },
         });
 
         return NextResponse.json(blog);

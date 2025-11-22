@@ -26,19 +26,25 @@ export async function POST(request: Request) {
         }
 
         const story = await prisma.story.create({
-            data: {
-                title: data.title,
-                author: data.author,
-                summary: data.summary,
-                content: data.content,
-                type: data.type,
-                videoUrl: data.videoUrl,
-                audioFile: data.audioFile,
-                thumbnail: data.thumbnail,
-                isFeatured: data.isFeatured || false,
-                status: data.status,
-                slug: data.slug,
-            },
+          data: {
+            title: data.title,
+            author: data.author,
+            summary: data.summary,
+            content: data.content,
+            type: data.type,
+            videoUrl: data.videoUrl,
+            audioFile: data.audioFile,
+            thumbnail: data.thumbnail,
+            isFeatured: data.isFeatured || false,
+            status: data.status,
+            slug: data.slug,
+            metaTitle: data.metaTitle || data.title,
+            metaDescription:
+              data.metaDescription || data.summary?.slice(0, 160) + "...",
+            metaImage: data.metaImage || data.thumbnail,
+            faq: data.faq ?? [],
+            primaryKeyword: data.primaryKeyword || null,
+          },
         });
         return NextResponse.json(story, { status: 201 });
     } catch (error) {
