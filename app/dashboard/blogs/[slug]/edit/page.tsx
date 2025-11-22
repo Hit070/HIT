@@ -657,7 +657,10 @@ export default function EditBlogPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Primary Keyword (optional)</Label>
+                  <Label>
+                    Primary Keywords (optional, comma spaced;
+                    i.e. keyword1, keyword2...)
+                  </Label>
                   <Input
                     value={formData.primaryKeyword}
                     onChange={(e) =>

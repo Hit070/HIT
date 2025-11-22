@@ -17,14 +17,36 @@ export const metadata: Metadata = {
     default: "Her Immigrant Tales | Immigrant Women Stories",
     template: "%s | Her Immigrant Tales",
   },
-  description: "Discover powerful stories, connect with a vibrant community, and help us honor the voices of immigrant women everywhere.",
+  description:
+    "Discover powerful stories, connect with a vibrant community, and help us honor the voices of immigrant women everywhere.",
+  keywords:
+    "immigrant women, immigrant women health, immigrant stories, women empowerment",
   openGraph: {
-    images: "/favicon.png", // put a 1200x630 image in public/
+    type: "website",
+    locale: "en_US",
+    url: "https://www.herimmigranttales.org",
+    siteName: "Her Immigrant Tales",
+    images: [
+      {
+        url: "/favicon.png",
+        width: 512,
+        height: 512,
+        alt: "Her Immigrant Tales",
+      },
+      {
+        url: "/logo1.svg",
+        width: 1200,
+        height: 630,
+        alt: "Her Immigrant Tales",
+      },
+    ],
   },
-  robots: {
-    index: true,
-    follow: true,
+  twitter: {
+    card: "summary_large_image",
+    images: ["/favicon.png"],
   },
+  robots: { index: true, follow: true },
+  alternates: { canonical: "https://www.herimmigranttales.org" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
