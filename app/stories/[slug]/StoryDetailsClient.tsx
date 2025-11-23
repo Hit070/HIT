@@ -11,97 +11,153 @@ import { Story } from "@/types";
 import { ArrowUpRight } from "lucide-react";
 import { useParams } from "next/navigation";
 
-const getCategoryColor = (category: string) => {
-  const colors = [
-    {
-      text: "text-purple-600",
-      border: "border-purple-600",
-      bg: "bg-purple-100",
-    },
-    { text: "text-green-600", border: "border-green-600", bg: "bg-green-100" },
-    { text: "text-blue-600", border: "border-blue-600", bg: "bg-blue-100" },
-    {
-      text: "text-yellow-600",
-      border: "border-yellow-600",
-      bg: "bg-yellow-100",
-    },
-    {
-      text: "text-indigo-600",
-      border: "border-indigo-600",
-      bg: "bg-indigo-100",
-    },
-    {
-      text: "text-emerald-600",
-      border: "border-emerald-600",
-      bg: "bg-emerald-100",
-    },
-    { text: "text-red-600", border: "border-red-600", bg: "bg-red-100" },
-    { text: "text-pink-600", border: "border-pink-600", bg: "bg-pink-100" },
-    { text: "text-teal-600", border: "border-teal-600", bg: "bg-teal-100" },
-    {
-      text: "text-orange-600",
-      border: "border-orange-600",
-      bg: "bg-orange-100",
-    },
-    { text: "text-cyan-600", border: "border-cyan-600", bg: "bg-cyan-100" },
-  ];
-
-  if (!category) {
-    return colors[0];
-  }
-
-  let hash = 0;
-  for (let i = 0; i < category.length; i++) {
-    const char = category.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
+// NEW: Props type - receive server data
+type Props = {
+  story: Story | null;
+  otherStories: Story[];
 };
 
-export default function StoryDetailPage() {
+// Initialize with server data, but can be updated from store
+export default function StoryDetailsClient({
+  story: serverStory,
+  otherStories: serverOtherStories,
+}: Props) {
   const params = useParams<{ slug: string }>();
   const storySlug = params.slug;
-  const { stories, fetchStories } = useContentStore();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [story, setStory] = useState<Story | null>(null);
-  const [otherStories, setOtherStories] = useState<Story[]>([]);
 
+  const { stories, fetchStories } = useContentStore();
+
+  // Initialize with server data, but can be updated from store
+  const [loading, setLoading] = useState<boolean>(!serverStory);
+  const [story, setStory] = useState<Story | null>(serverStory);
+  const [otherStories, setOtherStories] = useState<Story[]>(serverOtherStories);
+
+  // Fetch from store if needed (for client-side navigation)
   useEffect(() => {
     const loadStory = async () => {
-      try {
-        if (stories.length === 0) {
+      // Only fetch if we don't have server data and store is empty
+      if (!serverStory && stories.length === 0) {
+        try {
           await fetchStories();
+        } catch (error) {
+          toast({
+            title: "Failed to fetch stories",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        toast({
-          title: "Failed to fetch stories",
-          variant: "destructive",
-        });
-      } finally {
+      } else if (serverStory) {
+        // We have server data, no loading needed
         setLoading(false);
       }
     };
 
     loadStory();
-  }, []);
+  }, [serverStory, stories.length, fetchStories]);
 
+  // Update from store when available (for client-side navigation)
   useEffect(() => {
-    if (stories.length > 0 && storySlug) {
-      // Find the current story by slug
-      const currentStory = stories.find((s: Story) => s.slug === storySlug);
-      setStory(currentStory || null);
+    if (stories.length > 0) {
+      const currentStory = stories.find((b: Story) => b.slug === storySlug);
 
-      // Get other published stories (excluding current one)
+      // Only update if we found it in store and don't have server data
+      if (currentStory && !serverStory) {
+        setStory(currentStory);
+      }
+
       const others = stories
-        .filter((s: Story) => s.slug !== storySlug && s.status === "published")
+        .filter((b: Story) => b.slug !== storySlug && b.status === "published")
         .slice(0, 3);
-      setOtherStories(others);
-    }
-  }, [stories, storySlug]);
 
+      // Only update if we don't have server data
+      if (!serverStory || serverOtherStories.length === 0) {
+        setOtherStories(others);
+      }
+    }
+  }, [stories, storySlug, serverStory, serverOtherStories]);
+  // Update meta tags dynamically (for client-side navigation)
+  useEffect(() => {
+    if (story) {
+      // Update document title
+      document.title = story.metaTitle || story.title || "Story Post";
+
+      // Update or create meta tags
+      const updateMetaTag = (name: string, content: string) => {
+        let tag = document.querySelector(
+          `meta[name="${name}"]`
+        ) as HTMLMetaElement;
+        if (!tag) {
+          tag = document.createElement("meta");
+          tag.name = name;
+          document.head.appendChild(tag);
+        }
+        tag.content = content;
+      };
+
+      const updatePropertyTag = (property: string, content: string) => {
+        let tag = document.querySelector(
+          `meta[property="${property}"]`
+        ) as HTMLMetaElement;
+        if (!tag) {
+          tag = document.createElement("meta");
+          tag.setAttribute("property", property);
+          document.head.appendChild(tag);
+        }
+        tag.content = content;
+      };
+
+      // Standard meta tags
+      updateMetaTag("description", story.metaDescription || story.summary || "");
+      if (story.primaryKeyword) {
+        updateMetaTag("keywords", story.primaryKeyword);
+      }
+      updateMetaTag("author", story.author);
+
+      // Article meta tags
+      updateMetaTag("article:author", story.author);
+      updateMetaTag("article:published_time", story.dateCreated);
+      updateMetaTag(
+        "article:modified_time",
+        story.lastUpdated || story.dateCreated
+      );
+      // if (story.category) {
+      //   updateMetaTag("article:section", story.category);
+      // }
+
+      // Open Graph tags
+      updatePropertyTag("og:title", story.metaTitle || story.title || "");
+      updatePropertyTag(
+        "og:description",
+        story.metaDescription || story.summary || ""
+      );
+      updatePropertyTag("og:image", story.metaImage || story.thumbnail || "");
+      updatePropertyTag("og:type", "article");
+      updatePropertyTag(
+        "og:url",
+        `https://herimmigranttales.org/stories/${story.slug}`
+      );
+      updatePropertyTag("og:site_name", "Her Immigrant Tales");
+      updatePropertyTag("article:author", story.author);
+      updatePropertyTag("article:published_time", story.dateCreated);
+      updatePropertyTag(
+        "article:modified_time",
+        story.lastUpdated || story.dateCreated
+      );
+
+      // Twitter Card tags
+      updateMetaTag("twitter:card", "summary_large_image");
+      updateMetaTag("twitter:title", story.metaTitle || story.title || "");
+      updateMetaTag(
+        "twitter:description",
+        story.metaDescription || story.summary || ""
+      );
+      updateMetaTag("twitter:image", story.metaImage || story.thumbnail || "");
+      updateMetaTag("twitter:creator", story.author);
+    }
+  }, [story]);
+
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
@@ -114,19 +170,17 @@ export default function StoryDetailPage() {
     );
   }
 
+  // Not found state
   if (!story) {
     return (
       <div className="min-h-screen bg-white">
         <Header />
-        <div className="px-4 py-16 max-w-4xl mx-auto text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Story Not Found
+        <div className="flex flex-col items-center justify-center min-h-[60vh]">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Story not found
           </h1>
-          <p className="text-gray-600 mb-8">
-            The story you're looking for doesn't exist.
-          </p>
           <Link href="/stories" className="text-[#bf5925] hover:underline">
-            ← Back to Stories
+            ← Back to stories
           </Link>
         </div>
         <Footer />
@@ -191,7 +245,20 @@ export default function StoryDetailPage() {
           </header>
 
           {/* Story Content */}
-          <article className="text-xl prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono">
+          <article
+            className="text-xl prose prose-lg max-w-none 
+  [&_ul]:list-disc [&_ul]:ml-6 
+  [&_ol]:list-decimal [&_ol]:ml-6 
+  [&_li]:my-1 
+  [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 
+  [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 
+  [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 
+  [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+  [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4
+  [&_div:has(>a>img)]:border-2 [&_div:has(>a>img)]:border-blue-200 [&_div:has(>a>img)]:rounded-lg [&_div:has(>a>img)]:p-3 [&_div:has(>a>img)]:bg-blue-50/50 [&_div:has(>a>img)]:my-4
+  [&_a:has(img)]:block [&_a:has(img)]:no-underline
+  [&_a:has(img)_div]:mt-2 [&_a:has(img)_div]:text-sm [&_a:has(img)_div]:text-blue-600"
+          >
             <div
               className="mb-8 leading-relaxed"
               dangerouslySetInnerHTML={{ __html: story.content?.html || "" }}

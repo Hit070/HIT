@@ -62,46 +62,73 @@ const getCategoryColor = (category: string) => {
   return colors[index];
 };
 
-export default function BlogDetailsPage() {
+// NEW: Props type - receive server data
+type Props = {
+  blog: Blog | null;
+  otherBlogs: Blog[];
+};
+
+// Initialize with server data, but can be updated from store
+export default function BlogDetailsClient({
+  blog: serverBlog,
+  otherBlogs: serverOtherBlogs,
+}: Props) {
   const params = useParams<{ slug: string }>();
   const blogSlug = params.slug;
-  const { blogs, fetchBlogs } = useContentStore();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const [otherBlogs, setOtherBlogs] = useState<Blog[]>([]);
 
+  const { blogs, fetchBlogs } = useContentStore();
+
+  // Initialize with server data, but can be updated from store
+  const [loading, setLoading] = useState<boolean>(!serverBlog);
+  const [blog, setBlog] = useState<Blog | null>(serverBlog);
+  const [otherBlogs, setOtherBlogs] = useState<Blog[]>(serverOtherBlogs);
+
+  // Fetch from store if needed (for client-side navigation)
   useEffect(() => {
     const loadBlog = async () => {
-      try {
-        if (blogs.length === 0) {
+      // Only fetch if we don't have server data and store is empty
+      if (!serverBlog && blogs.length === 0) {
+        try {
           await fetchBlogs();
+        } catch (error) {
+          toast({
+            title: "Failed to fetch blogs",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        toast({
-          title: "Failed to fetch blogs",
-          variant: "destructive",
-        });
-      } finally {
+      } else if (serverBlog) {
+        // We have server data, no loading needed
         setLoading(false);
       }
     };
 
     loadBlog();
-  }, [blogs.length, fetchBlogs]);
+  }, [serverBlog, blogs.length, fetchBlogs]);
 
+  // Update from store when available (for client-side navigation)
   useEffect(() => {
     if (blogs.length > 0) {
       const currentBlog = blogs.find((b: Blog) => b.slug === blogSlug);
-      setBlog(currentBlog || null);
+
+      // Only update if we found it in store and don't have server data
+      if (currentBlog && !serverBlog) {
+        setBlog(currentBlog);
+      }
 
       const others = blogs
         .filter((b: Blog) => b.slug !== blogSlug && b.status === "published")
         .slice(0, 3);
-      setOtherBlogs(others);
-    }
-  }, [blogs, blogSlug]);
 
-  // Update meta tags when blog changes
+      // Only update if we don't have server data
+      if (!serverBlog || serverOtherBlogs.length === 0) {
+        setOtherBlogs(others);
+      }
+    }
+  }, [blogs, blogSlug, serverBlog, serverOtherBlogs]);
+
+  // Update meta tags dynamically (for client-side navigation)
   useEffect(() => {
     if (blog) {
       // Update document title
@@ -182,6 +209,7 @@ export default function BlogDetailsPage() {
     }
   }, [blog]);
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
@@ -194,6 +222,7 @@ export default function BlogDetailsPage() {
     );
   }
 
+  // Not found state
   if (!blog) {
     return (
       <div className="min-h-screen bg-white">
@@ -213,69 +242,8 @@ export default function BlogDetailsPage() {
 
   const color = getCategoryColor(blog.category);
 
-  // Generate JSON-LD structured data
-  const generateStructuredData = () => {
-    const baseSchema = {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      headline: blog.metaTitle || blog.title,
-      description: blog.metaDescription || blog.summary,
-      image: blog.metaImage || blog.thumbnail,
-      author: {
-        "@type": "Person",
-        name: blog.author,
-      },
-      publisher: {
-        "@type": "Organization",
-        name: "Her Immigrant Tales",
-        logo: {
-          "@type": "ImageObject",
-          url: "https://herimmigranttales.org/logo1.svg",
-        },
-      },
-      datePublished: blog.dateCreated,
-      dateModified: blog.lastUpdated || blog.dateCreated,
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": `https://herimmigranttales.org/blog/${blog.slug}`,
-      },
-      keywords: blog.primaryKeyword || blog.category,
-    };
-
-    // If there are FAQs, create a separate FAQ schema
-    if (blog.faq && blog.faq.length > 0) {
-      const faqSchema = {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: blog.faq.map((f: any) => ({
-          "@type": "Question",
-          name: f.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: f.answer,
-          },
-        })),
-      };
-
-      // Return both schemas in an array
-      return [baseSchema, faqSchema];
-    }
-
-    return baseSchema;
-  };
-
-  const structuredData = generateStructuredData();
-
   return (
     <div className="min-h-screen bg-white">
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData),
-        }}
-      />
-
       <Header />
 
       <main className="max-w-[1200px] mx-auto px-4 py-8">
@@ -335,7 +303,20 @@ export default function BlogDetailsPage() {
         </header>
 
         {/* Blog Content */}
-        <article className="text-xl prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono">
+        <article
+          className="text-xl prose prose-lg max-w-none 
+  [&_ul]:list-disc [&_ul]:ml-6 
+  [&_ol]:list-decimal [&_ol]:ml-6 
+  [&_li]:my-1 
+  [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 
+  [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 
+  [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 
+  [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+  [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4
+  [&_div:has(>a>img)]:border-2 [&_div:has(>a>img)]:border-blue-200 [&_div:has(>a>img)]:rounded-lg [&_div:has(>a>img)]:p-3 [&_div:has(>a>img)]:bg-blue-50/50 [&_div:has(>a>img)]:my-4
+  [&_a:has(img)]:block [&_a:has(img)]:no-underline
+  [&_a:has(img)_div]:mt-2 [&_a:has(img)_div]:text-sm [&_a:has(img)_div]:text-blue-600"
+        >
           <div
             className="mb-8 leading-relaxed"
             dangerouslySetInnerHTML={{ __html: blog.content?.html || "" }}

@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog | Her Immigrant Tales",
+    title: "Blog",
     description:
       "Her Immigrant Tales blog shares inspiring stories and industry updates, highlighting immigrant women's journeys, empowerment, and community growth.",
     images: ["/logo1.svg"],
@@ -35,6 +35,55 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogPage() {
-  return <BlogPageClient />;
+// Server component: fetch initial blogs for SEO and pass to client
+export default async function BlogPage() {
+  let serverBlogs: any[] = [];
+
+  try {
+    const res = await fetch("https://www.herimmigranttales.org/api/blogs", {
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const all = await res.json();
+      serverBlogs = Array.isArray(all)
+        ? all.filter((b: any) => b.status === "published")
+        : [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch server blogs:", error);
+    serverBlogs = [];
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://www.herimmigranttales.org",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://www.herimmigranttales.org/blog",
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      <BlogPageClient serverBlogs={serverBlogs} />
+    </>
+  );
 }

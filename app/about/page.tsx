@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "About Us | Her Immigrant Tales",
+    title: "About Us",
     description:
       "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope.",
     images: ["/logo1.svg"],

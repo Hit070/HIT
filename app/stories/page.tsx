@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stories | Her Immigrant Tales",
+    title: "Stories",
     description:
       "Discover inspiring immigrant stories and voices of immigrant women, sharing experiences, resilience, and industry updates from around the world.",
     images: ["/logo1.svg"],
@@ -35,6 +35,56 @@ export const metadata: Metadata = {
   },
 };
 
-export default function StoriesPage() {
-  return <StoriesPageClient />;
+// Server component: fetch initial stories for SEO and pass to client
+export default async function StoriesPage() {
+  let serverStories: any[] = [];
+
+  try {
+    const res = await fetch("https://www.herimmigranttales.org/api/stories", {
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const all = await res.json();
+      serverStories = Array.isArray(all)
+        ? all.filter((s: any) => s.status === "published")
+        : [];
+    }
+  } catch (error) {
+    // swallow - client can fetch
+    console.error("Failed to fetch server stories:", error);
+    serverStories = [];
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://www.herimmigranttales.org",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Stories",
+        item: "https://www.herimmigranttales.org/stories",
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      <StoriesPageClient serverStories={serverStories} />
+    </>
+  );
 }

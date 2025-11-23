@@ -76,7 +76,7 @@ export default function AboutPage() {
 
     useEffect(() => {
       // Update document title
-      document.title = "About Us | Her Immigrant Tales";
+      document.title = "About Us";
 
       // Helper functions
       const updateMetaTag = (name: string, content: string) => {
@@ -114,7 +114,7 @@ export default function AboutPage() {
       );
 
       // Open Graph tags
-      updatePropertyTag("og:title", "About Us | Her Immigrant Tales");
+      updatePropertyTag("og:title", "About Us");
       updatePropertyTag(
         "og:description",
         "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
@@ -125,7 +125,7 @@ export default function AboutPage() {
 
       // Twitter tags
       updateMetaTag("twitter:card", "summary_large_image");
-      updateMetaTag("twitter:title", "About Us | Her Immigrant Tales");
+      updateMetaTag("twitter:title", "About Us");
       updateMetaTag(
         "twitter:description",
         "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."

@@ -9,8 +9,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useContentStore } from "@/store/store";
 import { toast } from "@/components/ui/use-toast";
+import { Blog } from "@/types";
 
 const MAX_DESC_LENGTH = 100;
+
+type Props = {
+  serverBlogs?: Blog[];
+};
 
 const getCategoryColor = (category: string) => {
   const colors = [
@@ -65,33 +70,58 @@ const getCategoryColor = (category: string) => {
   return colors[index];
 };
 
-export default function BlogPage() {
+export default function BlogPage({ serverBlogs }: Props) {
   const { blogs, fetchBlogs } = useContentStore();
   const [visibleCount, setVisibleCount] = useState(6);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    !serverBlogs || serverBlogs.length === 0
+  );
   const [hasClickedLoadMore, setHasClickedLoadMore] = useState(false);
+  const [localBlogs, setLocalBlogs] = useState<Blog[]>(
+    serverBlogs && serverBlogs.length > 0 ? serverBlogs : blogs
+  );
 
+  // Initialize: prefer store data when available, otherwise use serverBlogs
   useEffect(() => {
-    if (blogs.length === 0) {
-      fetchBlogs()
-        .catch(() => {
+    let mounted = true;
+
+    const init = async () => {
+      if (blogs.length === 0) {
+        if (serverBlogs && serverBlogs.length > 0) {
+          setLocalBlogs(serverBlogs);
+          if (mounted) setLoading(false);
+          return;
+        }
+
+        try {
+          await fetchBlogs();
+        } catch (err) {
           toast({
             title: "Failed to fetch blogs",
             variant: "destructive",
           });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-  }, []);
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      } else {
+        setLocalBlogs(blogs.filter((b: Blog) => b.status === "published"));
+        if (mounted) setLoading(false);
+      }
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+    };
+  }, [serverBlogs, blogs.length, fetchBlogs]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  // Remove the date filter that's too restrictive - just filter by published status
-  const filteredBlogs = blogs.filter((blog) => blog.status === "published");
+
+  const filteredBlogs = localBlogs.filter(
+    (blog) => blog.status === "published"
+  );
   const featuredBlog = filteredBlogs.find((b) => b.isFeatured);
   const otherBlogs = filteredBlogs
     .filter((b) => !b.isFeatured)

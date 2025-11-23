@@ -195,7 +195,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/events" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/community/events" className="text-gray-300 hover:text-white transition-colors">
                     Events
                   </Link>
                 </li>

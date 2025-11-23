@@ -11,14 +11,29 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { EventModal } from "@/components/event-modal";
 import { useEventStore } from "@/store/store";
 import { toast } from "@/components/ui/use-toast";
+import { Event } from "@/types"; // Make sure you import your Event type
 
-export default function CommunityEventsPage() {
+// Props type to receive server data
+type Props = {
+  serverEvents: Event[];
+};
+
+// Component now accepts props from server
+export default function EventsClient({ serverEvents }: Props) {
+  // KEPT: Zustand store still works!
   const { events, fetchEvents } = useEventStore();
 
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 5;
 
-  const activeEvents = events.filter((event) => event.status === "active");
+  // Initialize with server data, can be updated from store
+  const [localEvents, setLocalEvents] = useState<Event[]>(serverEvents);
+  const [loading, setLoading] = useState<boolean>(
+    !serverEvents || serverEvents.length === 0
+  );
+
+  // Filter active events from local state
+  const activeEvents = localEvents.filter((event) => event.status === "active");
 
   const totalPages = Math.ceil(activeEvents.length / eventsPerPage);
   const currentEvents = activeEvents.slice(
@@ -26,31 +41,49 @@ export default function CommunityEventsPage() {
     currentPage * eventsPerPage
   );
 
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
 
+  // Fetch from store if needed (for client-side navigation)
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (events.length === 0) {
+      // Only fetch if we don't have server data and store is empty
+      if ((!serverEvents || serverEvents.length === 0) && events.length === 0) {
+        try {
           await fetchEvents();
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to fetch events. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch events. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
+      } else if (serverEvents && serverEvents.length > 0) {
+        // We have server data, no loading needed
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
 
-  const handleEventClick = (event: any) => {
+    fetchData();
+  }, [serverEvents, events.length, fetchEvents]);
+
+  // Update from store when available (for client-side navigation)
+  useEffect(() => {
+    if (events.length > 0) {
+      const activeStoreEvents = events.filter(
+        (e: Event) => e.status === "active"
+      );
+
+      // Only update if we don't have server data
+      if (!serverEvents || serverEvents.length === 0) {
+        setLocalEvents(activeStoreEvents);
+      }
+    }
+  }, [events, serverEvents]);
+
+  const handleEventClick = (event: Event) => {
     setSelectedEvent(event);
     setIsModalOpen(true);
   };
@@ -59,6 +92,7 @@ export default function CommunityEventsPage() {
     setIsModalOpen(false);
   };
 
+  // KEPT: Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white">

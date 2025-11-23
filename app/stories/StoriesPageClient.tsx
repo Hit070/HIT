@@ -13,83 +13,60 @@ import { Story } from "@/types";
 
 const MAX_DESC_LENGTH = 100;
 
-const getCategoryColor = (category: string) => {
-  const colors = [
-    {
-      text: "text-purple-600",
-      border: "border-purple-600",
-      bg: "bg-purple-100",
-    },
-    { text: "text-green-600", border: "border-green-600", bg: "bg-green-100" },
-    { text: "text-blue-600", border: "border-blue-600", bg: "bg-blue-100" },
-    {
-      text: "text-yellow-600",
-      border: "border-yellow-600",
-      bg: "bg-yellow-100",
-    },
-    {
-      text: "text-indigo-600",
-      border: "border-indigo-600",
-      bg: "bg-indigo-100",
-    },
-    {
-      text: "text-emerald-600",
-      border: "border-emerald-600",
-      bg: "bg-emerald-100",
-    },
-    { text: "text-red-600", border: "border-red-600", bg: "bg-red-100" },
-    { text: "text-pink-600", border: "border-pink-600", bg: "bg-pink-100" },
-    { text: "text-teal-600", border: "border-teal-600", bg: "bg-teal-100" },
-    {
-      text: "text-orange-600",
-      border: "border-orange-600",
-      bg: "bg-orange-100",
-    },
-    { text: "text-cyan-600", border: "border-cyan-600", bg: "bg-cyan-100" },
-  ];
-
-  if (!category) {
-    return colors[0];
-  }
-
-  let hash = 0;
-  for (let i = 0; i < category.length; i++) {
-    const char = category.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
+type Props = {
+  serverStories?: Story[];
 };
 
-export default function StoriesPage() {
+export default function StoriesPage({ serverStories }: Props) {
   const { stories, fetchStories } = useContentStore();
   const [visibleCount, setVisibleCount] = useState(6);
-  const [loading, setLoading] = useState<boolean>(true);
+const [loading, setLoading] = useState(
+  !serverStories || serverStories.length === 0
+);
   const [hasClickedLoadMore, setHasClickedLoadMore] = useState<boolean>(false);
+  const [localStories, setLocalStories] = useState<Story[]>(
+    serverStories && serverStories.length > 0 ? serverStories : stories
+  );
 
+  // Initialize: prefer store data when available, otherwise use serverStories
   useEffect(() => {
-    if (stories.length === 0) {
-      fetchStories()
-        .catch(() => {
+    let mounted = true;
+
+    const init = async () => {
+      if (stories.length === 0) {
+        if (serverStories && serverStories.length > 0) {
+          setLocalStories(serverStories);
+          if (mounted) setLoading(false);
+          return;
+        }
+
+        try {
+          await fetchStories();
+        } catch (err) {
           toast({
             title: "Failed to fetch stories",
             variant: "destructive",
           });
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    } else {
-      setLoading(false);
-    }
-  }, []);
+        } finally {
+          if (mounted) setLoading(false);
+        }
+      } else {
+        setLocalStories(stories.filter((s: Story) => s.status === "published"));
+        if (mounted) setLoading(false);
+      }
+    };
+
+    init();
+
+    return () => {
+      mounted = false;
+    };
+  }, [serverStories, stories.length, fetchStories]);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   // Remove the date filter that's too restrictive - just filter by published status
-  const filteredStories = stories.filter(
+  const filteredStories = localStories.filter(
     (story) => story.status === "published"
   );
   const featuredStory = filteredStories.find((s: Story) => s.isFeatured);

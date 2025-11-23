@@ -6,10 +6,9 @@ export const metadata: Metadata = {
   title: "Global Community",
   description:
     "Join our global community of immigrant women sharing stories, building connections, and inspiring change across cultures and borders.",
-  keywords:
-    "global community, immigrant women",
+  keywords: "global community, immigrant women",
   openGraph: {
-    title: "Global Community | Her Immigrant Tales",
+    title: "Global Community",
     description:
       "Join our global community of immigrant women sharing stories, building connections, and inspiring change across cultures and borders.",
     url: "https://www.herimmigranttales.org/community",
@@ -25,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Global Community | Her Immigrant Tales",
+    title: "Global Community",
     description:
       "Join our global community of immigrant women sharing stories, building connections, and inspiring change across cultures and borders.",
     images: ["/logo1.svg"],
@@ -35,6 +34,53 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CommunityPage() {
-  return <CommunityClient />;
+// Server component: fetch initial events for SEO and pass to client
+export default async function CommunityPage() {
+  let serverEvents: any[] = [];
+
+  try {
+    const res = await fetch("https://www.herimmigranttales.org/api/events", {
+      cache: "no-store",
+    });
+
+    if (res.ok) {
+      const all = await res.json();
+      serverEvents = Array.isArray(all) ? all : [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch server events:", error);
+    serverEvents = [];
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://www.herimmigranttales.org",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Community",
+        item: "https://www.herimmigranttales.org/community",
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      <CommunityClient serverEvents={serverEvents} />
+    </>
+  );
 }

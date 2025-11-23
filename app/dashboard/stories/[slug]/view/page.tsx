@@ -257,10 +257,23 @@ export default function ViewStoryPage() {
         </header>
 
         {/* Story Content */}
-        <article className="prose prose-lg max-w-none [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono">
+        <article
+          className="text-xl prose prose-lg max-w-none 
+  [&_ul]:list-disc [&_ul]:ml-6 
+  [&_ol]:list-decimal [&_ol]:ml-6 
+  [&_li]:my-1 
+  [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 
+  [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 
+  [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 
+  [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+  [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4
+  [&_div:has(>a>img)]:border-2 [&_div:has(>a>img)]:border-blue-200 [&_div:has(>a>img)]:rounded-lg [&_div:has(>a>img)]:p-3 [&_div:has(>a>img)]:bg-blue-50/50 [&_div:has(>a>img)]:my-4
+  [&_a:has(img)]:block [&_a:has(img)]:no-underline
+  [&_a:has(img)_div]:mt-2 [&_a:has(img)_div]:text-sm [&_a:has(img)_div]:text-blue-600"
+        >
           <div
             className="mb-8 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: story.content.html || "" }}
+            dangerouslySetInnerHTML={{ __html: story.content?.html || "" }}
           />
         </article>
       </main>
