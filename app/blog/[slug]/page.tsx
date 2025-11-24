@@ -112,10 +112,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Generate JSON-LD structured data
+// Generate JSON-LD structured data using @graph approach
 function generateStructuredData(blog: any) {
   const blogPostingSchema = {
-    "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: blog.metaTitle || blog.title,
     description: blog.metaDescription || blog.summary,
@@ -143,7 +142,6 @@ function generateStructuredData(blog: any) {
   };
 
   const breadcrumbSchema = {
-    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       {
@@ -167,10 +165,12 @@ function generateStructuredData(blog: any) {
     ],
   };
 
+  // Build the @graph array with explicit any[] type
+  const graphItems: any[] = [blogPostingSchema, breadcrumbSchema];
+
   // If there are FAQs, add FAQ schema
   if (blog.faq && blog.faq.length > 0) {
     const faqSchema = {
-      "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: blog.faq.map((f: any) => ({
         "@type": "Question",
@@ -181,11 +181,14 @@ function generateStructuredData(blog: any) {
         },
       })),
     };
-
-    return [blogPostingSchema, breadcrumbSchema, faqSchema];
+    graphItems.push(faqSchema);
   }
 
-  return [blogPostingSchema, breadcrumbSchema];
+  // Return a single structured data object with @graph
+  return {
+    "@context": "https://schema.org",
+    "@graph": graphItems,
+  };
 }
 
 // Server Component - crawlers see this
@@ -201,7 +204,7 @@ export default async function BlogPage({ params }: Props) {
 
   return (
     <>
-      {/* JSON-LD Structured Data - bots see this */}
+      {/* JSON-LD Structured Data - Single script tag with @graph */}
       {structuredData && (
         <script
           type="application/ld+json"

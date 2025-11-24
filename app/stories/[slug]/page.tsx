@@ -115,11 +115,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Generate JSON-LD structured data
+// Generate JSON-LD structured data using @graph approach
 function generateStructuredData(story: any) {
-  const storyPostingSchema = {
-    "@context": "https://schema.org",
-    "@type": "Story",
+  const articleSchema = {
+    "@type": "Article",
     headline: story.metaTitle || story.title,
     description: story.metaDescription || story.summary,
     image: story.metaImage || story.thumbnail,
@@ -146,7 +145,6 @@ function generateStructuredData(story: any) {
   };
 
   const breadcrumbSchema = {
-    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       {
@@ -170,10 +168,12 @@ function generateStructuredData(story: any) {
     ],
   };
 
+  // Build the @graph array with explicit any[] type
+  const graphItems: any[] = [articleSchema, breadcrumbSchema];
+
   // If there are FAQs, add FAQ schema
   if (story.faq && story.faq.length > 0) {
     const faqSchema = {
-      "@context": "https://schema.org",
       "@type": "FAQPage",
       mainEntity: story.faq.map((f: any) => ({
         "@type": "Question",
@@ -184,11 +184,14 @@ function generateStructuredData(story: any) {
         },
       })),
     };
-
-    return [storyPostingSchema, breadcrumbSchema, faqSchema];
+    graphItems.push(faqSchema);
   }
 
-  return [storyPostingSchema, breadcrumbSchema];
+  // Return a single structured data object with @graph
+  return {
+    "@context": "https://schema.org",
+    "@graph": graphItems,
+  };
 }
 
 // Server Component - crawlers see this
@@ -201,9 +204,10 @@ export default async function StoryPage({ params }: Props) {
 
   // Generate structured data if story exists
   const structuredData = story ? generateStructuredData(story) : null;
+
   return (
     <>
-      {/* JSON-LD Structured Data - bots see this */}
+      {/* JSON-LD Structured Data - Single script tag with @graph */}
       {structuredData && (
         <script
           type="application/ld+json"
