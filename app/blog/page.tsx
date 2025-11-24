@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     title: "Blog",
     description:
       "Her Immigrant Tales blog shares inspiring stories and industry updates, highlighting immigrant women's journeys, empowerment, and community growth.",
-    url: "https://www.herimmigranttales.org/blog",
+    url: "https://herimmigranttales.org/blog",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     title: "Blog",
     description:
       "Her Immigrant Tales blog shares inspiring stories and industry updates, highlighting immigrant women's journeys, empowerment, and community growth.",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/blog",
+    canonical: "https://herimmigranttales.org/blog",
   },
 };
 
@@ -40,7 +40,7 @@ export default async function BlogPage() {
   let serverBlogs: any[] = [];
 
   try {
-    const res = await fetch("https://www.herimmigranttales.org/api/blogs", {
+    const res = await fetch("https://herimmigranttales.org/api/blogs", {
       cache: "no-store",
     });
 
@@ -63,13 +63,13 @@ export default async function BlogPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Blog",
-        item: "https://www.herimmigranttales.org/blog",
+        item: "https://herimmigranttales.org/blog",
       },
     ],
   };

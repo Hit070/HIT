@@ -12,10 +12,10 @@ export const metadata: Metadata = {
     title: "About Us",
     description:
       "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope.",
-    url: "https://www.herimmigranttales.org/about",
+    url: "https://herimmigranttales.org/about",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -29,10 +29,10 @@ export const metadata: Metadata = {
     title: "About Us",
     description:
       "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope.",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/about",
+    canonical: "https://herimmigranttales.org/about",
   },
 };
 

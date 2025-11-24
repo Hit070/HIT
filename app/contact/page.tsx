@@ -8,16 +8,16 @@ export const metadata: Metadata = {
     "Contact Her Immigrant Tales to share your story, ask questions, or collaborate. We’d love to connect and support you.",
   keywords: "contact",
   authors: [
-    { name: "Her Immigrant Tales", url: "https://www.herimmigranttales.org" },
+    { name: "Her Immigrant Tales", url: "https://herimmigranttales.org" },
   ],
   openGraph: {
     title: "Contact Us",
     description:
       "Contact Her Immigrant Tales to share your story, ask questions, or collaborate. We’d love to connect and support you.",
-    url: "https://www.herimmigranttales.org/contact",
+    url: "https://herimmigranttales.org/contact",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -30,10 +30,10 @@ export const metadata: Metadata = {
     title: "Contact Us",
     description:
       "Contact Her Immigrant Tales to share your story, ask questions, or collaborate. We’d love to connect and support you.",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/contact",
+    canonical: "https://herimmigranttales.org/contact",
   },
 };
 
@@ -46,13 +46,13 @@ export default function ContactPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Contact",
-        item: "https://www.herimmigranttales.org/contact",
+        item: "https://herimmigranttales.org/contact",
       },
     ],
   };
@@ -61,8 +61,8 @@ export default function ContactPage() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Her Immigrant Tales",
-    url: "https://www.herimmigranttales.org",
-    logo: "https://www.herimmigranttales.org/logo1.svg",
+    url: "https://herimmigranttales.org",
+    logo: "https://herimmigranttales.orghttps://herimmigranttales.org/logo1.svg",
     contactPoint: [
       {
         "@type": "ContactPoint",

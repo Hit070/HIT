@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     title: "Immigrant Women Stories",
     description:
       "Discover inspiring immigrant stories and voices of immigrant women, sharing experiences, resilience, and industry updates from around the world.",
-    url: "https://www.herimmigranttales.org/stories",
+    url: "https://herimmigranttales.org/stories",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -28,10 +28,10 @@ export const metadata: Metadata = {
     title: "Stories",
     description:
       "Discover inspiring immigrant stories and voices of immigrant women, sharing experiences, resilience, and industry updates from around the world.",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/stories",
+    canonical: "https://herimmigranttales.org/stories",
   },
 };
 
@@ -40,7 +40,7 @@ export default async function StoriesPage() {
   let serverStories: any[] = [];
 
   try {
-    const res = await fetch("https://www.herimmigranttales.org/api/stories", {
+    const res = await fetch("https://herimmigranttales.org/api/stories", {
       cache: "no-store",
     });
 
@@ -64,13 +64,13 @@ export default async function StoriesPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Stories",
-        item: "https://www.herimmigranttales.org/stories",
+        item: "https://herimmigranttales.org/stories",
       },
     ],
   };

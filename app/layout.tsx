@@ -20,7 +20,7 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.herimmigranttales.org"),
+  metadataBase: new URL("https://herimmigranttales.org"),
   title: {
     default: "Her Immigrant Tales | Immigrant Women Stories",
     template: "%s | Her Immigrant Tales",

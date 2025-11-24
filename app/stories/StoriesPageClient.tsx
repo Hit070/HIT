@@ -20,9 +20,9 @@ type Props = {
 export default function StoriesPage({ serverStories }: Props) {
   const { stories, fetchStories } = useContentStore();
   const [visibleCount, setVisibleCount] = useState(6);
-const [loading, setLoading] = useState(
-  !serverStories || serverStories.length === 0
-);
+  const [loading, setLoading] = useState(
+    !serverStories || serverStories.length === 0
+  );
   const [hasClickedLoadMore, setHasClickedLoadMore] = useState<boolean>(false);
   const [localStories, setLocalStories] = useState<Story[]>(
     serverStories && serverStories.length > 0 ? serverStories : stories
@@ -222,7 +222,7 @@ const [loading, setLoading] = useState(
               </p>
               <div className="flex gap-3">
                 <Link
-                  href="/home"
+                  href="/"
                   className="inline-flex items-center px-5 py-3 bg-primary text-white rounded-full hover:bg-primary/80 transition-colors"
                 >
                   Visit Homepage

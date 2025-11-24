@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     title: "Global Community",
     description:
       "Join our global community of immigrant women sharing stories, building connections, and inspiring change across cultures and borders.",
-    url: "https://www.herimmigranttales.org/community",
+    url: "https://herimmigranttales.org/community",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -27,10 +27,10 @@ export const metadata: Metadata = {
     title: "Global Community",
     description:
       "Join our global community of immigrant women sharing stories, building connections, and inspiring change across cultures and borders.",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/community",
+    canonical: "https://herimmigranttales.org/community",
   },
 };
 
@@ -39,7 +39,7 @@ export default async function CommunityPage() {
   let serverEvents: any[] = [];
 
   try {
-    const res = await fetch("https://www.herimmigranttales.org/api/events", {
+    const res = await fetch("https://herimmigranttales.org/api/events", {
       cache: "no-store",
     });
 
@@ -60,13 +60,13 @@ export default async function CommunityPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Community",
-        item: "https://www.herimmigranttales.org/community",
+        item: "https://herimmigranttales.org/community",
       },
     ],
   };

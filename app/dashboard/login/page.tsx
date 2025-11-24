@@ -65,7 +65,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="absolute top-8 left-8 z-10 pl-8">
           <Image
-            src="/logo1.svg"
+            src="https://herimmigranttales.org/logo1.svg"
             alt="HER IMMIGRANT TALES Logo"
             width={250}
             height={50}
@@ -79,9 +79,9 @@ export default function LoginPage() {
             Your Impact Starts Here
           </h3>
           <p className="text-lg opacity-90 leading-relaxed">
-            Every update you make plays a part in amplifying the voices of immigrant women,
-            strengthening our community, and ensuring their stories continue to inspire and
-            reach the world.
+            Every update you make plays a part in amplifying the voices of
+            immigrant women, strengthening our community, and ensuring their
+            stories continue to inspire and reach the world.
           </p>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
           {/* Mobile Logo */}
           <div className="flex md:hidden absolute top-8 left-8 z-10 pl-8">
             <Image
-              src="/logo1.svg"
+              src="https://herimmigranttales.org/logo1.svg"
               alt="HER IMMIGRANT TALES Logo"
               width={250}
               height={50}
@@ -103,7 +103,9 @@ export default function LoginPage() {
           {/* Welcome Back Header */}
           <div className="text-left space-y-2">
             <h2 className="text-3xl font-bold text-gray-900">Welcome Back!</h2>
-            <p className="text-gray-600">Manage everything from one simple dashboard</p>
+            <p className="text-gray-600">
+              Manage everything from one simple dashboard
+            </p>
           </div>
 
           {/* Login Form */}
@@ -117,7 +119,10 @@ export default function LoginPage() {
 
             {/* Email Field */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-gray-700"
+              >
                 Email Address
               </Label>
               <Input
@@ -133,7 +138,10 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-gray-700"
+              >
                 Password
               </Label>
               <div className="relative">

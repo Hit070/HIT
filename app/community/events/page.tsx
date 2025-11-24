@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     title: "Events",
     description:
       "Discover upcoming events hosted by Her Immigrant Tales. Connect, collaborate, and grow together.",
-    url: "https://www.herimmigranttales.org/events",
+    url: "https://herimmigranttales.org/events",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -27,17 +27,17 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Events",
     description: "Discover upcoming events hosted by Her Immigrant Tales",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/events",
+    canonical: "https://herimmigranttales.org/events",
   },
 };
 
 // Helper to fetch events server-side
 async function getEvents() {
   try {
-    const res = await fetch("https://www.herimmigranttales.org/api/events", {
+    const res = await fetch("https://herimmigranttales.org/api/events", {
       cache: "no-store",
     });
 
@@ -65,19 +65,19 @@ function generateStructuredData(events: any[]) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Community",
-        item: "https://www.herimmigranttales.org/community",
+        item: "https://herimmigranttales.org/community",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: "Events",
-        item: "https://www.herimmigranttales.org/events",
+        item: "https://herimmigranttales.org/events",
       },
     ],
   };
@@ -98,7 +98,7 @@ function generateStructuredData(events: any[]) {
       organizer: {
         "@type": "Organization",
         name: "Her Immigrant Tales",
-        url: "https://www.herimmigranttales.org",
+        url: "https://herimmigranttales.org",
       },
       eventStatus: "https://schema.org/EventScheduled",
       eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",

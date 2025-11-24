@@ -274,7 +274,7 @@ export default function BlogPage({ serverBlogs }: Props) {
             </p>
             <div className="flex gap-3">
               <Link
-                href="/home"
+                href="/"
                 className="inline-flex items-center px-5 py-3 bg-primary text-white rounded-full hover:bg-primary/80 transition-colors"
               >
                 Go to Homepage

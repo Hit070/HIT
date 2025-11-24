@@ -10,7 +10,7 @@ type Props = {
 async function getStoryData(slug: string) {
   try {
     const res = await fetch(
-      `https://www.herimmigranttales.org/api/stories/${slug}`,
+      `https://herimmigranttales.org/api/stories/${slug}`,
       {
         cache: "no-store",
       }
@@ -30,7 +30,7 @@ async function getStoryData(slug: string) {
 // Helper to fetch other stories
 async function getOtherStories(currentSlug: string) {
   try {
-    const res = await fetch(`https://www.herimmigranttales.org/api/stories`, {
+    const res = await fetch(`https://herimmigranttales.org/api/stories`, {
       cache: "no-store",
     });
 
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Story",
         description:
           "Read inspiring stories from immigrant women around the world.",
-        images: ["/logo1.svg"],
+        images: ["https://herimmigranttales.org/logo1.svg"],
         type: "article",
       },
       twitter: {
@@ -70,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: "Story",
         description:
           "Read inspiring stories from immigrant women around the world.",
-        images: ["/logo1.svg"],
+        images: ["https://herimmigranttales.org/logo1.svg"],
       },
     };
   }
@@ -82,13 +82,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       story.summary ||
       "Read inspiring stories from immigrant women",
     keywords: story.primaryKeyword || story.title,
-    authors: [{ name: story.author, url: "https://www.herimmigranttales.org" }],
+    authors: [{ name: story.author, url: "https://herimmigranttales.org" }],
     openGraph: {
       title: story.metaTitle || story.title,
       description: story.metaDescription || story.summary,
-      images: [story.metaImage || story.thumbnail || "/logo1.svg"],
+      images: [
+        story.metaImage ||
+          story.thumbnail ||
+          "https://herimmigranttales.org/logo1.svg",
+      ],
       type: "article",
-      url: `https://www.herimmigranttales.org/stories/${story.slug}`,
+      url: `https://herimmigranttales.org/stories/${story.slug}`,
       siteName: "Her Immigrant Tales",
       publishedTime: story.dateCreated,
       modifiedTime: story.lastUpdated || story.dateCreated,
@@ -98,11 +102,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: story.metaTitle || story.title,
       description: story.metaDescription || story.summary,
-      images: [story.metaImage || story.thumbnail || "/logo1.svg"],
+      images: [
+        story.metaImage ||
+          story.thumbnail ||
+          "https://herimmigranttales.org/logo1.svg",
+      ],
       creator: story.author,
     },
     alternates: {
-      canonical: `https://www.herimmigranttales.org/stories/${story.slug}`,
+      canonical: `https://herimmigranttales.org/stories/${story.slug}`,
     },
   };
 }
@@ -118,21 +126,21 @@ function generateStructuredData(story: any) {
     author: {
       "@type": "Person",
       name: story.author,
-      url: "https://www.herimmigranttales.org",
+      url: "https://herimmigranttales.org",
     },
     publisher: {
       "@type": "Organization",
       name: "Her Immigrant Tales",
       logo: {
         "@type": "ImageObject",
-        url: "https://www.herimmigranttales.org/logo1.svg",
+        url: "https://herimmigranttales.orghttps://herimmigranttales.org/logo1.svg",
       },
     },
     datePublished: story.dateCreated,
     dateModified: story.lastUpdated || story.dateCreated,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://www.herimmigranttales.org/stories/${story.slug}`,
+      "@id": `https://herimmigranttales.org/stories/${story.slug}`,
     },
     keywords: story.primaryKeyword || story.title,
   };
@@ -145,19 +153,19 @@ function generateStructuredData(story: any) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Stories",
-        item: "https://www.herimmigranttales.org/stories",
+        item: "https://herimmigranttales.org/stories",
       },
       {
         "@type": "ListItem",
         position: 3,
         name: story.title,
-        item: `https://www.herimmigranttales.org/stories/${story.slug}`,
+        item: `https://herimmigranttales.org/stories/${story.slug}`,
       },
     ],
   };

@@ -12,10 +12,10 @@ export const metadata: Metadata = {
     title: "Frequently Asked Questions",
     description:
       "Explore our FAQ page for answers to frequently asked questions about Her Immigrant Tales, community, and storytelling platform.",
-    url: "https://www.herimmigranttales.org/faq",
+    url: "https://herimmigranttales.org/faq",
     images: [
       {
-        url: "/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
         width: 1200,
         height: 630,
         alt: "Her Immigrant Tales",
@@ -29,10 +29,10 @@ export const metadata: Metadata = {
     title: "Frequently Asked Questions",
     description:
       "Explore our FAQ page for answers to frequently asked questions about Her Immigrant Tales, community, and storytelling platform.",
-    images: ["/logo1.svg"],
+    images: ["https://herimmigranttales.org/logo1.svg"],
   },
   alternates: {
-    canonical: "https://www.herimmigranttales.org/faq",
+    canonical: "https://herimmigranttales.org/faq",
   },
 };
 
@@ -90,13 +90,13 @@ function generateStructuredData() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "FAQ",
-        item: "https://www.herimmigranttales.org/faq",
+        item: "https://herimmigranttales.org/faq",
       },
     ],
   };
