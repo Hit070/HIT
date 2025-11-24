@@ -197,31 +197,21 @@ export default async function StoryPage({ params }: Props) {
         }
       : null;
 
+  const structuredData = [articleSchema, breadcrumbSchema, faqSchema].filter(
+    Boolean as any
+  );
+  const dedupeStructuredData = (await import("@/lib/dedupeStructuredData"))
+    .default;
+  const deduped = dedupeStructuredData(structuredData as any[]);
+
   return (
     <>
-      {/* Separate script tags for each schema - like contact page */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(articleSchema),
+          __html: JSON.stringify(deduped),
         }}
       />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
-        }}
-      />
-
-      {faqSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(faqSchema),
-          }}
-        />
-      )}
 
       {/* Pass server data to client component */}
       <StoryDetailsClient story={story} otherStories={otherStories} />

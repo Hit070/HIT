@@ -152,7 +152,6 @@ export default async function BlogPage({ params }: Props) {
     },
     keywords: blog.primaryKeyword || blog.category,
   };
-
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -194,31 +193,26 @@ export default async function BlogPage({ params }: Props) {
         }
       : null;
 
+  // Combine and dedupe schemas so we emit a single JSON-LD script
+  const structuredData = [
+    blogPostingSchema,
+    breadcrumbSchema,
+    faqSchema,
+  ].filter(Boolean as any);
+
+  // Import dedupe lazily to keep server bundle small when possible
+  const dedupeStructuredData = (await import("@/lib/dedupeStructuredData"))
+    .default;
+  const deduped = dedupeStructuredData(structuredData as any[]);
+
   return (
     <>
-      {/* Separate script tags for each schema - like contact page */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(blogPostingSchema),
+          __html: JSON.stringify(deduped),
         }}
       />
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(breadcrumbSchema),
-        }}
-      />
-
-      {faqSchema && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(faqSchema),
-          }}
-        />
-      )}
 
       {/* Pass server data to client component */}
       <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />
