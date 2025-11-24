@@ -62,7 +62,7 @@ export default function ContactPage() {
     "@type": "Organization",
     name: "Her Immigrant Tales",
     url: "https://herimmigranttales.org",
-    logo: "https://herimmigranttales.orghttps://herimmigranttales.org/logo1.svg",
+    logo: "https://herimmigranttales.org/logo1.svg",
     contactPoint: [
       {
         "@type": "ContactPoint",

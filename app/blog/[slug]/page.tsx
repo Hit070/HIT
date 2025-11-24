@@ -130,7 +130,7 @@ function generateStructuredData(blog: any) {
       name: "Her Immigrant Tales",
       logo: {
         "@type": "ImageObject",
-        url: "https://herimmigranttales.orghttps://herimmigranttales.org/logo1.svg",
+        url: "https://herimmigranttales.org/logo1.svg",
       },
     },
     datePublished: blog.dateCreated,

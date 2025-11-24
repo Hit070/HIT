@@ -73,64 +73,64 @@ export default function AboutPage() {
   const imageGridRef = useRef(null);
   // const charityRef = useRef(null);
 
-  useEffect(() => {
-    // Update document title
-    document.title = "About Us";
+  // useEffect(() => {
+  //   // Update document title
+  //   document.title = "About Us";
 
-    // Helper functions
-    const updateMetaTag = (name: string, content: string) => {
-      let tag = document.querySelector(
-        `meta[name="${name}"]`
-      ) as HTMLMetaElement;
-      if (!tag) {
-        tag = document.createElement("meta");
-        tag.name = name;
-        document.head.appendChild(tag);
-      }
-      tag.content = content;
-    };
+  //   // Helper functions
+  //   const updateMetaTag = (name: string, content: string) => {
+  //     let tag = document.querySelector(
+  //       `meta[name="${name}"]`
+  //     ) as HTMLMetaElement;
+  //     if (!tag) {
+  //       tag = document.createElement("meta");
+  //       tag.name = name;
+  //       document.head.appendChild(tag);
+  //     }
+  //     tag.content = content;
+  //   };
 
-    const updatePropertyTag = (property: string, content: string) => {
-      let tag = document.querySelector(
-        `meta[property="${property}"]`
-      ) as HTMLMetaElement;
-      if (!tag) {
-        tag = document.createElement("meta");
-        tag.setAttribute("property", property);
-        document.head.appendChild(tag);
-      }
-      tag.content = content;
-    };
+  //   const updatePropertyTag = (property: string, content: string) => {
+  //     let tag = document.querySelector(
+  //       `meta[property="${property}"]`
+  //     ) as HTMLMetaElement;
+  //     if (!tag) {
+  //       tag = document.createElement("meta");
+  //       tag.setAttribute("property", property);
+  //       document.head.appendChild(tag);
+  //     }
+  //     tag.content = content;
+  //   };
 
-    // Standard meta tags
-    updateMetaTag(
-      "description",
-      "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
-    );
-    updateMetaTag(
-      "keywords",
-      "empowering immigrants, empowering immigrant women, amplifying voices, immigrant stories, women empowerment"
-    );
+  //   // Standard meta tags
+  //   updateMetaTag(
+  //     "description",
+  //     "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
+  //   );
+  //   updateMetaTag(
+  //     "keywords",
+  //     "empowering immigrants, empowering immigrant women, amplifying voices, immigrant stories, women empowerment"
+  //   );
 
-    // Open Graph tags
-    updatePropertyTag("og:title", "About Us");
-    updatePropertyTag(
-      "og:description",
-      "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
-    );
-    updatePropertyTag("og:url", "https://herimmigranttales.org/about");
-    updatePropertyTag("og:image", "https://herimmigranttales.org/logo1.svg");
-    updatePropertyTag("og:type", "website");
+  //   // Open Graph tags
+  //   updatePropertyTag("og:title", "About Us");
+  //   updatePropertyTag(
+  //     "og:description",
+  //     "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
+  //   );
+  //   updatePropertyTag("og:url", "https://herimmigranttales.org/about");
+  //   updatePropertyTag("og:image", "https://herimmigranttales.org/logo1.svg");
+  //   updatePropertyTag("og:type", "website");
 
-    // Twitter tags
-    updateMetaTag("twitter:card", "summary_large_image");
-    updateMetaTag("twitter:title", "About Us");
-    updateMetaTag(
-      "twitter:description",
-      "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
-    );
-    updateMetaTag("twitter:image", "https://herimmigranttales.org/logo1.svg");
-  }, []);
+  //   // Twitter tags
+  //   updateMetaTag("twitter:card", "summary_large_image");
+  //   updateMetaTag("twitter:title", "About Us");
+  //   updateMetaTag(
+  //     "twitter:description",
+  //     "Her Immigrant Tales is empowering immigrants, empowering immigrant women, and amplifying voices through stories of strength, resilience, and hope."
+  //   );
+  //   updateMetaTag("twitter:image", "https://herimmigranttales.org/logo1.svg");
+  // }, []);
 
   // const charityInView = useInView(charityRef, {
   //     once: false,
