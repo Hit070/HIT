@@ -115,9 +115,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Generate JSON-LD structured data using @graph approach
-function generateStructuredData(story: any) {
+// Server Component - crawlers see this
+export default async function StoryPage({ params }: Props) {
+  const { slug } = await params;
+
+  // Fetch data server-side for SEO
+  const story = await getStoryData(slug);
+  const otherStories = await getOtherStories(slug);
+
+  if (!story) {
+    return <StoryDetailsClient story={null} otherStories={[]} />;
+  }
+
+  // Generate individual schemas (like contact page)
   const articleSchema = {
+    "@context": "https://schema.org",
     "@type": "Article",
     headline: story.metaTitle || story.title,
     description: story.metaDescription || story.summary,
@@ -145,6 +157,7 @@ function generateStructuredData(story: any) {
   };
 
   const breadcrumbSchema = {
+    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       {
@@ -168,54 +181,48 @@ function generateStructuredData(story: any) {
     ],
   };
 
-  // Build the @graph array with explicit any[] type
-  const graphItems: any[] = [articleSchema, breadcrumbSchema];
-
-  // If there are FAQs, add FAQ schema
-  if (story.faq && story.faq.length > 0) {
-    const faqSchema = {
-      "@type": "FAQPage",
-      mainEntity: story.faq.map((f: any) => ({
-        "@type": "Question",
-        name: f.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: f.answer,
-        },
-      })),
-    };
-    graphItems.push(faqSchema);
-  }
-
-  // Return a single structured data object with @graph
-  return {
-    "@context": "https://schema.org",
-    "@graph": graphItems,
-  };
-}
-
-// Server Component - crawlers see this
-export default async function StoryPage({ params }: Props) {
-  const { slug } = await params;
-
-  // Fetch data server-side for SEO
-  const story = await getStoryData(slug);
-  const otherStories = await getOtherStories(slug);
-
-  // Generate structured data if story exists
-  const structuredData = story ? generateStructuredData(story) : null;
+  const faqSchema =
+    story.faq && story.faq.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: story.faq.map((f: any) => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer,
+            },
+          })),
+        }
+      : null;
 
   return (
     <>
-      {/* JSON-LD Structured Data - Single script tag with @graph */}
-      {structuredData && (
+      {/* Separate script tags for each schema - like contact page */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleSchema),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      {faqSchema && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
+            __html: JSON.stringify(faqSchema),
           }}
         />
       )}
+
       {/* Pass server data to client component */}
       <StoryDetailsClient story={story} otherStories={otherStories} />
     </>

@@ -112,9 +112,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Generate JSON-LD structured data using @graph approach
-function generateStructuredData(blog: any) {
+// Server Component - crawlers see this
+export default async function BlogPage({ params }: Props) {
+  const { slug } = await params;
+
+  // Fetch data server-side for SEO
+  const blog = await getBlogData(slug);
+  const otherBlogs = await getOtherBlogs(slug);
+
+  if (!blog) {
+    return <BlogDetailsClient blog={null} otherBlogs={[]} />;
+  }
+
+  // Generate individual schemas (like contact page)
   const blogPostingSchema = {
+    "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: blog.metaTitle || blog.title,
     description: blog.metaDescription || blog.summary,
@@ -142,6 +154,7 @@ function generateStructuredData(blog: any) {
   };
 
   const breadcrumbSchema = {
+    "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       {
@@ -165,54 +178,48 @@ function generateStructuredData(blog: any) {
     ],
   };
 
-  // Build the @graph array with explicit any[] type
-  const graphItems: any[] = [blogPostingSchema, breadcrumbSchema];
-
-  // If there are FAQs, add FAQ schema
-  if (blog.faq && blog.faq.length > 0) {
-    const faqSchema = {
-      "@type": "FAQPage",
-      mainEntity: blog.faq.map((f: any) => ({
-        "@type": "Question",
-        name: f.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: f.answer,
-        },
-      })),
-    };
-    graphItems.push(faqSchema);
-  }
-
-  // Return a single structured data object with @graph
-  return {
-    "@context": "https://schema.org",
-    "@graph": graphItems,
-  };
-}
-
-// Server Component - crawlers see this
-export default async function BlogPage({ params }: Props) {
-  const { slug } = await params;
-
-  // Fetch data server-side for SEO
-  const blog = await getBlogData(slug);
-  const otherBlogs = await getOtherBlogs(slug);
-
-  // Generate structured data if blog exists
-  const structuredData = blog ? generateStructuredData(blog) : null;
+  const faqSchema =
+    blog.faq && blog.faq.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: blog.faq.map((f: any) => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer,
+            },
+          })),
+        }
+      : null;
 
   return (
     <>
-      {/* JSON-LD Structured Data - Single script tag with @graph */}
-      {structuredData && (
+      {/* Separate script tags for each schema - like contact page */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(blogPostingSchema),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      {faqSchema && (
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(structuredData),
+            __html: JSON.stringify(faqSchema),
           }}
         />
       )}
+
       {/* Pass server data to client component */}
       <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />
     </>
