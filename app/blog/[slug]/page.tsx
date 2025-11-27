@@ -88,15 +88,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: blog.metaTitle || blog.title,
       description: blog.metaDescription || blog.summary,
       images: [
-        {
-          url:
-            blog.metaImage ||
-            blog.thumbnail ||
-            "https://herimmigranttales.org/logo1.svg",
-          width: 1200,
-          height: 630,
-          alt: blog.metaTitle || blog.title || "Her Immigrant Tales",
-        },
+        blog.metaImage ||
+          blog.thumbnail ||
+          "https://herimmigranttales.org/logo1.svg",
       ],
       type: "article",
       url: `https://herimmigranttales.org/blog/${blog.slug}`,
@@ -134,6 +128,104 @@ export default async function BlogPage({ params }: Props) {
     return <BlogDetailsClient blog={null} otherBlogs={[]} />;
   }
 
-  // Do not emit JSON-LD here; rely on `generateMetadata` for meta tags.
-  return <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />;
+  // Generate individual schemas (like contact page)
+  const blogPostingSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: blog.metaTitle || blog.title,
+    description: blog.metaDescription || blog.summary,
+    image: blog.metaImage || blog.thumbnail,
+    author: {
+      "@type": "Person",
+      name: blog.author,
+      url: "https://herimmigranttales.org",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Her Immigrant Tales",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://herimmigranttales.org/logo1.svg",
+      },
+    },
+    datePublished: blog.dateCreated,
+    dateModified: blog.lastUpdated || blog.dateCreated,
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://herimmigranttales.org/blog/${blog.slug}`,
+    },
+    keywords: blog.primaryKeyword || blog.category,
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://herimmigranttales.org",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: "https://herimmigranttales.org/blog",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: blog.title,
+        item: `https://herimmigranttales.org/blog/${blog.slug}`,
+      },
+    ],
+  };
+
+  const faqSchema =
+    blog.faq && blog.faq.length > 0
+      ? {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: blog.faq.map((f: any) => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer,
+            },
+          })),
+        }
+      : null;
+
+  return (
+    <>
+      {/* Separate script tags for each schema - like contact page */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(blogPostingSchema),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      {faqSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(faqSchema),
+          }}
+        />
+      )}
+
+      {/* Pass server data to client component */}
+      <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />
+    </>
+  );
 }
