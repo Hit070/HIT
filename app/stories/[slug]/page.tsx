@@ -1,4 +1,4 @@
-// app/story/[slug]/page.tsx
+// app/stories/[slug]/page.tsx
 import { Metadata } from "next";
 import StoryDetailsClient from "./StoryDetailsClient";
 
@@ -55,7 +55,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!story) {
     return {
-      title: "Story",
+      title: {
+        absolute: "Story",
+      },
       description:
         "Read inspiring stories from immigrant women around the world.",
       openGraph: {
@@ -76,7 +78,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: story.metaTitle || story.title || "Story",
+    title: {
+      absolute: story.metaTitle || story.title || "Story",
+    },
     description:
       story.metaDescription ||
       story.summary ||
@@ -87,9 +91,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: story.metaTitle || story.title,
       description: story.metaDescription || story.summary,
       images: [
-        story.metaImage ||
-          story.thumbnail ||
-          "https://herimmigranttales.org/logo1.svg",
+        {
+          url:
+            story.metaImage ||
+            story.thumbnail ||
+            "https://herimmigranttales.org/logo1.svg",
+          width: 1200,
+          height: 630,
+          alt: story.metaTitle || story.title || "Her Immigrant Tales",
+        },
       ],
       type: "article",
       url: `https://herimmigranttales.org/stories/${story.slug}`,
@@ -127,94 +137,6 @@ export default async function StoryPage({ params }: Props) {
     return <StoryDetailsClient story={null} otherStories={[]} />;
   }
 
-  // Generate individual schemas (like contact page)
-  const articleSchema = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: story.metaTitle || story.title,
-    description: story.metaDescription || story.summary,
-    image: story.metaImage || story.thumbnail,
-    author: {
-      "@type": "Person",
-      name: story.author,
-      url: "https://herimmigranttales.org",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Her Immigrant Tales",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://herimmigranttales.org/logo1.svg",
-      },
-    },
-    datePublished: story.dateCreated,
-    dateModified: story.lastUpdated || story.dateCreated,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://herimmigranttales.org/stories/${story.slug}`,
-    },
-    keywords: story.primaryKeyword || story.title,
-  };
-
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://herimmigranttales.org",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Stories",
-        item: "https://herimmigranttales.org/stories",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: story.title,
-        item: `https://herimmigranttales.org/stories/${story.slug}`,
-      },
-    ],
-  };
-
-  const faqSchema =
-    story.faq && story.faq.length > 0
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: story.faq.map((f: any) => ({
-            "@type": "Question",
-            name: f.question,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: f.answer,
-            },
-          })),
-        }
-      : null;
-
-  const structuredData = [articleSchema, breadcrumbSchema, faqSchema].filter(
-    Boolean as any
-  );
-  const dedupeStructuredData = (await import("@/lib/dedupeStructuredData"))
-    .default;
-  const deduped = dedupeStructuredData(structuredData as any[]);
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(deduped),
-        }}
-      />
-
-      {/* Pass server data to client component */}
-      <StoryDetailsClient story={story} otherStories={otherStories} />
-    </>
-  );
+  // Rely on `generateMetadata` for meta tags. Do not emit JSON-LD here.
+  return <StoryDetailsClient story={story} otherStories={otherStories} />;
 }

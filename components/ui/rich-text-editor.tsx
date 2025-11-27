@@ -45,6 +45,8 @@ import {
   Quote,
   Heading1,
   Heading2,
+  Heading3,
+  Heading4,
   ImagePlus,
   X,
 } from "lucide-react";
@@ -63,6 +65,8 @@ type CustomElementType =
   | "paragraph"
   | "heading-one"
   | "heading-two"
+  | "heading-three"
+  | "heading-four"
   | "block-quote"
   | "numbered-list"
   | "bulleted-list"
@@ -242,6 +246,14 @@ export function RichTextEditor({
             icon={<Heading2 className="h-4 w-4" />}
           />
           <BlockButton
+            format="heading-three"
+            icon={<Heading3 className="h-4 w-4" />}
+          />
+          <BlockButton
+            format="heading-four"
+            icon={<Heading4 className="h-4 w-4" />}
+          />
+          <BlockButton
             format="block-quote"
             icon={<Quote className="h-4 w-4" />}
           />
@@ -300,8 +312,10 @@ export function RichTextEditor({
               [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 
               [&_li]:my-1 [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 
               [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600
-              [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4
-              [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3
+              [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-4
+              [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-3
+              [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-3
+              [&_h4]:text-base [&_h4]:font-semibold [&_h4]:my-2
               [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono"
             readOnly={disabled}
             onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
@@ -555,6 +569,18 @@ const Element = ({ attributes, children, element }: RenderElementProps) => {
           {children}
         </h2>
       );
+    case "heading-three":
+      return (
+        <h3 style={style} {...attributes}>
+          {children}
+        </h3>
+      );
+    case "heading-four":
+      return (
+        <h4 style={style} {...attributes}>
+          {children}
+        </h4>
+      );
     case "list-item":
       return (
         <li style={style} {...attributes}>
@@ -638,7 +664,7 @@ const MarkButton = ({ format, icon }: MarkButtonProps) => {
       size="sm"
       className="h-8 w-8 p-0 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground"
       data-active={isMarkActive(editor, format)}
-      onPointerDown={(event: PointerEvent<HTMLButtonElement>) =>
+      onPointerDown={(event: PointerEvent<HTMLButtonButton>) =>
         event.preventDefault()
       }
       onClick={() => toggleMark(editor, format)}
@@ -732,6 +758,18 @@ function htmlToSlate(html: string): Descendant[] {
           children: children as CustomText[],
           ...(textAlign && { align: textAlign }),
         };
+      case "h3":
+        return {
+          type: "heading-three",
+          children: children as CustomText[],
+          ...(textAlign && { align: textAlign }),
+        };
+      case "h4":
+        return {
+          type: "heading-four",
+          children: children as CustomText[],
+          ...(textAlign && { align: textAlign }),
+        };
       case "blockquote":
         return {
           type: "block-quote",
@@ -807,6 +845,10 @@ function slateToHtml(value: Descendant[]): string {
         return `<h1${align}>${content}</h1>`;
       case "heading-two":
         return `<h2${align}>${content}</h2>`;
+      case "heading-three":
+        return `<h3${align}>${content}</h3>`;
+      case "heading-four":
+        return `<h4${align}>${content}</h4>`;
       case "block-quote":
         return `<blockquote${align}>${content}</blockquote>`;
       case "bulleted-list":

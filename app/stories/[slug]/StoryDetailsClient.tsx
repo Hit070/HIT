@@ -166,13 +166,15 @@ export default function StoryDetailsClient({
 
           {/* Story Content */}
           <article
-            className="text-xl prose prose-lg max-w-none 
+            className="prose prose-lg max-w-none 
   [&_ul]:list-disc [&_ul]:ml-6 
   [&_ol]:list-decimal [&_ol]:ml-6 
   [&_li]:my-1 
   [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-gray-600 
-  [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-4 
-  [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:my-3 
+  [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:my-4 
+  [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:my-3 
+  [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:my-3
+  [&_h4]:text-base [&_h4]:font-semibold [&_h4]:my-2
   [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
   [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4
   [&_div:has(>a>img)]:border-2 [&_div:has(>a>img)]:border-blue-200 [&_div:has(>a>img)]:rounded-lg [&_div:has(>a>img)]:p-3 [&_div:has(>a>img)]:bg-blue-50/50 [&_div:has(>a>img)]:my-4

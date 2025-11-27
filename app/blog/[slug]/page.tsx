@@ -52,7 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!blog) {
     return {
-      title: "Blog Post",
+      title: {
+        absolute: "Blog Post",
+      },
       description:
         "Read inspiring stories from immigrant women around the world.",
       openGraph: {
@@ -73,7 +75,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: blog.metaTitle || blog.title || "Blog Post",
+    title: {
+      absolute: blog.metaTitle || blog.title || "Blog Post",
+    },
     description:
       blog.metaDescription ||
       blog.summary ||
@@ -84,9 +88,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: blog.metaTitle || blog.title,
       description: blog.metaDescription || blog.summary,
       images: [
-        blog.metaImage ||
-          blog.thumbnail ||
-          "https://herimmigranttales.org/logo1.svg",
+        {
+          url:
+            blog.metaImage ||
+            blog.thumbnail ||
+            "https://herimmigranttales.org/logo1.svg",
+          width: 1200,
+          height: 630,
+          alt: blog.metaTitle || blog.title || "Her Immigrant Tales",
+        },
       ],
       type: "article",
       url: `https://herimmigranttales.org/blog/${blog.slug}`,
@@ -124,98 +134,6 @@ export default async function BlogPage({ params }: Props) {
     return <BlogDetailsClient blog={null} otherBlogs={[]} />;
   }
 
-  // Generate individual schemas (like contact page)
-  const blogPostingSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: blog.metaTitle || blog.title,
-    description: blog.metaDescription || blog.summary,
-    image: blog.metaImage || blog.thumbnail,
-    author: {
-      "@type": "Person",
-      name: blog.author,
-      url: "https://herimmigranttales.org",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Her Immigrant Tales",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://herimmigranttales.org/logo1.svg",
-      },
-    },
-    datePublished: blog.dateCreated,
-    dateModified: blog.lastUpdated || blog.dateCreated,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://herimmigranttales.org/blog/${blog.slug}`,
-    },
-    keywords: blog.primaryKeyword || blog.category,
-  };
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://herimmigranttales.org",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blog",
-        item: "https://herimmigranttales.org/blog",
-      },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: blog.title,
-        item: `https://herimmigranttales.org/blog/${blog.slug}`,
-      },
-    ],
-  };
-
-  const faqSchema =
-    blog.faq && blog.faq.length > 0
-      ? {
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: blog.faq.map((f: any) => ({
-            "@type": "Question",
-            name: f.question,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: f.answer,
-            },
-          })),
-        }
-      : null;
-
-  // Combine and dedupe schemas so we emit a single JSON-LD script
-  const structuredData = [
-    blogPostingSchema,
-    breadcrumbSchema,
-    faqSchema,
-  ].filter(Boolean as any);
-
-  // Import dedupe lazily to keep server bundle small when possible
-  const dedupeStructuredData = (await import("@/lib/dedupeStructuredData"))
-    .default;
-  const deduped = dedupeStructuredData(structuredData as any[]);
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(deduped),
-        }}
-      />
-
-      {/* Pass server data to client component */}
-      <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />
-    </>
-  );
+  // Do not emit JSON-LD here; rely on `generateMetadata` for meta tags.
+  return <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />;
 }
