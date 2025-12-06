@@ -1,37 +1,61 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Search, Filter, MoreHorizontal, Plus, PencilLine, StarOff, Star, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { DateRangeFilter } from "@/components/date-range-filter"
-import { DeleteModal } from "@/components/delete-modal"
-import Link from "next/link"
-import { toast } from "@/components/ui/use-toast"
-import { format } from "date-fns"
-import { useContentStore } from "@/store/store"
-import { Story } from "@/types"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useEffect, useState } from "react";
+import {
+  Search,
+  Filter,
+  MoreHorizontal,
+  Plus,
+  PencilLine,
+  StarOff,
+  Star,
+  Trash2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DateRangeFilter } from "@/components/date-range-filter";
+import { DeleteModal } from "@/components/delete-modal";
+import Link from "next/link";
+import { toast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
+import { useContentStore } from "@/store/store";
+import { Story } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function StoriesPage() {
-  const [activeTab, setActiveTab] = useState("All")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
+  const [activeTab, setActiveTab] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; storySlug: string | null }>({
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    storySlug: string | null;
+  }>({
     isOpen: false,
     storySlug: null,
-  })
+  });
 
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
     from: undefined,
     to: undefined,
-  })
+  });
 
-  const { stories, fetchStories, updateStory, deleteStory } = useContentStore()
+  const { stories, fetchStories, updateStory, deleteStory } = useContentStore();
 
   useEffect(() => {
     if (stories.length === 0) {
@@ -40,83 +64,99 @@ export default function StoriesPage() {
           toast({
             title: "Failed to fetch stories",
             variant: "destructive",
-          })
+          });
         })
         .finally(() => {
-          setLoading(false)
-        })
+          setLoading(false);
+        });
     } else {
-      setLoading(false)
+      setLoading(false);
     }
-  }, [])
+  }, []);
 
-  const itemsPerPage = 10
+  const itemsPerPage = 10;
 
-  const filteredData = stories.filter((item) => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesTab = activeTab === "All" || item.status.toLowerCase() === activeTab.toLowerCase()
+  const filteredData = stories
+    .filter((item) => {
+      const matchesSearch = item.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchesTab =
+        activeTab === "All" ||
+        item.status.toLowerCase() === activeTab.toLowerCase();
 
-    // Date filter logic
-    const matchesDate = !dateRange.from && !dateRange.to ? true : (
-      new Date(item.dateCreated) >= (dateRange.from || new Date(0)) &&
-      new Date(item.dateCreated) <= (dateRange.to || new Date(8640000000000000))
-    )
+      // Date filter logic
+      const matchesDate =
+        !dateRange.from && !dateRange.to
+          ? true
+          : new Date(item.dateCreated) >= (dateRange.from || new Date(0)) &&
+            new Date(item.dateCreated) <=
+              (dateRange.to || new Date(8640000000000000));
 
-    return matchesSearch && matchesTab && matchesDate
-  })
+      return matchesSearch && matchesTab && matchesDate;
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
+    );
 
   const handleDeleteClick = (storySlug: string) => {
-    setDeleteModal({ isOpen: true, storySlug })
-  }
+    setDeleteModal({ isOpen: true, storySlug });
+  };
 
   const handleDeleteConfirm = async () => {
     if (deleteModal.storySlug) {
       try {
-        await deleteStory(deleteModal.storySlug)
+        await deleteStory(deleteModal.storySlug);
         toast({
           title: "Story deleted successfully",
           variant: "default",
-        })
-        setDeleteModal({ isOpen: false, storySlug: null })
+        });
+        setDeleteModal({ isOpen: false, storySlug: null });
       } catch (error) {
         toast({
           title: "Failed to delete story",
           variant: "destructive",
-        })
+        });
       }
     }
-  }
+  };
 
   const handleDeleteCancel = () => {
-    setDeleteModal({ isOpen: false, storySlug: null })
-  }
+    setDeleteModal({ isOpen: false, storySlug: null });
+  };
 
   const handleMarkAsFeatured = async (slug: string, isFeatured: boolean) => {
     try {
-      await updateStory(slug, { isFeatured: !isFeatured })
+      await updateStory(slug, { isFeatured: !isFeatured });
       toast({
-        title: `Story ${!isFeatured ? "marked as featured" : "removed from featured"} successfully`,
+        title: `Story ${
+          !isFeatured ? "marked as featured" : "removed from featured"
+        } successfully`,
         variant: "default",
-      })
+      });
     } catch (error) {
       toast({
         title: "Failed to update featured status",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
+    setCurrentPage(page);
+  };
 
   const renderPaginationButtons = () => {
-    const buttons = []
-    const maxVisiblePages = 5
+    const buttons = [];
+    const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
@@ -129,8 +169,8 @@ export default function StoriesPage() {
             onClick={() => handlePageChange(i)}
           >
             {i}
-          </Button>,
-        )
+          </Button>
+        );
       }
     } else {
       buttons.push(
@@ -142,19 +182,19 @@ export default function StoriesPage() {
           onClick={() => handlePageChange(1)}
         >
           1
-        </Button>,
-      )
+        </Button>
+      );
 
       if (currentPage > 3) {
         buttons.push(
           <span key="ellipsis1" className="text-muted-foreground">
             ...
-          </span>,
-        )
+          </span>
+        );
       }
 
-      const start = Math.max(2, currentPage - 1)
-      const end = Math.min(totalPages - 1, currentPage + 1)
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
 
       for (let i = start; i <= end; i++) {
         buttons.push(
@@ -166,16 +206,16 @@ export default function StoriesPage() {
             onClick={() => handlePageChange(i)}
           >
             {i}
-          </Button>,
-        )
+          </Button>
+        );
       }
 
       if (currentPage < totalPages - 2) {
         buttons.push(
           <span key="ellipsis2" className="text-muted-foreground">
             ...
-          </span>,
-        )
+          </span>
+        );
       }
 
       if (totalPages > 1) {
@@ -188,13 +228,13 @@ export default function StoriesPage() {
             onClick={() => handlePageChange(totalPages)}
           >
             {totalPages}
-          </Button>,
-        )
+          </Button>
+        );
       }
     }
 
-    return buttons
-  }
+    return buttons;
+  };
 
   if (loading) {
     return (
@@ -247,21 +287,33 @@ export default function StoriesPage() {
         <Button
           variant={activeTab === "All" ? "default" : "outline"}
           onClick={() => setActiveTab("All")}
-          className={activeTab === "All" ? "bg-orange-100 text-primary border border-primary px-8 rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl px-8"}
+          className={
+            activeTab === "All"
+              ? "bg-orange-100 text-primary border border-primary px-8 rounded-2xl hover:bg-primary/50 hover:text-white"
+              : "bg-transparent rounded-2xl px-8"
+          }
         >
           All
         </Button>
         <Button
           variant={activeTab === "Published" ? "default" : "outline"}
           onClick={() => setActiveTab("Published")}
-          className={activeTab === "Published" ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl"}
+          className={
+            activeTab === "Published"
+              ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white"
+              : "bg-transparent rounded-2xl"
+          }
         >
           Published
         </Button>
         <Button
           variant={activeTab === "Draft" ? "default" : "outline"}
           onClick={() => setActiveTab("Draft")}
-          className={activeTab === "Draft" ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white" : "bg-transparent rounded-2xl"}
+          className={
+            activeTab === "Draft"
+              ? "bg-orange-100 text-primary border border-primary rounded-2xl hover:bg-primary/50 hover:text-white"
+              : "bg-transparent rounded-2xl"
+          }
         >
           Draft
         </Button>
@@ -350,9 +402,14 @@ export default function StoriesPage() {
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center">
                     <div className="flex flex-col items-center justify-center">
-                      <p className="text-muted-foreground text-lg mb-2">No stories found</p>
+                      <p className="text-muted-foreground text-lg mb-2">
+                        No stories found
+                      </p>
                       <p className="text-muted-foreground text-sm">
-                        {searchQuery || dateRange.from || dateRange.to || activeTab !== "All"
+                        {searchQuery ||
+                        dateRange.from ||
+                        dateRange.to ||
+                        activeTab !== "All"
                           ? "Try adjusting your filters or search terms"
                           : "Create your first story to get started"}
                       </p>
@@ -362,9 +419,15 @@ export default function StoriesPage() {
               ) : (
                 paginatedData.map((item: Story) => (
                   <tr key={item.slug} className="border-b last:border-0">
-                    <td className="px-4 py-4 text-sm text-muted-foreground">#{item.id}</td>
-                    <td className="px-4 py-4 text-sm font-medium">{item.title}</td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">{item.author}</td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      #{item.id}
+                    </td>
+                    <td className="px-4 py-4 text-sm font-medium">
+                      {item.title}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-muted-foreground">
+                      {item.author}
+                    </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
                       {new Date(item.dateCreated).toLocaleDateString("en-GB", {
                         day: "2-digit",
@@ -374,16 +437,23 @@ export default function StoriesPage() {
                     </td>
                     <td className="px-4 py-4 text-sm">
                       <div
-                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl font-medium ${item.status === "published"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-orange-100 text-orange-700"
-                          }`}
+                        className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl font-medium ${
+                          item.status === "published"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-orange-100 text-orange-700"
+                        }`}
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${item.status === "published" ? "bg-green-500" : "bg-orange-500"
-                            }`}
+                          className={`h-2 w-2 rounded-full ${
+                            item.status === "published"
+                              ? "bg-green-500"
+                              : "bg-orange-500"
+                          }`}
                         />
-                        <span>{item.status.charAt(0).toUpperCase() + item.status.slice(1)}</span>
+                        <span>
+                          {item.status.charAt(0).toUpperCase() +
+                            item.status.slice(1)}
+                        </span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
@@ -400,13 +470,19 @@ export default function StoriesPage() {
                         className="text-primary hover:text-primary h-auto p-0"
                         asChild
                       >
-                        <Link href={`/dashboard/stories/${item.slug}/view`}>View</Link>
+                        <Link href={`/dashboard/stories/${item.slug}/view`}>
+                          View
+                        </Link>
                       </Button>
                     </td>
                     <td className="px-4 py-4">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -417,7 +493,12 @@ export default function StoriesPage() {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleMarkAsFeatured(item.slug, item.isFeatured as boolean)}
+                            onClick={() =>
+                              handleMarkAsFeatured(
+                                item.slug,
+                                item.isFeatured as boolean
+                              )
+                            }
                             className="flex items-center gap-2"
                           >
                             {item.isFeatured ? (
@@ -459,12 +540,16 @@ export default function StoriesPage() {
           ← Back
         </Button>
 
-        <div className="flex items-center gap-2">{renderPaginationButtons()}</div>
+        <div className="flex items-center gap-2">
+          {renderPaginationButtons()}
+        </div>
 
         <Button
           variant="ghost"
           className="gap-2"
-          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+          onClick={() =>
+            handlePageChange(Math.min(totalPages, currentPage + 1))
+          }
           disabled={currentPage === totalPages}
         >
           Next →
@@ -480,5 +565,5 @@ export default function StoriesPage() {
         itemType="story"
       />
     </div>
-  )
+  );
 }

@@ -45,13 +45,13 @@ export default function AboutPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://www.herimmigranttales.org",
+        item: "https://herimmigranttales.org",
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "About",
-        item: "https://www.herimmigranttales.org/about",
+        item: "https://herimmigranttales.org/about",
       },
     ],
   };

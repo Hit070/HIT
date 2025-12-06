@@ -280,7 +280,7 @@ export default function ViewStoryPage() {
         >
           <div
             className="mb-8 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: blog.content?.html || "" }}
+            dangerouslySetInnerHTML={{ __html: story.content?.html || "" }}
           />
         </article>
       </main>

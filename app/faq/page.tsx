@@ -80,8 +80,8 @@ const faqs = [
   },
 ];
 
-// Generate structured data schemas
-function generateStructuredData() {
+// Server Component - no fetching needed, just metadata and schemas
+export default function FAQPage() {
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -114,20 +114,20 @@ function generateStructuredData() {
     })),
   };
 
-  return [breadcrumbSchema, faqSchema];
-}
-
-// Server Component - no fetching needed, just metadata and schemas
-export default function FAQPage() {
-  const structuredData = generateStructuredData();
-
   return (
     <>
-      {/* JSON-LD Structured Data */}
+      {/* Separate script tags for each schema - like your blog and story pages */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(structuredData),
+          __html: JSON.stringify(breadcrumbSchema),
+        }}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqSchema),
         }}
       />
 

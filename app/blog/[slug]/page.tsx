@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           "https://herimmigranttales.org/logo1.svg",
       ],
       type: "article",
-      url: `https://herimmigranttales.org/blog/${blog.slug}`,
+      url: `https://www.herimmigranttales.org/blog/${blog.slug}`,
       siteName: "Her Immigrant Tales",
       publishedTime: blog.dateCreated,
       modifiedTime: blog.lastUpdated || blog.dateCreated,
