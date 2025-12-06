@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           "https://herimmigranttales.org/logo1.svg",
       ],
       type: "article",
-      url: `https://www.herimmigranttales.org/stories/${story.slug}`,
+      url: `https://herimmigranttales.org/stories/${story.slug}`,
       siteName: "Her Immigrant Tales",
       publishedTime: story.dateCreated,
       modifiedTime: story.lastUpdated || story.dateCreated,
@@ -114,7 +114,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       creator: story.author,
     },
     alternates: {
-      canonical: `https://herimmigranttales.org/stories/${story.slug}`,
+      canonical: `https://www.herimmigranttales.org/stories/${story.slug}`,
     },
   };
 }
