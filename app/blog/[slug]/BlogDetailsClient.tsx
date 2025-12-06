@@ -234,9 +234,14 @@ export default function BlogDetailsClient({
   [&_h4]:text-base [&_h4]:font-semibold [&_h4]:my-2
   [&_code]:bg-gray-100 [&_code]:px-1 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
   [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg [&_img]:my-4
+  [&_a]:text-blue-600 [&_a]:underline [&_a]:hover:text-blue-800
   [&_div:has(>a>img)]:border-2 [&_div:has(>a>img)]:border-blue-200 [&_div:has(>a>img)]:rounded-lg [&_div:has(>a>img)]:p-3 [&_div:has(>a>img)]:bg-blue-50/50 [&_div:has(>a>img)]:my-4
   [&_a:has(img)]:block [&_a:has(img)]:no-underline
-  [&_a:has(img)_div]:mt-2 [&_a:has(img)_div]:text-sm [&_a:has(img)_div]:text-blue-600"
+  [&_a:has(img)_div]:mt-2 [&_a:has(img)_div]:text-sm [&_a:has(img)_div]:text-blue-600
+  [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
+  [&_table_th]:border [&_table_th]:border-gray-300 [&_table_th]:bg-gray-100 [&_table_th]:px-3 [&_table_th]:py-2 [&_table_th]:text-left [&_table_th]:font-semibold
+  [&_table_td]:border [&_table_td]:border-gray-300 [&_table_td]:px-3 [&_table_td]:py-2
+  [&_table_tr]:hover:bg-gray-50"
         >
           <div
             className="mb-8 leading-relaxed"

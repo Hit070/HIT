@@ -17,6 +17,7 @@ import {
   createEditor,
   Text,
   Range,
+  Point,
 } from "slate";
 import { withHistory } from "slate-history";
 import {
@@ -49,6 +50,8 @@ import {
   Heading4,
   ImagePlus,
   X,
+  Link as LinkIcon,
+  Grid3x3,
 } from "lucide-react";
 import {
   Dialog,
@@ -71,8 +74,15 @@ type CustomElementType =
   | "numbered-list"
   | "bulleted-list"
   | "list-item"
-  | "image";
+  | "image"
+  | "table"
+  | "table-row"
+  | "table-cell";
 type CustomTextKey = "bold" | "italic" | "underline" | "code";
+
+type LinkText = CustomText & {
+  link?: string;
+};
 
 type ImageElement = {
   type: "image";
@@ -82,13 +92,35 @@ type ImageElement = {
   children: CustomText[];
 };
 
+type TableCellElement = {
+  type: "table-cell";
+  header?: boolean;
+  children: CustomText[];
+};
+
+type TableRowElement = {
+  type: "table-row";
+  children: TableCellElement[];
+};
+
+type TableElement = {
+  type: "table";
+  children: TableRowElement[];
+};
+
 type CustomElement =
   | {
-      type: Exclude<CustomElementType, "image">;
+      type: Exclude<
+        CustomElementType,
+        "image" | "table" | "table-row" | "table-cell"
+      >;
       align?: "left" | "center" | "right" | "justify";
       children: (CustomText | CustomElement)[];
     }
-  | ImageElement;
+  | ImageElement
+  | TableElement
+  | TableRowElement
+  | TableCellElement;
 
 type CustomText = {
   text: string;
@@ -96,6 +128,8 @@ type CustomText = {
   italic?: boolean;
   underline?: boolean;
   code?: boolean;
+  link?: string;
+  linkTitle?: string;
 };
 
 declare module "slate" {
@@ -120,12 +154,115 @@ type AlignType = (typeof TEXT_ALIGN_TYPES)[number];
 type ListType = (typeof LIST_TYPES)[number];
 type CustomElementFormat = CustomElementType | AlignType | ListType;
 
-// Extend editor with image support
-const withImages = (editor: Editor & ReactEditor) => {
+// Extend editor with image and table support
+const withImages = (editor: Editor & ReactEditor): Editor & ReactEditor => {
   const { isVoid } = editor;
 
-  editor.isVoid = (element) => {
-    return (element as CustomElement).type === "image" ? true : isVoid(element);
+  editor.isVoid = (element: any) => {
+    const type = (element as CustomElement).type;
+    return type === "image" ? true : isVoid(element);
+  };
+
+  return editor;
+};
+
+const withTables = (editor: Editor & ReactEditor): Editor & ReactEditor => {
+  const { deleteBackward, insertBreak } = editor;
+
+  editor.deleteBackward = (unit: any) => {
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+      const [cell] = Editor.nodes(editor, {
+        match: (n) => (n as CustomElement).type === "table-cell",
+      });
+
+      if (cell) {
+        const [, cellPath] = cell;
+        const start = Editor.start(editor, cellPath);
+
+        if (Point.equals(selection.anchor, start)) {
+          return;
+        }
+      }
+    }
+
+    deleteBackward(unit);
+  };
+
+  editor.insertBreak = () => {
+    const { selection } = editor;
+
+    if (selection) {
+      const [table] = Editor.nodes(editor, {
+        match: (n) => (n as CustomElement).type === "table",
+      });
+
+      if (table) {
+        // If we're inside a table, prevent Enter from breaking out
+        return;
+      }
+    }
+
+    insertBreak();
+  };
+
+  return editor;
+};
+
+const withTableNormalization = (
+  editor: Editor & ReactEditor
+): Editor & ReactEditor => {
+  const { normalizeNode } = editor;
+
+  editor.normalizeNode = (entry: any) => {
+    const [node, path] = entry;
+
+    // Normalize table: must only contain table-rows
+    if (SlateElement.isElement(node) && node.type === "table") {
+      const tableNode = node as TableElement;
+      for (let i = 0; i < tableNode.children.length; i++) {
+        const child = tableNode.children[i];
+        if (child.type !== "table-row") {
+          Transforms.removeNodes(editor, { at: [...path, i] });
+          return;
+        }
+      }
+    }
+
+    // Normalize table-row: must only contain table-cells
+    if (SlateElement.isElement(node) && node.type === "table-row") {
+      const rowNode = node as TableRowElement;
+      for (let i = 0; i < rowNode.children.length; i++) {
+        const child = rowNode.children[i];
+        if (child.type !== "table-cell") {
+          Transforms.removeNodes(editor, { at: [...path, i] });
+          return;
+        }
+      }
+    }
+
+    // Normalize table-cell: ensure it has text children
+    if (SlateElement.isElement(node) && node.type === "table-cell") {
+      const cellNode = node as TableCellElement;
+
+      // Remove any invalid nested structures
+      for (let i = cellNode.children.length - 1; i >= 0; i--) {
+        const child = cellNode.children[i];
+        if (!Text.isText(child)) {
+          Transforms.removeNodes(editor, { at: [...path, i] });
+          return;
+        }
+      }
+
+      // Ensure cell has at least one text node
+      if (cellNode.children.length === 0) {
+        Transforms.insertNodes(editor, { text: "" }, { at: [...path, 0] });
+        return;
+      }
+    }
+
+    normalizeNode(entry);
   };
 
   return editor;
@@ -147,6 +284,15 @@ export function RichTextEditor({
   const [imageLink, setImageLink] = useState("");
   const [imageAlt, setImageAlt] = useState("");
 
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
+  const [linkAlt, setLinkAlt] = useState("");
+
+  const [tableDialogOpen, setTableDialogOpen] = useState(false);
+  const [tableRows, setTableRows] = useState(3);
+  const [tableCols, setTableCols] = useState(3);
+
   const renderElement = useCallback(
     (props: RenderElementProps) => <Element {...props} />,
     []
@@ -155,10 +301,13 @@ export function RichTextEditor({
     (props: RenderLeafProps) => <Leaf {...props} />,
     []
   );
-  const editor = useMemo(
-    () => withImages(withHistory(withReact(createEditor()))),
-    []
-  );
+const editor = useMemo(
+  () =>
+    withTableNormalization(
+      withTables(withImages(withHistory(withReact(createEditor()))))
+    ),
+  []
+);
 
   // Convert HTML to Slate value or use default
   const initialValue = useMemo((): Descendant[] => {
@@ -186,7 +335,7 @@ export function RichTextEditor({
       setValue(newValue);
 
       const isAstChange = editor.operations.some(
-        (op) => "set_selection" !== op.type
+        (op: any) => "set_selection" !== op.type
       );
 
       if (isAstChange) {
@@ -221,6 +370,103 @@ export function RichTextEditor({
     setImageDialogOpen(false);
   };
 
+  const insertLink = () => {
+    if (!linkUrl) return;
+
+    const { selection } = editor;
+
+    if (!selection) {
+      // No selection, insert text with link marks
+      Transforms.insertText(editor, linkText || linkUrl);
+      addMarkToSelection(editor, "link", linkUrl);
+      if ((linkText || linkUrl) && linkAlt)
+        addMarkToSelection(editor, "linkTitle", linkAlt);
+    } else if (Range.isCollapsed(selection)) {
+      // Collapsed selection, insert text with link
+      Transforms.insertText(editor, linkText || linkUrl);
+      // select the newly inserted text so we can mark it
+      const { anchor } = editor.selection!;
+      const newAnchor = { path: anchor.path, offset: anchor.offset };
+      const startOffset = anchor.offset - (linkText || linkUrl).length;
+      Transforms.select(editor, {
+        anchor: { path: anchor.path, offset: startOffset },
+        focus: newAnchor,
+      } as any);
+      addMarkToSelection(editor, "link", linkUrl);
+      if (linkAlt) addMarkToSelection(editor, "linkTitle", linkAlt);
+    } else {
+      // Text selected, apply link marks
+      addMarkToSelection(editor, "link", linkUrl);
+      if (linkAlt) addMarkToSelection(editor, "linkTitle", linkAlt);
+    }
+
+    // Reset form
+    setLinkUrl("");
+    setLinkText("");
+    setLinkDialogOpen(false);
+  };
+
+  const addMarkToSelection = (editor: Editor, key: string, value: string) => {
+    Editor.addMark(editor, key, value);
+  };
+
+  const insertTable = () => {
+    // Create header row cells
+    const headerCells: TableCellElement[] = Array.from({
+      length: tableCols,
+    }).map((_, index) => ({
+      type: "table-cell",
+      header: true,
+      children: [{ text: `Header ${index + 1}` }],
+    }));
+
+    const rows: TableRowElement[] = [
+      {
+        type: "table-row",
+        children: headerCells,
+      },
+    ];
+
+    // Add data rows
+    for (let i = 1; i < tableRows; i++) {
+      const dataCells: TableCellElement[] = Array.from({
+        length: tableCols,
+      }).map(() => ({
+        type: "table-cell",
+        children: [{ text: "" }],
+      }));
+
+      rows.push({
+        type: "table-row",
+        children: dataCells,
+      });
+    }
+
+    const table: TableElement = {
+      type: "table",
+      children: rows,
+    };
+
+    const paragraph = {
+      type: "paragraph",
+      children: [{ text: "" }],
+    };
+
+    // Insert table
+    Transforms.insertNodes(editor, table);
+
+    // Insert paragraph after table
+    Transforms.insertNodes(editor, paragraph);
+
+    // Move selection to the paragraph below the table
+    Transforms.move(editor, { unit: "offset" });
+
+    // Reset form
+    setTableRows(3);
+    setTableCols(3);
+    setTableDialogOpen(false);
+  };
+
   return (
     <div className="border rounded-lg">
       <Slate editor={editor} initialValue={value} onChange={handleChange}>
@@ -232,7 +478,7 @@ export function RichTextEditor({
             format="underline"
             icon={<Underline className="h-4 w-4" />}
           />
-          <MarkButton format="code" icon={<Code className="h-4 w-4" />} />
+          {/* <MarkButton format="code" icon={<Code className="h-4 w-4" />} /> */}
 
           <div className="w-px h-6 bg-border mx-1" />
 
@@ -300,6 +546,32 @@ export function RichTextEditor({
             onClick={() => setImageDialogOpen(true)}
           >
             <ImagePlus className="h-4 w-4" />
+          </Button>
+
+          {/* Link */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onPointerDown={(event: PointerEvent<HTMLButtonElement>) =>
+              event.preventDefault()
+            }
+            onClick={() => setLinkDialogOpen(true)}
+          >
+            <LinkIcon className="h-4 w-4" />
+          </Button>
+
+          {/* Table */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onPointerDown={(event: PointerEvent<HTMLButtonElement>) =>
+              event.preventDefault()
+            }
+            onClick={() => setTableDialogOpen(true)}
+          >
+            <Grid3x3 className="h-4 w-4" />
           </Button>
         </div>
 
@@ -379,6 +651,128 @@ export function RichTextEditor({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Link Insert Dialog */}
+      <Dialog open={linkDialogOpen} onOpenChange={setLinkDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="link-url">Link URL *</Label>
+              <Input
+                id="link-url"
+                placeholder="https://example.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="link-text">Link Text (optional)</Label>
+              <Input
+                id="link-text"
+                placeholder="Text to display"
+                value={linkText}
+                onChange={(e) => setLinkText(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                If you have text selected, it will be used as the link.
+                Otherwise, the link URL or custom text will be displayed.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="link-alt">Alt / Title (SEO, optional)</Label>
+              <Input
+                id="link-alt"
+                placeholder="Short description for SEO"
+                value={linkAlt}
+                onChange={(e) => setLinkAlt(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional alt/title text added as the anchor's title attribute
+                for SEO.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLinkDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={insertLink} disabled={!linkUrl}>
+              Insert Link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Table Insert Dialog */}
+      <Dialog open={tableDialogOpen} onOpenChange={setTableDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert Table</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="table-rows">Rows: {tableRows}</Label>
+              <input
+                id="table-rows"
+                type="range"
+                min="1"
+                max="10"
+                value={tableRows}
+                onChange={(e) => setTableRows(parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="table-cols">Columns: {tableCols}</Label>
+              <input
+                id="table-cols"
+                type="range"
+                min="1"
+                max="10"
+                value={tableCols}
+                onChange={(e) => setTableCols(parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground mb-3">Preview:</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse border border-gray-300">
+                  <tbody>
+                    {Array(Math.min(tableRows, 3))
+                      .fill(null)
+                      .map((_, rowIdx) => (
+                        <tr key={rowIdx}>
+                          {Array(tableCols)
+                            .fill(null)
+                            .map((_, colIdx) => (
+                              <td
+                                key={colIdx}
+                                className="border border-gray-300 px-2 py-1 text-center text-gray-500"
+                              >
+                                {rowIdx === 0 ? `Col ${colIdx + 1}` : ""}
+                              </td>
+                            ))}
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTableDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={insertTable}>
+              Insert Table ({tableRows}x{tableCols})
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -393,10 +787,10 @@ const toggleBlock = (editor: Editor, format: CustomElementFormat) => {
   const isList = isListType(format);
 
   Transforms.unwrapNodes(editor, {
-    match: (n) =>
+    match: (n: any) =>
       !Editor.isEditor(n) &&
       SlateElement.isElement(n) &&
-      isListType(n.type as any) &&
+      isListType((n as CustomElement).type as any) &&
       !isAlignType(format),
     split: true,
   });
@@ -440,12 +834,13 @@ const isBlockActive = (
   const [match] = Array.from(
     Editor.nodes(editor, {
       at: Editor.unhangRange(editor, selection),
-      match: (n) => {
+      match: (n: any) => {
         if (!Editor.isEditor(n) && SlateElement.isElement(n)) {
-          if (blockType === "align" && isAlignElement(n)) {
-            return n.align === format;
+          const element = n as CustomElement;
+          if (blockType === "align" && isAlignElement(element)) {
+            return element.align === format;
           }
-          return n.type === format;
+          return element.type === format;
         }
         return false;
       },
@@ -527,11 +922,241 @@ const ImageElement = ({
   );
 };
 
+// Table element renderer with simple toolbar (add/delete row/col, delete table)
+const TableElement = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps) => {
+  const editor = useSlate();
+  const selected = useSelected();
+  const focused = useFocused();
+
+  const tableElement = element as TableElement;
+
+  const addRow = () => {
+    const tablePath = ReactEditor.findPath(editor as ReactEditor, element);
+    const colCount = (tableElement.children[0]?.children || []).length || 1;
+    const newRow: TableRowElement = {
+      type: "table-row",
+      children: Array.from({ length: colCount }).map(() => ({
+        type: "table-cell",
+        children: [{ text: "" }],
+      })),
+    };
+    Transforms.insertNodes(editor, newRow, {
+      at: [...tablePath, tableElement.children.length],
+    });
+  };
+
+  const deleteLastRow = () => {
+    const tablePath = ReactEditor.findPath(editor as ReactEditor, element);
+    const lastIndex = tableElement.children.length - 1;
+    if (lastIndex < 0) return;
+    if (tableElement.children.length === 1) {
+      // Remove whole table and ensure paragraph after
+      Transforms.removeNodes(editor, { at: tablePath });
+      Transforms.insertNodes(editor, {
+        type: "paragraph",
+        children: [{ text: "" }],
+      });
+      return;
+    }
+    Transforms.removeNodes(editor, { at: [...tablePath, lastIndex] });
+  };
+
+  const addColumn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const tablePath = ReactEditor.findPath(editor as ReactEditor, element);
+    const rows = tableElement.children;
+
+    // Process rows in reverse to avoid path issues
+    for (let rIdx = rows.length - 1; rIdx >= 0; rIdx--) {
+      const row = rows[rIdx];
+      const isHeader = rIdx === 0;
+      const insertAt = [...tablePath, rIdx, row.children.length];
+
+      Transforms.insertNodes(
+        editor,
+        {
+          type: "table-cell",
+          header: isHeader,
+          children: [{ text: "" }],
+        } as TableCellElement,
+        { at: insertAt }
+      );
+    }
+  };
+
+  const deleteLastColumn = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const tablePath = ReactEditor.findPath(editor as ReactEditor, element);
+    const rows = tableElement.children;
+    const firstRowCols = (rows[0]?.children || []).length;
+
+    if (firstRowCols <= 1) {
+      // Remove table and ensure paragraph after
+      Transforms.removeNodes(editor, { at: tablePath });
+      Transforms.insertNodes(editor, {
+        type: "paragraph",
+        children: [{ text: "" }],
+      });
+      return;
+    }
+
+    // Process rows in reverse to avoid path issues
+    for (let rIdx = rows.length - 1; rIdx >= 0; rIdx--) {
+      const lastCellIndex = rows[rIdx].children.length - 1;
+      if (lastCellIndex >= 0) {
+        Transforms.removeNodes(editor, {
+          at: [...tablePath, rIdx, lastCellIndex],
+        });
+      }
+    }
+  };
+
+  const deleteTable = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const tablePath = ReactEditor.findPath(editor as ReactEditor, element);
+    Transforms.removeNodes(editor, { at: tablePath });
+    // Ensure there's a paragraph after deletion
+    Transforms.insertNodes(editor, {
+      type: "paragraph",
+      children: [{ text: "" }],
+    });
+  };
+
+  return (
+    <div {...attributes} className="my-4 relative">
+      {selected && focused && (
+        <div
+          contentEditable={false}
+          className="absolute -top-10 right-0 flex items-center gap-2 bg-white border rounded-md shadow-sm p-1"
+        >
+          <Button
+            size="sm"
+            variant="ghost"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              addRow();
+            }}
+            className="text-xs"
+          >
+            + Row
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              e.preventDefault();
+              deleteLastRow();
+            }}
+            className="text-xs"
+          >
+            - Row
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={addColumn}
+            className="text-xs"
+          >
+            + Col
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={deleteLastColumn}
+            className="text-xs"
+          >
+            - Col
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={deleteTable}
+            className="text-xs"
+          >
+            Delete
+          </Button>
+        </div>
+      )}
+      <table className="w-full border-collapse border border-gray-300">
+        <tbody>{children}</tbody>
+      </table>
+    </div>
+  );
+};
+
+const TableRowElement = ({ attributes, children }: RenderElementProps) => (
+  <tr {...attributes} className="border border-gray-300">
+    {children}
+  </tr>
+);
+
+const TableCellElement = ({
+  attributes,
+  children,
+  element,
+}: RenderElementProps) => {
+  const isHeader = (element as TableCellElement).header;
+  return isHeader ? (
+    <th
+      {...attributes}
+      className="border border-gray-300 bg-gray-100 px-3 py-2 text-left font-semibold"
+    >
+      {children}
+    </th>
+  ) : (
+    <td {...attributes} className="border border-gray-300 px-3 py-2">
+      {children}
+    </td>
+  );
+};
+
 // Element renderer from Slate demo
 const Element = ({ attributes, children, element }: RenderElementProps) => {
   if (element.type === "image") {
     return (
       <ImageElement
+        attributes={attributes}
+        children={children}
+        element={element}
+      />
+    );
+  }
+
+  if (element.type === "table") {
+    return (
+      <TableElement
+        attributes={attributes}
+        children={children}
+        element={element}
+      />
+    );
+  }
+
+  if (element.type === "table-row") {
+    return (
+      <TableRowElement
+        attributes={attributes}
+        children={children}
+        element={element}
+      />
+    );
+  }
+
+  if (element.type === "table-cell") {
+    return (
+      <TableCellElement
         attributes={attributes}
         children={children}
         element={element}
@@ -620,6 +1245,21 @@ const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
     children = <u>{children}</u>;
   }
 
+  if (leaf.link) {
+    return (
+      <a
+        {...attributes}
+        href={leaf.link}
+        title={leaf.linkTitle}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline hover:text-blue-800"
+      >
+        {children}
+      </a>
+    );
+  }
+
   return <span {...attributes}>{children}</span>;
 };
 
@@ -664,7 +1304,7 @@ const MarkButton = ({ format, icon }: MarkButtonProps) => {
       size="sm"
       className="h-8 w-8 p-0 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground"
       data-active={isMarkActive(editor, format)}
-      onPointerDown={(event: PointerEvent<HTMLButtonButton>) =>
+      onPointerDown={(event: PointerEvent<HTMLButtonElement>) =>
         event.preventDefault()
       }
       onClick={() => toggleMark(editor, format)}
@@ -694,7 +1334,7 @@ function htmlToSlate(html: string): Descendant[] {
   const div = document.createElement("div");
   div.innerHTML = html;
 
-  const parseElement = (el: Element): CustomElement => {
+  const parseElement = (el: Element): CustomElement | null => {
     const tagName = el.tagName.toLowerCase();
 
     // Handle images
@@ -707,6 +1347,59 @@ function htmlToSlate(html: string): Descendant[] {
         alt,
         children: [{ text: "" }],
       } as ImageElement;
+    }
+
+    // Handle tables
+    if (tagName === "table") {
+      const rows: TableRowElement[] = [];
+      const tbody = el.querySelector("tbody") || el;
+      const trElements = tbody.querySelectorAll("tr");
+
+      trElements.forEach((trEl) => {
+        const cells: TableCellElement[] = [];
+        const cellElements = trEl.querySelectorAll("td, th");
+
+        cellElements.forEach((cellEl) => {
+          const isHeader = cellEl.tagName.toLowerCase() === "th";
+          const text = cellEl.textContent || "";
+          cells.push({
+            type: "table-cell",
+            header: isHeader,
+            children: [{ text }],
+          });
+        });
+
+        if (cells.length > 0) {
+          rows.push({
+            type: "table-row",
+            children: cells,
+          });
+        }
+      });
+
+      // Don't add a default row if we have rows
+      if (rows.length > 0) {
+        return {
+          type: "table",
+          children: rows,
+        } as TableElement;
+      }
+
+      // Only if completely empty, add one cell
+      return {
+        type: "table",
+        children: [
+          {
+            type: "table-row",
+            children: [
+              {
+                type: "table-cell",
+                children: [{ text: "" }],
+              } as TableCellElement,
+            ],
+          },
+        ],
+      } as TableElement;
     }
 
     // Handle linked images (a > img)
@@ -731,7 +1424,23 @@ function htmlToSlate(html: string): Descendant[] {
     for (const child of Array.from(el.childNodes)) {
       if (child.nodeType === Node.TEXT_NODE) {
         const text = child.textContent || "";
-        if (text) children.push({ text });
+        if (text) {
+          // Check if parent is an anchor for link
+          if (el.tagName.toLowerCase() === "a") {
+            const link = el.getAttribute("href");
+            const title =
+              el.getAttribute("title") ||
+              el.getAttribute("aria-label") ||
+              undefined;
+            children.push({
+              text,
+              ...(link && { link }),
+              ...(title && { linkTitle: title }),
+            } as CustomText);
+          } else {
+            children.push({ text });
+          }
+        }
       } else if (child.nodeType === Node.ELEMENT_NODE) {
         const childEl = child as Element;
         const parsed = parseElement(childEl);
@@ -743,7 +1452,9 @@ function htmlToSlate(html: string): Descendant[] {
       children.push({ text: "" });
     }
 
-    const textAlign = el.style.textAlign as AlignType | undefined;
+    const textAlign = (el as HTMLElement).style.textAlign as
+      | AlignType
+      | undefined;
 
     switch (tagName) {
       case "h1":
@@ -782,6 +1493,15 @@ function htmlToSlate(html: string): Descendant[] {
         return { type: "numbered-list", children: children as CustomElement[] };
       case "li":
         return { type: "list-item", children: children as CustomText[] };
+      case "tr":
+        return { type: "table-row", children: children as TableCellElement[] };
+      case "td":
+      case "th":
+        return {
+          type: "table-cell",
+          header: tagName === "th",
+          children: children as CustomText[],
+        };
       default:
         return {
           type: "paragraph",
@@ -796,7 +1516,9 @@ function htmlToSlate(html: string): Descendant[] {
       return [{ type: "paragraph", children: [{ text: html }] }];
     }
 
-    return Array.from(div.children).map(parseElement);
+    return Array.from(div.children)
+      .map(parseElement)
+      .filter((el) => el !== null) as CustomElement[];
   } catch (e) {
     return [{ type: "paragraph", children: [{ text: html }] }];
   }
@@ -810,6 +1532,10 @@ function slateToHtml(value: Descendant[]): string {
       if (node.italic) string = `<em>${string}</em>`;
       if (node.underline) string = `<u>${string}</u>`;
       if (node.code) string = `<code>${string}</code>`;
+      if (node.link) {
+        const titleAttr = node.linkTitle ? ` title="${node.linkTitle}"` : "";
+        string = `<a href="${node.link}"${titleAttr} target="_blank" rel="noopener noreferrer">${string}</a>`;
+      }
       return string;
     }
 
@@ -832,6 +1558,31 @@ function slateToHtml(value: Descendant[]): string {
       }
 
       return `<div style="margin: 1rem 0;">${img}</div>`;
+    }
+
+    // Handle tables
+    if (node.type === "table") {
+      const rows = node.children
+        .map(
+          (row: TableRowElement) =>
+            `<tr>
+            ${row.children
+              .map((cell: TableCellElement) => {
+                const content = cell.children
+                  .map((child: any) => serialize(child))
+                  .join("");
+                return cell.header
+                  ? `<th style="border: 1px solid #d1d5db; padding: 0.75rem; text-align: left; background-color: #f3f4f6; font-weight: 600;">${content}</th>`
+                  : `<td style="border: 1px solid #d1d5db; padding: 0.75rem;">${content}</td>`;
+              })
+              .join("")}
+          </tr>`
+        )
+        .join("");
+
+      return `<table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+        <tbody>${rows}</tbody>
+      </table>`;
     }
 
     const children = node.children.map(serialize).join("");
