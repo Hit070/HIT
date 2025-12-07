@@ -111,7 +111,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       creator: blog.author,
     },
     alternates: {
-      canonical: `https://www.herimmigranttales.org/blog/${blog.slug}`,
+      canonical: `https://herimmigranttales.org/blog/${blog.slug}`,
     },
   };
 }
