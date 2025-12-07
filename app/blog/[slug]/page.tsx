@@ -198,28 +198,23 @@ export default async function BlogPage({ params }: Props) {
         }
       : null;
 
+  // Combine all schemas into a single @graph structure
+  const combinedSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      blogPostingSchema,
+      breadcrumbSchema,
+      ...(faqSchema ? [faqSchema] : []),
+    ],
+  };
+
   return (
     <>
-      {/* Separate script tags for each schema - like contact page */}
+      {/* Single combined schema to prevent duplication */}
       <script
-        key="blog-posting-schema"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(combinedSchema) }}
       />
-
-      <script
-        key="breadcrumb-schema"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
-
-      {/* {faqSchema && (
-        <script
-          key="faq-schema"
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-        />
-      )} */}
 
       {/* Pass server data to client component */}
       <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />
