@@ -1,6 +1,7 @@
 // app/events/page.tsx
 import { Metadata } from "next";
 import EventsClient from "./EventsClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Events",
@@ -121,7 +122,7 @@ export default async function EventsPage() {
   return (
     <>
       {/* JSON-LD Structured Data */}
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(structuredData),

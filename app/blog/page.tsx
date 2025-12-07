@@ -1,6 +1,7 @@
 // app/blog/page.tsx
 import { Metadata } from "next";
 import BlogPageClient from "./BlogPageClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -76,7 +77,7 @@ export default async function BlogPage() {
 
   return (
     <>
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbSchema),

@@ -1,6 +1,7 @@
 // app/about/page.tsx
 import { Metadata } from "next";
 import AboutPageClient from "./AboutPageClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -58,7 +59,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbSchema),

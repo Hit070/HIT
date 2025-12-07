@@ -1,6 +1,7 @@
 // app/stories/page.tsx
 import { Metadata } from "next";
 import StoriesPageClient from "./StoriesPageClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Stories",
@@ -77,7 +78,7 @@ export default async function StoriesPage() {
 
   return (
     <>
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbSchema),

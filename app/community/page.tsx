@@ -1,6 +1,7 @@
 // app/community/page.tsx
 import { Metadata } from "next";
 import CommunityClient from "./CommunityClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Global Community",
@@ -73,7 +74,7 @@ export default async function CommunityPage() {
 
   return (
     <>
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbSchema),

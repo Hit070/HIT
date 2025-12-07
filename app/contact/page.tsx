@@ -1,6 +1,7 @@
 // app/contact/page.tsx
 import { Metadata } from "next";
 import ContactClient from "./ContactClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -77,12 +78,12 @@ export default function ContactPage() {
 
   return (
     <>
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />

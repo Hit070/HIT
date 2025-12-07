@@ -1,6 +1,7 @@
 // app/page.tsx
 import { Metadata } from "next";
 import HomePageClient from "./HomePageClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Her Immigrant Tales | Celebrating Immigrant Women's Stories",
@@ -136,7 +137,7 @@ export default async function HomePage() {
   return (
     <>
       {/* Single JSON-LD script with all schemas */}
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />

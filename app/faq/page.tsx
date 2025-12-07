@@ -1,6 +1,7 @@
 // app/faq/page.tsx
 import { Metadata } from "next";
 import FAQClient from "./FAQClient";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Frequently Asked Questions",
@@ -117,14 +118,14 @@ export default function FAQPage() {
   return (
     <>
       {/* Separate script tags for each schema - like your blog and story pages */}
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbSchema),
         }}
       />
 
-      <script
+      <Script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(faqSchema),
