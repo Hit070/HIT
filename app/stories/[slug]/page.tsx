@@ -1,5 +1,6 @@
 // app/story/[slug]/page.tsx
 import { Metadata } from "next";
+import Script from "next/script";
 import StoryDetailsClient from "./StoryDetailsClient";
 
 type Props = {
@@ -213,10 +214,12 @@ export default async function StoryPage({ params }: Props) {
 
   return (
     <>
-      {/* Single combined schema to prevent duplication */}
-      <script
+      {/* Single combined schema using Next.js Script component for proper head placement */}
+      <Script
+        id="story-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(combinedSchema) }}
+        strategy="afterInteractive"
       />
 
       {/* Pass server data to client component */}

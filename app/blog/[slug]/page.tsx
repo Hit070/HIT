@@ -1,5 +1,6 @@
 // app/blog/[slug]/page.tsx
 import { Metadata } from "next";
+import Script from "next/script";
 import BlogDetailsClient from "./BlogDetailsClient";
 
 type Props = {
@@ -210,10 +211,12 @@ export default async function BlogPage({ params }: Props) {
 
   return (
     <>
-      {/* Single combined schema to prevent duplication */}
-      <script
+      {/* Single combined schema using Next.js Script component for proper head placement */}
+      <Script
+        id="blog-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(combinedSchema) }}
+        strategy="afterInteractive"
       />
 
       {/* Pass server data to client component */}
