@@ -216,13 +216,13 @@ export default async function StoryPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      {faqSchema && (
+      {/* {faqSchema && (
         <script
           key="faq-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
-      )}
+      )} */}
 
       {/* Pass server data to client component */}
       <StoryDetailsClient story={story} otherStories={otherStories} />

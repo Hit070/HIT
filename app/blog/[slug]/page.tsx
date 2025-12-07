@@ -213,13 +213,13 @@ export default async function BlogPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      {faqSchema && (
+      {/* {faqSchema && (
         <script
           key="faq-schema"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
-      )}
+      )} */}
 
       {/* Pass server data to client component */}
       <BlogDetailsClient blog={blog} otherBlogs={otherBlogs} />
