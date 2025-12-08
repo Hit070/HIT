@@ -59,6 +59,15 @@ export default function BlogsPage() {
 
   const { blogs, fetchBlogs, updateBlog, deleteBlog } = useContentStore();
 
+  // Compare helper: ensure robust descending sort by dateCreated (newest first)
+  const compareByDateDesc = (
+    a: { dateCreated?: string },
+    b: { dateCreated?: string }
+  ) => {
+    const ta = a?.dateCreated ? new Date(a.dateCreated).getTime() : 0;
+    const tb = b?.dateCreated ? new Date(b.dateCreated).getTime() : 0;
+    return tb - ta;
+  };
   useEffect(() => {
     if (blogs.length === 0) {
       fetchBlogs()
@@ -97,10 +106,7 @@ export default function BlogsPage() {
 
       return matchesSearch && matchesTab && matchesDate;
     })
-    .sort(
-      (a, b) =>
-        new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
-    );
+    .sort(compareByDateDesc);
 
   const handleDeleteClick = (blogSlug: string) => {
     setDeleteModal({ isOpen: true, blogSlug });

@@ -57,6 +57,16 @@ export default function StoriesPage() {
 
   const { stories, fetchStories, updateStory, deleteStory } = useContentStore();
 
+  // Compare helper: ensure robust descending sort by dateCreated (newest first)
+  const compareByDateDesc = (
+    a: { dateCreated?: string },
+    b: { dateCreated?: string }
+  ) => {
+    const ta = a?.dateCreated ? new Date(a.dateCreated).getTime() : 0;
+    const tb = b?.dateCreated ? new Date(b.dateCreated).getTime() : 0;
+    return tb - ta;
+  };
+
   useEffect(() => {
     if (stories.length === 0) {
       fetchStories()
@@ -95,10 +105,7 @@ export default function StoriesPage() {
 
       return matchesSearch && matchesTab && matchesDate;
     })
-    .sort(
-      (a, b) =>
-        new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime()
-    );
+    .sort(compareByDateDesc);
 
   const handleDeleteClick = (storySlug: string) => {
     setDeleteModal({ isOpen: true, storySlug });
