@@ -116,12 +116,21 @@ export default function BlogPage({ serverBlogs }: Props) {
     };
   }, [serverBlogs, blogs.length, fetchBlogs]);
 
+  const compareByDateDesc = (
+    a: { dateCreated?: string },
+    b: { dateCreated?: string }
+  ) => {
+    const ta = a?.dateCreated ? new Date(a.dateCreated).getTime() : 0;
+    const tb = b?.dateCreated ? new Date(b.dateCreated).getTime() : 0;
+    return tb - ta;
+  };
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const filteredBlogs = localBlogs.filter(
-    (blog) => blog.status === "published"
-  );
+  const filteredBlogs = localBlogs
+    .filter((blog) => blog.status === "published")
+    .sort(compareByDateDesc);
   const featuredBlog = filteredBlogs.find((b) => b.isFeatured);
   const otherBlogs = filteredBlogs
     .filter((b) => !b.isFeatured)

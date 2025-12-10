@@ -32,8 +32,17 @@ export default function EventsClient({ serverEvents }: Props) {
     !serverEvents || serverEvents.length === 0
   );
 
+  // Compare helper: ensure robust descending sort by date (newest first)
+  const compareByDateDesc = (a: { date?: string }, b: { date?: string }) => {
+    const ta = a?.date ? new Date(a.date).getTime() : 0;
+    const tb = b?.date ? new Date(b.date).getTime() : 0;
+    return tb - ta;
+  };
+
   // Filter active events from local state
-  const activeEvents = localEvents.filter((event) => event.status === "active");
+  const activeEvents = localEvents
+    .filter((event) => event.status === "active")
+    .sort(compareByDateDesc);
 
   const totalPages = Math.ceil(activeEvents.length / eventsPerPage);
   const currentEvents = activeEvents.slice(

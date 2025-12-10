@@ -63,12 +63,21 @@ export default function StoriesPage({ serverStories }: Props) {
     };
   }, [serverStories, stories.length, fetchStories]);
 
+  const compareByDateDesc = (
+    a: { dateCreated?: string },
+    b: { dateCreated?: string }
+  ) => {
+    const ta = a?.dateCreated ? new Date(a.dateCreated).getTime() : 0;
+    const tb = b?.dateCreated ? new Date(b.dateCreated).getTime() : 0;
+    return tb - ta;
+  };
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   // Remove the date filter that's too restrictive - just filter by published status
-  const filteredStories = localStories.filter(
-    (story) => story.status === "published"
-  );
+  const filteredStories = localStories
+    .filter((story) => story.status === "published")
+    .sort(compareByDateDesc);
   const featuredStory = filteredStories.find((s: Story) => s.isFeatured);
   const otherStories = filteredStories
     .filter((s: Story) => !s.isFeatured)
