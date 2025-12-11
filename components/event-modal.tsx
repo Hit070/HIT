@@ -81,7 +81,7 @@ export function EventModal({ event, isOpen, onClose }: EventModalProps) {
                                 <div className="text-gray-600 ml-1"> at {event.time}</div>
                             </div>
 
-                            <p className="text-gray-700 leading-relaxed">{event.description}</p>
+                            <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{event.description}</p>
 
                             {/* QR Code */}
                             <div className="flex justify-left py-4">
