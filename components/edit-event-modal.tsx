@@ -1,28 +1,46 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Upload, Calendar, MapPin, Clock, Link2, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { useEventStore } from "@/store/store"
-import { toast } from "@/components/ui/use-toast"
-import type { Event } from "@/types"
+import { useState, useRef, useEffect } from "react";
+import { Upload, Calendar, MapPin, Clock, Link2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useEventStore } from "@/store/store";
+import { toast } from "@/components/ui/use-toast";
+import type { Event } from "@/types";
 
 interface EditEventModalProps {
-  isOpen: boolean
-  eventSlug: string | null
-  events: Event[]
-  onClose: () => void
-  onEventUpdated: () => void
+  isOpen: boolean;
+  eventSlug: string | null;
+  events: Event[];
+  onClose: () => void;
+  onEventUpdated: () => void;
 }
 
-export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpdated }: EditEventModalProps) {
-  const { updateEvent } = useEventStore()
+export function EditEventModal({
+  isOpen,
+  eventSlug,
+  events,
+  onClose,
+  onEventUpdated,
+}: EditEventModalProps) {
+  const { updateEvent } = useEventStore();
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -34,12 +52,12 @@ export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpda
     image: "",
     status: "active" as "active" | "ended",
     featured: false,
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const currentEvent = events.find((event) => event.slug === eventSlug)
+  const currentEvent = events.find((event) => event.slug === eventSlug);
 
   useEffect(() => {
     if (currentEvent) {
@@ -54,105 +72,121 @@ export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpda
         image: currentEvent.image,
         status: currentEvent.status,
         featured: currentEvent.featured,
-      })
+      });
     }
-  }, [currentEvent])
+  }, [currentEvent]);
 
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-  }
+      .replace(/^-+|-+$/g, "");
+  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
       ...(name === "title" ? { slug: generateSlug(value) } : {}),
-    }))
-  }
+    }));
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Invalid file type",
         description: "Please select an image file (PNG or JPG).",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
         description: "Please select an image smaller than 5MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    setIsUploading(true)
+    setIsUploading(true);
     try {
-      const uploadFormData = new FormData()
-      uploadFormData.append("file", file)
+      const uploadFormData = new FormData();
+      uploadFormData.append("file", file);
       const response = await fetch("/api/upload/events", {
         method: "POST",
         body: uploadFormData,
-      })
-      if (!response.ok) throw new Error("Upload failed")
-      const { url } = await response.json()
-      setFormData((prev) => ({ ...prev, image: url }))
-      toast({ title: "Image uploaded", description: "Upload successful." })
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      const { url } = await response.json();
+      setFormData((prev) => ({ ...prev, image: url }));
+      toast({ title: "Image uploaded", description: "Upload successful." });
     } catch (error) {
-      console.error("[UPLOAD_IMAGE]", error)
-      toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" })
+      console.error("[UPLOAD_IMAGE]", error);
+      toast({
+        title: "Upload failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!currentEvent || !eventSlug) return
-    if (!formData.title || !formData.slug || !formData.date || !formData.time || !formData.location || !formData.description) {
-      toast({ title: "Please fill in all required fields", variant: "destructive" })
-      return
+    e.preventDefault();
+    if (!currentEvent || !eventSlug) return;
+    if (
+      !formData.title ||
+      !formData.slug ||
+      !formData.date ||
+      !formData.time ||
+      !formData.location ||
+      !formData.description
+    ) {
+      toast({
+        title: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
     }
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(formData.slug)) {
       toast({
         title: "Invalid slug format",
         description: "Use lowercase letters, numbers, and hyphens only.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       await updateEvent(eventSlug, {
-        title: formData.title,
-        slug: formData.slug,
-        date: formData.date,
-        time: formData.time,
-        location: formData.location,
-        description: formData.description,
-        meetingLink: formData.meetingLink,
+        title: formData.title.trim(),
+        slug: formData.slug.trim(),
+        date: formData.date.trim(),
+        time: formData.time.trim(),
+        location: formData.location.trim(),
+        description: formData.description.trim(),
+        meetingLink: formData.meetingLink.trim(),
         image: formData.image,
         status: formData.status,
         featured: formData.featured,
-      })
-      onEventUpdated()
+      });
+      onEventUpdated();
       // toast({ title: "Event updated successfully", variant: "default" })
     } catch (error) {
-      console.error("[UPDATE_EVENT]", error)
-      toast({ title: "Failed to update event", variant: "destructive" })
+      console.error("[UPDATE_EVENT]", error);
+      toast({ title: "Failed to update event", variant: "destructive" });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
-  if (!currentEvent) return null
+  if (!currentEvent) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -295,7 +329,9 @@ export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpda
                       variant="destructive"
                       size="sm"
                       className="absolute top-2 right-2"
-                      onClick={() => setFormData((prev) => ({ ...prev, image: "" }))}
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, image: "" }))
+                      }
                       disabled={isSubmitting || isUploading}
                     >
                       <X className="h-4 w-4" />
@@ -307,7 +343,9 @@ export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpda
                       <Upload className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">Upload event image. PNG or JPG format recommended.</p>
+                      <p className="text-sm text-muted-foreground">
+                        Upload event image. PNG or JPG format recommended.
+                      </p>
                       <Button
                         type="button"
                         variant="outline"
@@ -336,7 +374,12 @@ export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpda
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value: "active" | "ended") => setFormData((prev) => ({ ...prev, status: value }))}>
+              <Select
+                value={formData.status}
+                onValueChange={(value: "active" | "ended") =>
+                  setFormData((prev) => ({ ...prev, status: value }))
+                }
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -364,15 +407,24 @@ export function EditEventModal({ isOpen, eventSlug, events, onClose, onEventUpda
           </div>
 
           <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting || isUploading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={isSubmitting || isUploading}
+            >
               Cancel
             </Button>
-            <Button type="submit" className="bg-primary hover:bg-primary/90" disabled={isSubmitting || isUploading}>
+            <Button
+              type="submit"
+              className="bg-primary hover:bg-primary/90"
+              disabled={isSubmitting || isUploading}
+            >
               {isSubmitting ? "Updating..." : "Update Event"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

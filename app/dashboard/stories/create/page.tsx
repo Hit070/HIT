@@ -395,24 +395,24 @@ export default function CreateStoryPage() {
         Story,
         "id" | "dateCreated" | "lastUpdated" | "isFeatured"
       > = {
-        title,
-        author,
-        summary,
+        title: title.trim(),
+        author: author.trim(),
+        summary: summary.trim(),
         content,
         type: storyType,
         videoUrl: storyType === "video" ? videoFile || videoUrl : undefined,
         audioFile: storyType === "audio" ? audioFile : undefined,
         thumbnail: thumbnail || undefined,
         status,
-        slug: slug || generateSlug(title),
-        metaTitle: metaTitle || title,
-        metaDescription: metaDescription || summary.slice(0, 160),
+        slug: (slug || generateSlug(title)).trim(),
+        metaTitle: (metaTitle || title).trim(),
+        metaDescription: (metaDescription || summary.slice(0, 160)).trim(),
         metaImage: metaImage || thumbnail,
         faq:
           faq.length > 0
             ? faq.filter((f) => f.question && f.answer)
             : undefined,
-        primaryKeyword: primaryKeyword || undefined,
+        primaryKeyword: (primaryKeyword || "").trim() || undefined,
       };
       await addStory(story);
       toast({

@@ -486,23 +486,23 @@ export default function EditStoryPage() {
     setLoadingState(true);
     try {
       const updatedStory: Partial<Story> = {
-        title: formData.title,
-        slug: formData.slug,
-        summary: formData.summary,
+        title: formData.title.trim(),
+        slug: formData.slug.trim(),
+        summary: formData.summary.trim(),
         content: formData.content,
         type: formData.type,
         videoUrl: formData.type === "video" ? formData.videoUrl : undefined,
         audioFile: formData.type === "audio" ? formData.audioFile : undefined,
         thumbnail: formData.thumbnail || undefined,
-        metaTitle: formData.metaTitle || undefined,
-        metaDescription: formData.metaDescription || undefined,
+        metaTitle: (formData.metaTitle || "").trim() || undefined,
+        metaDescription: (formData.metaDescription || "").trim() || undefined,
         metaImage: formData.metaImage || undefined,
-        primaryKeyword: formData.primaryKeyword || undefined,
+        primaryKeyword: (formData.primaryKeyword || "").trim() || undefined,
         faq:
           formData.faq && formData.faq.length > 0
             ? formData.faq.map((f) => ({
-                question: f.question,
-                answer: f.answer,
+                question: f.question.trim(),
+                answer: f.answer.trim(),
               }))
             : undefined,
         status,

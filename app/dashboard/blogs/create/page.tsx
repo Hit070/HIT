@@ -386,25 +386,25 @@ export default function CreateBlogPage() {
         Blog,
         "id" | "dateCreated" | "lastUpdated" | "isFeatured"
       > = {
-        title,
-        author,
-        summary,
+        title: title.trim(),
+        author: author.trim(),
+        summary: summary.trim(),
         content,
-        category,
+        category: category.trim(),
         type: blogType,
         videoUrl: blogType === "video" ? videoFile || videoUrl : undefined,
         audioFile: blogType === "audio" ? audioFile : undefined,
         thumbnail: thumbnail || undefined,
         status,
-        slug: slug || generateSlug(title),
-        metaTitle: metaTitle || title,
-        metaDescription: metaDescription || summary.slice(0, 160),
+        slug: (slug || generateSlug(title)).trim(),
+        metaTitle: (metaTitle || title).trim(),
+        metaDescription: (metaDescription || summary.slice(0, 160)).trim(),
         metaImage: metaImage || thumbnail,
         faq:
           faq.length > 0
             ? faq.filter((f) => f.question && f.answer)
             : undefined,
-        primaryKeyword: primaryKeyword || undefined,
+        primaryKeyword: (primaryKeyword || "").trim() || undefined,
       };
       await addBlog(blog);
       toast({
@@ -422,17 +422,17 @@ export default function CreateBlogPage() {
     }
   };
 
- const updateFaqQuestion = (id: string, question: string) => {
-   setFaq((prev) => prev.map((f) => (f.id === id ? { ...f, question } : f)));
- };
+  const updateFaqQuestion = (id: string, question: string) => {
+    setFaq((prev) => prev.map((f) => (f.id === id ? { ...f, question } : f)));
+  };
 
- const updateFaqAnswer = (id: string, answer: string) => {
-   setFaq((prev) => prev.map((f) => (f.id === id ? { ...f, answer } : f)));
- };
+  const updateFaqAnswer = (id: string, answer: string) => {
+    setFaq((prev) => prev.map((f) => (f.id === id ? { ...f, answer } : f)));
+  };
 
- const removeFaq = (id: string) => {
-   setFaq((prev) => prev.filter((f) => f.id !== id));
- };
+  const removeFaq = (id: string) => {
+    setFaq((prev) => prev.filter((f) => f.id !== id));
+  };
 
   return (
     <div className="md:px-20 space-y-6">
