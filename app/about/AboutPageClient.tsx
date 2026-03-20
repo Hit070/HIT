@@ -484,11 +484,7 @@ export default function AboutPage() {
                   <h3 className="text-2xl font-serif mb-4">Our Vision</h3>
                 </div>
                 <p className="text-sm leading-relaxed">
-                  A world where every immigrant woman feels seen, heard, and
-                  valued and where her story becomes a source of healing, pride,
-                  and power as we envision Her Immigrant Tales - the global
-                  voice of immigrant women - a platform where stories heal,
-                  creations inspire, and opportunities grow.
+                  Building a living archive of immigrant women’s experiences.
                 </p>
               </div>
             </div>
@@ -516,10 +512,8 @@ export default function AboutPage() {
                   </h3>
                 </div>
                 <p className="text-sm leading-relaxed text-gray-700">
-                  To amplify the voices and lived experiences of immigrant women
-                  through storytelling, healing spaces, and culturally inspired
-                  creations - building community, fostering belonging, and
-                  empowering women in a world that too often overlooks them.
+                  To document, amplify, and preserve the lived experiences of
+                  immigrant women.
                 </p>
               </div>
             </div>
