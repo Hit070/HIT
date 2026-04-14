@@ -512,7 +512,7 @@ export default function AboutPage() {
                   </h3>
                 </div>
                 <p className="text-sm leading-relaxed text-gray-700">
-                  To document, amplify, and preserve the lived experiences of
+                  To document, amplify, preserve and celebrate the lived experiences of
                   immigrant women.
                 </p>
               </div>
