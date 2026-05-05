@@ -484,9 +484,9 @@ export default function AboutPage() {
                   <h3 className="text-2xl font-serif mb-4">Our Vision</h3>
                 </div>
                 <p className="text-sm leading-relaxed">
-                  A world where immigrant women are confident, connected, and
-                  empowered to navigate every stage of life and fully
-                  participate in their communities and the economy.
+                  A world where immigrant women&apos;s stories shape the systems
+                  around them and where they are confident, connected, and fully
+                  able to participate in their communities and the economy.
                 </p>
               </div>
             </div>
@@ -514,10 +514,10 @@ export default function AboutPage() {
                   </h3>
                 </div>
                 <p className="text-sm leading-relaxed text-gray-700">
-                  Her Immigrant Tales empowers immigrant women through
-                  storytelling and skill-building to strengthen confidence,
-                  build meaningful connections, and navigate key life
-                  transitions including work, relationships, and wellbeing.
+                  Her Immigrant Tales (HIT) turns immigrant women&apos;s lived
+                  experiences into pathways for growth - using storytelling and
+                  skill-building to drive confidence, connection, and real-life
+                  progress.
                 </p>
               </div>
             </div>
