@@ -484,9 +484,9 @@ export default function AboutPage() {
                   <h3 className="text-2xl font-serif mb-4">Our Vision</h3>
                 </div>
                 <p className="text-sm leading-relaxed">
-                  A world where immigrant women&apos;s stories shape the systems
-                  around them and where they are confident, connected, and fully
-                  able to participate in their communities and the economy.
+                  A world where every immigrant woman's story is valued,
+                  preserved, and recognized as an essential part of our shared
+                  human experience.
                 </p>
               </div>
             </div>
@@ -514,10 +514,10 @@ export default function AboutPage() {
                   </h3>
                 </div>
                 <p className="text-sm leading-relaxed text-gray-700">
-                  Her Immigrant Tales (HIT) turns immigrant women&apos;s lived
-                  experiences into pathways for growth - using storytelling and
-                  skill-building to drive confidence, connection, and real-life
-                  progress.
+                  Her Immigrant Tales collects, preserves, and amplifies the
+                  stories of immigrant women through storytelling, media, and
+                  community, creating a living archive that fosters belonging,
+                  understanding, and social change.
                 </p>
               </div>
             </div>
@@ -544,9 +544,9 @@ export default function AboutPage() {
                   </h3>
                 </div>
                 <p className="text-sm leading-relaxed text-gray-700">
-                  To collaborate for impact by partnering with organizations,
-                  creators, and institutions to amplify immigrant voices through
-                  meaningful projects.
+                  We exist to ensure that immigrant women's voices are heard,
+                  their experiences are honored, and their stories are never
+                  lost.
                 </p>
               </div>
             </div>
